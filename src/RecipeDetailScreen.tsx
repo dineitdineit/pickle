@@ -39,6 +39,14 @@ type StepRow = {
   is_final: boolean | null;
 };
 
+function formatTime(totalMinutes: number | null) {
+  if (totalMinutes === null) return '—';
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if (hours === 0) return `${minutes}m`;
+  return `${hours}h ${minutes}m`;
+}
+
 function imageUrl(path: string | null) {
   if (!path) return '';
   return supabase.storage.from('recipe_images').getPublicUrl(path).data.publicUrl;
@@ -163,7 +171,7 @@ export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScr
 
         <div className="grid grid-cols-3 gap-2 mt-5">
           {[
-            ['Time', recipe.total_time_minutes ? `${recipe.total_time_minutes} min` : '—'],
+            ['Time', formatTime(recipe.total_time_minutes)],
             ['Difficulty', recipe.difficulty || '—'],
             ['Servings', recipe.servings ? `${recipe.servings}` : '—'],
           ].map(([label, value]) => (
@@ -237,7 +245,7 @@ export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScr
                     <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="font-semibold text-[17px]" style={{ color: '#1F1F1F' }}>{step.title || `Step ${step.step_number}`}</h3>
                       {step.step_time_minutes ? (
-                        <span className="text-[12px] px-2 py-0.5 rounded-full" style={{ backgroundColor: '#FFF0E6', color: '#F26B21' }}>{step.step_time_minutes} min</span>
+                        <span className="text-[12px] px-2 py-0.5 rounded-full" style={{ backgroundColor: '#FFF0E6', color: '#F26B21' }}>{formatTime(step.step_time_minutes)}</span>
                       ) : null}
                     </div>
                     <p className="text-[15px] leading-6 mt-1.5" style={{ color: '#6F6F6F' }}>{step.instruction}</p>
