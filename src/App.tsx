@@ -49,9 +49,9 @@ export default function App() {
   const [carouselWidth, setCarouselWidth] = useState(0);
   const carouselScrollRef = useRef<HTMLDivElement>(null);
 
-  const PEEK = 28;
-  const GAP = 12;
-  const cardWidth = carouselWidth > 0 ? carouselWidth - PEEK * 2 : 0;
+  const PEEK = 0;
+  const GAP = 16;
+  const cardWidth = carouselWidth;
 
   useEffect(() => {
     async function loadRecipes() {
@@ -129,19 +129,44 @@ export default function App() {
     el.scrollTo({ left: index * (cardWidth + GAP), behavior: 'smooth' });
     setFeaturedIndex(index);
   }
-  const touchStartX = useRef<number | null>(null);
+  const dragStartX = useRef<number | null>(null);
+  const dragStartScrollLeft = useRef(0);
+  const isDragging = useRef(false);
 
-  function handleTouchStart(e: React.TouchEvent<HTMLDivElement>) {
-    touchStartX.current = e.touches[0]?.clientX ?? null;
+  function handlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
+    const el = carouselScrollRef.current;
+    if (!el) return;
+
+    isDragging.current = true;
+    dragStartX.current = e.clientX;
+    dragStartScrollLeft.current = el.scrollLeft;
+    el.setPointerCapture(e.pointerId);
   }
 
-  function handleTouchEnd(e: React.TouchEvent<HTMLDivElement>) {
-    if (touchStartX.current === null) return;
-    const endX = e.changedTouches[0]?.clientX ?? touchStartX.current;
-    const deltaX = endX - touchStartX.current;
-    touchStartX.current = null;
+  function handlePointerMove(e: React.PointerEvent<HTMLDivElement>) {
+    const el = carouselScrollRef.current;
+    if (!el || !isDragging.current || dragStartX.current === null) return;
 
-    if (Math.abs(deltaX) < 40) return;
+    const deltaX = e.clientX - dragStartX.current;
+    el.scrollLeft = dragStartScrollLeft.current - deltaX;
+  }
+
+  function finishPointerDrag(e: React.PointerEvent<HTMLDivElement>) {
+    const el = carouselScrollRef.current;
+    if (!el || dragStartX.current === null) return;
+
+    const deltaX = e.clientX - dragStartX.current;
+    isDragging.current = false;
+    dragStartX.current = null;
+
+    try {
+      el.releasePointerCapture(e.pointerId);
+    } catch {}
+
+    if (Math.abs(deltaX) < 40) {
+      scrollToCard(featuredIndex);
+      return;
+    }
 
     const nextIndex =
       deltaX < 0
@@ -241,13 +266,15 @@ export default function App() {
             <div className="relative select-none" style={{ height: 260 }}>
               <div
                 ref={carouselScrollRef}
-                className="overflow-x-auto scrollbar-hide h-full"
-                style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
                 onScroll={handleCarouselScroll}
-                onTouchStart={handleTouchStart}
-                onTouchEnd={handleTouchEnd}
+                onPointerDown={handlePointerDown}
+                onPointerMove={handlePointerMove}
+                onPointerUp={finishPointerDrag}
+                onPointerCancel={finishPointerDrag}
+                className="overflow-x-auto scrollbar-hide h-full cursor-grab active:cursor-grabbing"
+                style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
               >
-                <div className="flex h-full" style={{ gap: GAP, paddingInline: PEEK }}>
+                <div className="flex h-full" style={{ gap: GAP }}>
                   {featuredRecipes.map((recipe) => (
                     <button
                       key={recipe.id}
@@ -255,7 +282,7 @@ export default function App() {
                       onClick={() => setSelectedRecipeId(recipe.id)}
                       className="relative flex-shrink-0 rounded-[16px] overflow-hidden text-left"
                       style={{
-                        width: cardWidth || `calc(100% - ${PEEK * 2}px)`,
+                        width: cardWidth || '100%',
                         scrollSnapAlign: 'center',
                         height: 260,
                       }}
