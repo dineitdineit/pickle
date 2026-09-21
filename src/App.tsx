@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import BrowseScreen from './BrowseScreen';
 import SearchScreen from './SearchScreen';
+import { supabase } from './lib/supabase';
 
 const assetPathPrefix = "/assets";
 
-const FEATURED_RECIPES = [
+const FALLBACK_FEATURED_RECIPES = [
   {
     id: 1,
     title: 'Creamy Pasta Carbonara',
@@ -102,6 +103,7 @@ const NAV_ICONS = [
 
 export default function App() {
   const [activeNav, setActiveNav] = useState(0);
+  const [featuredRecipes, setFeaturedRecipes] = useState(FALLBACK_FEATURED_RECIPES);
   const [activeFilter, setActiveFilter] = useState('All');
   const [searchValue, setSearchValue] = useState('');
   const [showSearch, setShowSearch] = useState(false);
@@ -110,6 +112,39 @@ export default function App() {
     if (searchValue.trim()) setShowSearch(true);
   }
   const [featuredIndex, setFeaturedIndex] = useState(0);
+
+  useEffect(() => {
+    async function loadFeaturedRecipe() {
+      const { data, error } = await supabase
+        .from('recipes')
+        .select('id, title, difficulty, total_time_minutes, cover_image')
+        .eq('id', '306499e3-865d-47a3-b8a9-dd615c34b115')
+        .single();
+
+      if (error || !data) {
+        console.error('Failed to load featured recipe:', error);
+        return;
+      }
+
+      const { data: imageData } = supabase.storage
+        .from('recipe_images')
+        .getPublicUrl(data.cover_image);
+
+      setFeaturedRecipes([
+        {
+          id: data.id,
+          title: data.title,
+          category: 'Filipino',
+          tag: data.difficulty,
+          time: `${data.total_time_minutes}m`,
+          image: imageData.publicUrl,
+        },
+      ]);
+      setFeaturedIndex(0);
+    }
+
+    loadFeaturedRecipe();
+  }, []);
   const [carouselWidth, setCarouselWidth] = useState(0);
   const carouselScrollRef = useRef<HTMLDivElement>(null);
 
@@ -130,7 +165,7 @@ export default function App() {
     const el = carouselScrollRef.current;
     if (!el || cardWidth === 0) return;
     const index = Math.round(el.scrollLeft / (cardWidth + GAP));
-    setFeaturedIndex(Math.max(0, Math.min(index, FEATURED_RECIPES.length - 1)));
+    setFeaturedIndex(Math.max(0, Math.min(index, featuredRecipes.length - 1)));
   }
 
   function scrollToCard(index: number) {
@@ -183,8 +218,8 @@ export default function App() {
       {/* Header */}
       <div className="flex items-center justify-between px-4 pt-6 pb-2">
         <div className="flex items-center gap-2">
-          <img src="/assets/logo.png" alt="MealPick logo" className="w-9 h-9 rounded-xl object-cover" />
-          <span className="font-bold text-[17px]" style={{ color: '#1F1F1F' }}>MealPick</span>
+          <img src="/assets/logo.png" alt="Pickle logo" className="w-9 h-9 rounded-xl object-cover" />
+          <span className="font-bold text-[17px]" style={{ color: '#1F1F1F' }}>Pickle</span>
         </div>
         <button className="w-9 h-9 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center border-2" style={{ borderColor: '#EAEAEA' }}>
           <img
@@ -241,7 +276,7 @@ export default function App() {
               className="flex h-full"
               style={{ gap: GAP, paddingInline: PEEK }}
             >
-              {FEATURED_RECIPES.map((recipe) => (
+              {featuredRecipes.map((recipe) => (
                 <div
                   key={recipe.id}
                   className="relative flex-shrink-0 rounded-[16px] overflow-hidden"
@@ -273,7 +308,7 @@ export default function App() {
 
           {/* Dot indicators — overlay, not inside scroll content */}
           <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 pointer-events-none z-10">
-            {FEATURED_RECIPES.map((_, i) => (
+            {featuredRecipes.map((_, i) => (
               <button
                 key={i}
                 onClick={() => scrollToCard(i)}
