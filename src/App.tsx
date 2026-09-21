@@ -121,6 +121,11 @@ export default function App() {
     return sortedRecipes;
   }, [sortedRecipes, activeFilter]);
 
+  useEffect(() => {
+    discoverScrollRef.current?.scrollTo({ left: 0, behavior: 'auto' });
+  }, [activeFilter]);
+
+
   function submitSearch() {
     setShowSearch(true);
   }
@@ -380,16 +385,21 @@ export default function App() {
               onPointerMove={handleDiscoverPointerMove}
               onPointerUp={finishDiscoverPointerDrag}
               onPointerCancel={finishDiscoverPointerDrag}
-              className="flex gap-3 px-4 overflow-x-auto scrollbar-hide pb-1 cursor-grab active:cursor-grabbing"
-              style={{ touchAction: 'pan-y', WebkitOverflowScrolling: 'touch' }}
+              className="flex items-start gap-3 px-4 overflow-x-auto scrollbar-hide pb-1 cursor-grab active:cursor-grabbing"
+              style={{ touchAction: 'pan-y', WebkitOverflowScrolling: 'touch', minHeight: 210 }}
             >
               {filteredRecipes.map((recipe) => (
-                <button key={recipe.id} onClick={() => setSelectedRecipeId(recipe.id)} className="flex-shrink-0 w-[148px] text-left">
-                  <div className="rounded-[12px] overflow-hidden mb-2.5 bg-gray-100" style={{ height: 148 }}>
-                    <img src={recipe.image} alt={recipe.title} className="w-full h-full object-cover" />
+                <button
+                  key={recipe.id}
+                  onClick={() => setSelectedRecipeId(recipe.id)}
+                  className="flex-none w-[148px] text-left self-start"
+                  style={{ height: 210 }}
+                >
+                  <div className="w-[148px] h-[148px] rounded-[12px] overflow-hidden mb-2.5 bg-gray-100">
+                    <img src={recipe.image} alt={recipe.title} className="w-full h-full object-cover block" />
                   </div>
-                  <p className="font-semibold text-[16px] leading-tight line-clamp-2" style={{ color: '#1F1F1F' }}>{recipe.title}</p>
-                  <p className="text-[13px] mt-1" style={{ color: '#6F6F6F' }}>{recipe.difficulty} · {formatTime(recipe.total_time_minutes)}</p>
+                  <p className="font-semibold text-[16px] leading-[19px] line-clamp-2 h-[38px]" style={{ color: '#1F1F1F' }}>{recipe.title}</p>
+                  <p className="text-[13px] mt-1 h-[18px]" style={{ color: '#6F6F6F' }}>{recipe.difficulty} · {formatTime(recipe.total_time_minutes)}</p>
                 </button>
               ))}
             </div>
