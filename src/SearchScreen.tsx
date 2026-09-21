@@ -19,6 +19,14 @@ interface SearchScreenProps {
   onSelectRecipe: (id: string) => void;
 }
 
+function formatTime(totalMinutes: number | null) {
+  if (totalMinutes === null) return '—';
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if (hours === 0) return `${minutes}m`;
+  return `${hours}h ${minutes}m`;
+}
+
 function publicImageUrl(path: string | null) {
   if (!path) return '';
   return supabase.storage.from('recipe_images').getPublicUrl(path).data.publicUrl;
@@ -129,7 +137,7 @@ export default function SearchScreen({ query, setQuery, onBack, onSelectRecipe }
                 <div className="flex items-center gap-2 mt-1 flex-wrap">
                   <span className="text-[13px] px-2 py-0.5 rounded-full" style={{ backgroundColor: '#F5F5F5', color: '#6F6F6F' }}>Filipino</span>
                   <span className="text-[13px] px-2 py-0.5 rounded-full" style={{ backgroundColor: '#F5F5F5', color: '#6F6F6F' }}>{recipe.difficulty}</span>
-                  <span className="text-[13px]" style={{ color: '#6F6F6F' }}>{recipe.total_time_minutes}m</span>
+                  <span className="text-[13px]" style={{ color: '#6F6F6F' }}>{formatTime(recipe.total_time_minutes)}</span>
                 </div>
               </div>
 
