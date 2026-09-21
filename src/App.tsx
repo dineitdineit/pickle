@@ -94,7 +94,16 @@ export default function App() {
     [recipes],
   );
 
-  const featuredRecipes = sortedRecipes.slice(0, 5);
+  const featuredRecipes = useMemo(() => {
+    if (sortedRecipes.length <= 5) return sortedRecipes;
+
+    const shuffled = [...sortedRecipes];
+    for (let i = shuffled.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled.slice(0, 5);
+  }, [sortedRecipes]);
 
   const filteredRecipes = useMemo(() => {
     if (activeFilter === 'Easy') return sortedRecipes.filter((r) => r.difficulty === 'Easy');
@@ -120,6 +129,28 @@ export default function App() {
     el.scrollTo({ left: index * (cardWidth + GAP), behavior: 'smooth' });
     setFeaturedIndex(index);
   }
+  const touchStartX = useRef<number | null>(null);
+
+  function handleTouchStart(e: React.TouchEvent<HTMLDivElement>) {
+    touchStartX.current = e.touches[0]?.clientX ?? null;
+  }
+
+  function handleTouchEnd(e: React.TouchEvent<HTMLDivElement>) {
+    if (touchStartX.current === null) return;
+    const endX = e.changedTouches[0]?.clientX ?? touchStartX.current;
+    const deltaX = endX - touchStartX.current;
+    touchStartX.current = null;
+
+    if (Math.abs(deltaX) < 40) return;
+
+    const nextIndex =
+      deltaX < 0
+        ? Math.min(featuredIndex + 1, featuredRecipes.length - 1)
+        : Math.max(featuredIndex - 1, 0);
+
+    scrollToCard(nextIndex);
+  }
+
 
   const NavBar = (
     <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md border-t flex items-center justify-around py-3 bg-white z-50" style={{ borderColor: '#EAEAEA' }}>
@@ -205,7 +236,6 @@ export default function App() {
           <div className="mb-8">
             <div className="flex items-center justify-between px-4 mb-4">
               <h2 className="font-semibold text-[20px]" style={{ color: '#1F1F1F' }}>Featured</h2>
-              <span className="text-[13px]" style={{ color: '#6F6F6F' }}>{recipes.length} recipes</span>
             </div>
 
             <div className="relative select-none" style={{ height: 260 }}>
@@ -214,6 +244,8 @@ export default function App() {
                 className="overflow-x-auto scrollbar-hide h-full"
                 style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
                 onScroll={handleCarouselScroll}
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
               >
                 <div className="flex h-full" style={{ gap: GAP, paddingInline: PEEK }}>
                   {featuredRecipes.map((recipe) => (
