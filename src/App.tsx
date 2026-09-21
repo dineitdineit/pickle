@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import BrowseScreen from './BrowseScreen';
 import SearchScreen from './SearchScreen';
 import { supabase } from './lib/supabase';
+import RecipeDetailScreen from './RecipeDetailScreen';
 
 const assetPathPrefix = "/assets";
 
@@ -107,6 +108,7 @@ export default function App() {
   const [activeFilter, setActiveFilter] = useState('All');
   const [searchValue, setSearchValue] = useState('');
   const [showSearch, setShowSearch] = useState(false);
+  const [selectedRecipeId, setSelectedRecipeId] = useState<string | null>(null);
 
   function submitSearch() {
     if (searchValue.trim()) setShowSearch(true);
@@ -190,6 +192,10 @@ export default function App() {
       ))}
     </nav>
   );
+
+  if (selectedRecipeId) {
+    return <RecipeDetailScreen recipeId={selectedRecipeId} onBack={() => setSelectedRecipeId(null)} />;
+  }
 
   if (showSearch) {
     return (
@@ -277,9 +283,11 @@ export default function App() {
               style={{ gap: GAP, paddingInline: PEEK }}
             >
               {featuredRecipes.map((recipe) => (
-                <div
+                <button
                   key={recipe.id}
-                  className="relative flex-shrink-0 rounded-[16px] overflow-hidden"
+                  type="button"
+                  onClick={() => typeof recipe.id === 'string' && setSelectedRecipeId(recipe.id)}
+                  className="relative flex-shrink-0 rounded-[16px] overflow-hidden text-left"
                   style={{
                     width: cardWidth || `calc(100% - ${PEEK * 2}px)`,
                     scrollSnapAlign: 'center',
@@ -301,7 +309,7 @@ export default function App() {
                       <span className="text-[13px] text-white/80">{recipe.time}</span>
                     </div>
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           </div>
