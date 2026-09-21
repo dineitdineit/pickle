@@ -200,6 +200,15 @@ export default function App() {
     } catch {}
   }
 
+  useEffect(() => {
+    if (activeNav !== 0 || showSearch || selectedRecipeId || loadingRecipes) return;
+    const el = carouselScrollRef.current;
+    if (!el) return;
+    requestAnimationFrame(() => {
+      el.scrollLeft = featuredIndex * (el.clientWidth + GAP);
+    });
+  }, [activeNav, showSearch, selectedRecipeId, loadingRecipes, featuredIndex]);
+
   const NavBar = (
     <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md border-t flex items-center justify-around py-3 bg-white z-50" style={{ borderColor: '#EAEAEA' }}>
       {NAV_ICONS.map((icon, i) => (
@@ -233,15 +242,6 @@ export default function App() {
       </div>
     );
   }
-
-  useEffect(() => {
-    if (activeNav !== 0 || showSearch || selectedRecipeId || loadingRecipes) return;
-    const el = carouselScrollRef.current;
-    if (!el) return;
-    requestAnimationFrame(() => {
-      el.scrollLeft = featuredIndex * (el.clientWidth + GAP);
-    });
-  }, [activeNav, showSearch, selectedRecipeId, loadingRecipes, featuredIndex]);
 
   if (activeNav === 1) {
     return (
