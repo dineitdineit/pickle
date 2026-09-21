@@ -48,6 +48,10 @@ export default function App() {
   const [loadingRecipes, setLoadingRecipes] = useState(true);
   const [carouselWidth, setCarouselWidth] = useState(0);
   const carouselScrollRef = useRef<HTMLDivElement>(null);
+  const discoverScrollRef = useRef<HTMLDivElement>(null);
+  const discoverDragStartX = useRef<number | null>(null);
+  const discoverDragStartScrollLeft = useRef(0);
+  const discoverDragging = useRef(false);
 
   const PEEK = 0;
   const GAP = 16;
@@ -176,6 +180,32 @@ export default function App() {
     scrollToCard(nextIndex);
   }
 
+
+  function handleDiscoverPointerDown(e: React.PointerEvent<HTMLDivElement>) {
+    const el = discoverScrollRef.current;
+    if (!el) return;
+    discoverDragging.current = true;
+    discoverDragStartX.current = e.clientX;
+    discoverDragStartScrollLeft.current = el.scrollLeft;
+    el.setPointerCapture(e.pointerId);
+  }
+
+  function handleDiscoverPointerMove(e: React.PointerEvent<HTMLDivElement>) {
+    const el = discoverScrollRef.current;
+    if (!el || !discoverDragging.current || discoverDragStartX.current === null) return;
+    const deltaX = e.clientX - discoverDragStartX.current;
+    el.scrollLeft = discoverDragStartScrollLeft.current - deltaX;
+  }
+
+  function finishDiscoverPointerDrag(e: React.PointerEvent<HTMLDivElement>) {
+    const el = discoverScrollRef.current;
+    if (!el) return;
+    discoverDragging.current = false;
+    discoverDragStartX.current = null;
+    try {
+      el.releasePointerCapture(e.pointerId);
+    } catch {}
+  }
 
   const NavBar = (
     <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md border-t flex items-center justify-around py-3 bg-white z-50" style={{ borderColor: '#EAEAEA' }}>
@@ -320,9 +350,8 @@ export default function App() {
           </div>
 
           <div className="mb-8">
-            <div className="flex items-center justify-between px-4 mb-4">
+            <div className="px-4 mb-4">
               <h2 className="font-semibold text-[20px]" style={{ color: '#1F1F1F' }}>Discover recipes</h2>
-              <button onClick={() => { setActiveNav(1); setShowSearch(false); }} className="text-[14px] font-medium" style={{ color: '#F26B21' }}>Browse</button>
             </div>
 
             <div className="flex gap-2 px-4 mb-4 overflow-x-auto scrollbar-hide">
@@ -340,7 +369,15 @@ export default function App() {
               ))}
             </div>
 
-            <div className="flex gap-3 px-4 overflow-x-auto scrollbar-hide pb-1">
+            <div
+              ref={discoverScrollRef}
+              onPointerDown={handleDiscoverPointerDown}
+              onPointerMove={handleDiscoverPointerMove}
+              onPointerUp={finishDiscoverPointerDrag}
+              onPointerCancel={finishDiscoverPointerDrag}
+              className="flex gap-3 px-4 overflow-x-auto scrollbar-hide pb-1 cursor-grab active:cursor-grabbing"
+              style={{ touchAction: 'pan-y', WebkitOverflowScrolling: 'touch' }}
+            >
               {filteredRecipes.map((recipe) => (
                 <button key={recipe.id} onClick={() => setSelectedRecipeId(recipe.id)} className="flex-shrink-0 w-[148px] text-left">
                   <div className="rounded-[12px] overflow-hidden mb-2.5 bg-gray-100" style={{ height: 148 }}>
