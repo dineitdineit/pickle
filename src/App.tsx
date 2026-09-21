@@ -46,16 +46,13 @@ export default function App() {
   const [recipes, setRecipes] = useState<RecipeCard[]>([]);
   const [featuredIndex, setFeaturedIndex] = useState(0);
   const [loadingRecipes, setLoadingRecipes] = useState(true);
-  const [carouselWidth, setCarouselWidth] = useState(0);
   const carouselScrollRef = useRef<HTMLDivElement>(null);
   const discoverScrollRef = useRef<HTMLDivElement>(null);
   const discoverDragStartX = useRef<number | null>(null);
   const discoverDragStartScrollLeft = useRef(0);
   const discoverDragging = useRef(false);
 
-  const PEEK = 0;
   const GAP = 16;
-  const cardWidth = carouselWidth;
 
   useEffect(() => {
     async function loadRecipes() {
@@ -83,20 +80,6 @@ export default function App() {
 
     loadRecipes();
   }, []);
-
-  useEffect(() => {
-    if (loadingRecipes) return;
-
-    const el = carouselScrollRef.current;
-    if (!el) return;
-
-    const updateWidth = () => setCarouselWidth(el.clientWidth);
-    updateWidth();
-
-    const observer = new ResizeObserver(updateWidth);
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [loadingRecipes]);
 
   const sortedRecipes = useMemo(
     () => [...recipes].sort((a, b) => a.title.localeCompare(b.title, 'en', { sensitivity: 'base' })),
@@ -132,15 +115,15 @@ export default function App() {
 
   function handleCarouselScroll() {
     const el = carouselScrollRef.current;
-    if (!el || cardWidth === 0) return;
-    const index = Math.round(el.scrollLeft / (cardWidth + GAP));
+    if (!el || el.clientWidth === 0) return;
+    const index = Math.round(el.scrollLeft / (el.clientWidth + GAP));
     setFeaturedIndex(Math.max(0, Math.min(index, featuredRecipes.length - 1)));
   }
 
   function scrollToCard(index: number) {
     const el = carouselScrollRef.current;
     if (!el) return;
-    el.scrollTo({ left: index * (cardWidth + GAP), behavior: 'smooth' });
+    el.scrollTo({ left: index * (el.clientWidth + GAP), behavior: 'smooth' });
     setFeaturedIndex(index);
   }
   const dragStartX = useRef<number | null>(null);
@@ -251,6 +234,15 @@ export default function App() {
     );
   }
 
+  useEffect(() => {
+    if (activeNav !== 0 || showSearch || selectedRecipeId || loadingRecipes) return;
+    const el = carouselScrollRef.current;
+    if (!el) return;
+    requestAnimationFrame(() => {
+      el.scrollLeft = featuredIndex * (el.clientWidth + GAP);
+    });
+  }, [activeNav, showSearch, selectedRecipeId, loadingRecipes, featuredIndex]);
+
   if (activeNav === 1) {
     return (
       <div className="bg-white min-h-screen max-w-md mx-auto relative">
@@ -314,16 +306,22 @@ export default function App() {
                 className="overflow-x-auto scrollbar-hide h-full cursor-grab active:cursor-grabbing"
                 style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
               >
-                <div className="flex h-full" style={{ gap: GAP, width: 'max-content' }}>
+                <div
+                  className="grid h-full"
+                  style={{
+                    gridAutoFlow: 'column',
+                    gridAutoColumns: '100%',
+                    gap: GAP,
+                  }}
+                >
                   {featuredRecipes.map((recipe) => (
                     <button
                       key={recipe.id}
                       type="button"
                       onClick={() => setSelectedRecipeId(recipe.id)}
-                      className="relative flex-shrink-0 rounded-[16px] overflow-hidden text-left"
+                      className="relative w-full rounded-[16px] overflow-hidden text-left"
                       style={{
-                        width: cardWidth || '100%',
-                        scrollSnapAlign: 'center',
+                        scrollSnapAlign: 'start',
                         height: 260,
                       }}
                     >
