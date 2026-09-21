@@ -24,6 +24,14 @@ const NAV_ICONS = [
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
 ];
 
+function formatTime(totalMinutes: number | null) {
+  if (totalMinutes === null) return '—';
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if (hours === 0) return `${minutes}m`;
+  return `${hours}h ${minutes}m`;
+}
+
 function publicImageUrl(path: string | null) {
   if (!path) return '';
   return supabase.storage.from('recipe_images').getPublicUrl(path).data.publicUrl;
@@ -227,7 +235,7 @@ export default function App() {
                         <div className="flex items-center gap-2">
                           <span className="text-[13px] text-white/80 px-2.5 py-0.5 rounded-full" style={{ backgroundColor: 'rgba(255,255,255,0.18)' }}>Filipino</span>
                           <span className="text-[13px] text-white/80 px-2.5 py-0.5 rounded-full" style={{ backgroundColor: 'rgba(255,255,255,0.18)' }}>{recipe.difficulty}</span>
-                          <span className="text-[13px] text-white/80">{recipe.total_time_minutes}m</span>
+                          <span className="text-[13px] text-white/80">{formatTime(recipe.total_time_minutes)}</span>
                         </div>
                       </div>
                     </button>
@@ -280,7 +288,7 @@ export default function App() {
                     <img src={recipe.image} alt={recipe.title} className="w-full h-full object-cover" />
                   </div>
                   <p className="font-semibold text-[16px] leading-tight line-clamp-2" style={{ color: '#1F1F1F' }}>{recipe.title}</p>
-                  <p className="text-[13px] mt-1" style={{ color: '#6F6F6F' }}>{recipe.difficulty} · {recipe.total_time_minutes}m</p>
+                  <p className="text-[13px] mt-1" style={{ color: '#6F6F6F' }}>{recipe.difficulty} · {formatTime(recipe.total_time_minutes)}</p>
                 </button>
               ))}
             </div>
