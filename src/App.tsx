@@ -85,13 +85,18 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    if (loadingRecipes) return;
+
     const el = carouselScrollRef.current;
     if (!el) return;
-    setCarouselWidth(el.offsetWidth);
-    const observer = new ResizeObserver(() => setCarouselWidth(el.offsetWidth));
+
+    const updateWidth = () => setCarouselWidth(el.clientWidth);
+    updateWidth();
+
+    const observer = new ResizeObserver(updateWidth);
     observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [loadingRecipes]);
 
   const sortedRecipes = useMemo(
     () => [...recipes].sort((a, b) => a.title.localeCompare(b.title, 'en', { sensitivity: 'base' })),
@@ -304,7 +309,7 @@ export default function App() {
                 className="overflow-x-auto scrollbar-hide h-full cursor-grab active:cursor-grabbing"
                 style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
               >
-                <div className="flex h-full" style={{ gap: GAP }}>
+                <div className="flex h-full" style={{ gap: GAP, width: 'max-content' }}>
                   {featuredRecipes.map((recipe) => (
                     <button
                       key={recipe.id}
