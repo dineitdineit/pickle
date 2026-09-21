@@ -364,7 +364,7 @@ export default function App() {
               <h2 className="font-semibold text-[20px]" style={{ color: '#1F1F1F' }}>Discover recipes</h2>
             </div>
 
-            <div className="flex gap-2 px-4 mb-4 overflow-x-auto scrollbar-hide">
+            <div className="flex gap-2 px-4 mb-2.5 overflow-x-auto scrollbar-hide">
               {FILTERS.map((filter) => (
                 <button
                   key={filter}
@@ -386,20 +386,19 @@ export default function App() {
               onPointerUp={finishDiscoverPointerDrag}
               onPointerCancel={finishDiscoverPointerDrag}
               className="flex items-start gap-3 px-4 overflow-x-auto scrollbar-hide pb-1 cursor-grab active:cursor-grabbing"
-              style={{ touchAction: 'pan-y', WebkitOverflowScrolling: 'touch', minHeight: 210 }}
+              style={{ touchAction: 'pan-y', WebkitOverflowScrolling: 'touch' }}
             >
               {filteredRecipes.map((recipe) => (
                 <button
                   key={recipe.id}
                   onClick={() => setSelectedRecipeId(recipe.id)}
                   className="flex-none w-[148px] text-left self-start"
-                  style={{ height: 210 }}
                 >
-                  <div className="w-[148px] h-[148px] rounded-[12px] overflow-hidden mb-2.5 bg-gray-100">
+                  <div className="w-[148px] h-[148px] rounded-[12px] overflow-hidden mb-2 bg-gray-100">
                     <img src={recipe.image} alt={recipe.title} className="w-full h-full object-cover block" />
                   </div>
-                  <p className="font-semibold text-[16px] leading-[19px] line-clamp-2 h-[38px]" style={{ color: '#1F1F1F' }}>{recipe.title}</p>
-                  <p className="text-[13px] mt-1 h-[18px]" style={{ color: '#6F6F6F' }}>{recipe.difficulty} · {formatTime(recipe.total_time_minutes)}</p>
+                  <p className="font-semibold text-[16px] leading-[19px] min-h-[19px] line-clamp-2" style={{ color: '#1F1F1F' }}>{recipe.title}</p>
+                  <p className="text-[13px] mt-1" style={{ color: '#6F6F6F' }}>{recipe.difficulty} · {formatTime(recipe.total_time_minutes)}</p>
                 </button>
               ))}
             </div>
