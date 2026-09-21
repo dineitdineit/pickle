@@ -81,14 +81,19 @@ export default function App() {
     return () => observer.disconnect();
   }, []);
 
-  const featuredRecipes = recipes.slice(0, 5);
+  const sortedRecipes = useMemo(
+    () => [...recipes].sort((a, b) => a.title.localeCompare(b.title, 'en', { sensitivity: 'base' })),
+    [recipes],
+  );
+
+  const featuredRecipes = sortedRecipes.slice(0, 5);
 
   const filteredRecipes = useMemo(() => {
-    if (activeFilter === 'Easy') return recipes.filter((r) => r.difficulty === 'Easy');
-    if (activeFilter === 'Intermediate') return recipes.filter((r) => r.difficulty === 'Intermediate');
-    if (activeFilter === 'Under 30m') return recipes.filter((r) => r.total_time_minutes <= 30);
-    return recipes;
-  }, [recipes, activeFilter]);
+    if (activeFilter === 'Easy') return sortedRecipes.filter((r) => r.difficulty === 'Easy');
+    if (activeFilter === 'Intermediate') return sortedRecipes.filter((r) => r.difficulty === 'Intermediate');
+    if (activeFilter === 'Under 30m') return sortedRecipes.filter((r) => r.total_time_minutes <= 30);
+    return sortedRecipes;
+  }, [sortedRecipes, activeFilter]);
 
   function submitSearch() {
     setShowSearch(true);
