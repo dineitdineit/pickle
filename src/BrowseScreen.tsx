@@ -2,7 +2,8 @@ import { useState } from 'react';
 
 const RECENT_SEARCHES = ['Easy', 'Quick', 'One Pan', 'Party'];
 
-const POPULAR_FILTERS = ['Easy', 'Quick', 'One Pan', 'Party', 'Chicken'];
+// Temporary UI data until search analytics are stored in Supabase.
+const TRENDING_SEARCHES = ['Chicken', 'Adobo', 'Easy', 'Pork', 'Quick'];
 
 const ALL_FILTERS: { label: string; items: string[] }[] = [
   { label: 'Lifestyle',   items: ['Healthy', 'Vegan', 'Protein Packed', 'Party'] },
@@ -30,6 +31,11 @@ export default function BrowseScreen({ searchValue, setSearchValue, onSearch }: 
 
   function removeRecent(item: string) {
     // no-op for now, kept interactive
+  }
+
+  function searchKeyword(keyword: string) {
+    setSearchValue(keyword);
+    requestAnimationFrame(() => onSearch());
   }
 
   const chipBase: React.CSSProperties = {
@@ -109,37 +115,37 @@ export default function BrowseScreen({ searchValue, setSearchValue, onSearch }: 
         </div>
       </div>
 
-      {/* Popular Filters */}
+      {/* Trending searches */}
       <div className="px-4 mb-8">
-        <h2 className="font-semibold text-[20px] mb-4" style={{ color: '#1F1F1F' }}>Popular Filters</h2>
+        <div className="mb-4">
+          <h2 className="font-semibold text-[20px]" style={{ color: '#1F1F1F' }}>What's trending</h2>
+          <p className="text-[13px] mt-1" style={{ color: '#8A8A8A' }}>Most searched this week</p>
+        </div>
         <div className="rounded-[16px] overflow-hidden border" style={{ borderColor: '#EAEAEA' }}>
-          {POPULAR_FILTERS.map((item, i) => (
+          {TRENDING_SEARCHES.map((item, i) => (
             <button
               key={item}
-              onClick={() => toggle(item)}
-              className="w-full flex items-center justify-between px-4 py-3.5 transition-colors text-left"
+              type="button"
+              onClick={() => searchKeyword(item)}
+              className="w-full flex items-center justify-between px-4 py-3.5 text-left"
               style={{
-                borderBottom: i < POPULAR_FILTERS.length - 1 ? '1px solid #EAEAEA' : undefined,
-                backgroundColor: selected.has(item) ? '#FFF7F2' : '#fff',
+                borderBottom: i < TRENDING_SEARCHES.length - 1 ? '1px solid #EAEAEA' : undefined,
+                backgroundColor: '#FFFFFF',
               }}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 min-w-0">
                 <span
                   className="w-6 h-6 rounded-full flex items-center justify-center text-[12px] font-semibold flex-shrink-0"
-                  style={{
-                    backgroundColor: selected.has(item) ? '#F26B21' : '#F5F5F5',
-                    color: selected.has(item) ? '#fff' : '#6F6F6F',
-                  }}
+                  style={{ backgroundColor: i === 0 ? '#FFF0E6' : '#F5F5F5', color: i === 0 ? '#F26B21' : '#6F6F6F' }}
                 >
                   {i + 1}
                 </span>
-                <span className="text-[16px]" style={{ color: selected.has(item) ? '#F26B21' : '#1F1F1F' }}>{item}</span>
+                <span className="text-[16px] truncate" style={{ color: '#1F1F1F' }}>{item}</span>
               </div>
-              {selected.has(item) && (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F26B21" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="20 6 9 17 4 12"/>
-                </svg>
-              )}
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A0A0A0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="7" />
+                <line x1="20" y1="20" x2="16.5" y2="16.5" />
+              </svg>
             </button>
           ))}
         </div>
