@@ -239,13 +239,13 @@ export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScr
           </section>
         )}
 
-        <div className="mt-8 rounded-[14px] p-1 flex gap-1" style={{ backgroundColor: '#F5F5F5' }}>
+        <div className="mt-8 rounded-[20px] p-1 flex gap-1 overflow-hidden" style={{ backgroundColor: '#F5F5F5' }}>
           {(['Ingredients', 'Steps', 'Nutrition'] as const).map((tab) => (
             <button
               key={tab}
               type="button"
               onClick={() => setActiveTab(tab)}
-              className="flex-1 h-10 rounded-[10px] text-[14px] font-semibold transition-colors"
+              className="flex-1 h-10 rounded-[16px] text-[14px] font-semibold transition-colors"
               style={
                 activeTab === tab
                   ? { backgroundColor: '#FFFFFF', color: '#F26B21', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }
