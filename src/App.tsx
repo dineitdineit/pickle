@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import BrowseScreen from './BrowseScreen';
 import SearchScreen from './SearchScreen';
 import SavedScreen from './SavedScreen';
+import ProfileScreen from './ProfileScreen';
 import RecipeDetailScreen from './RecipeDetailScreen';
 import TagRecipeListScreen from './TagRecipeListScreen';
 import { supabase } from './lib/supabase';
@@ -195,6 +196,10 @@ export default function App() {
 
   if (activeNav === 2) {
     return <div className="bg-white min-h-screen max-w-md mx-auto relative"><SavedScreen recipes={sortedRecipes} onSelectRecipe={setSelectedRecipeId} onBack={() => setActiveNav(0)} />{NavBar}</div>;
+  }
+
+  if (activeNav === 4) {
+    return <div className="bg-white min-h-screen max-w-md mx-auto relative"><ProfileScreen onOpenSaved={() => setActiveNav(2)} />{NavBar}</div>;
   }
 
   return (
