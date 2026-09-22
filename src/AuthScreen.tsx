@@ -1,11 +1,13 @@
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { supabase } from './lib/supabase';
 
-type Mode = 'signin' | 'signup';
+type Mode = 'signin' | 'signup' | 'forgot' | 'update';
 type SocialProvider = 'google' | 'apple';
 
 type AuthScreenProps = {
   onBack: () => void;
+  recoveryMode?: boolean;
+  onRecoveryComplete?: () => void;
 };
 
 function GoogleIcon() {
@@ -27,16 +29,49 @@ function AppleIcon() {
   );
 }
 
-export default function AuthScreen({ onBack }: AuthScreenProps) {
-  const [mode, setMode] = useState<Mode>('signin');
+function BackButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button type="button" onClick={onClick} aria-label="Back to log in" className="w-9 h-9 flex items-center justify-center mb-8" style={{ color: '#1F1F1F' }}>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="15 18 9 12 15 6" />
+      </svg>
+    </button>
+  );
+}
+
+export default function AuthScreen({ onBack, recoveryMode = false, onRecoveryComplete }: AuthScreenProps) {
+  const [mode, setMode] = useState<Mode>(recoveryMode ? 'update' : 'signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [username, setUsername] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [loading, setLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState<SocialProvider | null>(null);
   const [message, setMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [recoveryReady, setRecoveryReady] = useState(!recoveryMode);
+
+  useEffect(() => {
+    if (!recoveryMode) return;
+    setMode('update');
+
+    let mounted = true;
+    supabase.auth.getSession().then(({ data }) => {
+      if (mounted && data.session) setRecoveryReady(true);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if ((event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') && session) {
+        setRecoveryReady(true);
+      }
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, [recoveryMode]);
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -47,6 +82,56 @@ export default function AuthScreen({ onBack }: AuthScreenProps) {
     if (mode === 'signin') {
       const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
       if (error) setErrorMessage(error.message);
+      setLoading(false);
+      return;
+    }
+
+    if (mode === 'forgot') {
+      if (!email.trim()) {
+        setErrorMessage('Please enter your email address.');
+        setLoading(false);
+        return;
+      }
+
+      const redirectUrl = new URL(window.location.href);
+      redirectUrl.search = '';
+      redirectUrl.hash = '';
+      redirectUrl.searchParams.set('reset', '1');
+
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: redirectUrl.toString(),
+      });
+
+      if (error) setErrorMessage(error.message);
+      else setMessage('Password reset email sent. Check your inbox and open the reset link.');
+      setLoading(false);
+      return;
+    }
+
+    if (mode === 'update') {
+      if (!recoveryReady) {
+        setErrorMessage('This reset link is still being verified. Please wait a moment and try again.');
+        setLoading(false);
+        return;
+      }
+      if (password.length < 6) {
+        setErrorMessage('Password must be at least 6 characters.');
+        setLoading(false);
+        return;
+      }
+      if (password !== confirmPassword) {
+        setErrorMessage('Passwords do not match.');
+        setLoading(false);
+        return;
+      }
+
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) {
+        setErrorMessage(error.message);
+      } else {
+        setMessage('Password updated successfully.');
+        window.setTimeout(() => onRecoveryComplete?.(), 700);
+      }
       setLoading(false);
       return;
     }
@@ -70,11 +155,8 @@ export default function AuthScreen({ onBack }: AuthScreenProps) {
       },
     });
 
-    if (error) {
-      setErrorMessage(error.message);
-    } else if (!data.session) {
-      setMessage('Account created. Check your email to confirm your account, then sign in.');
-    }
+    if (error) setErrorMessage(error.message);
+    else if (!data.session) setMessage('Account created. Check your email to confirm your account, then sign in.');
     setLoading(false);
   }
 
@@ -85,9 +167,7 @@ export default function AuthScreen({ onBack }: AuthScreenProps) {
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
-      options: {
-        redirectTo: `${window.location.origin}/`,
-      },
+      options: { redirectTo: `${window.location.origin}/` },
     });
 
     if (error) {
@@ -98,6 +178,8 @@ export default function AuthScreen({ onBack }: AuthScreenProps) {
 
   function changeMode(nextMode: Mode) {
     setMode(nextMode);
+    setPassword('');
+    setConfirmPassword('');
     setMessage('');
     setErrorMessage('');
   }
@@ -109,88 +191,90 @@ export default function AuthScreen({ onBack }: AuthScreenProps) {
         <span className="text-[12px]" style={{ color: '#A0A0A0' }}>or continue with</span>
         <div className="h-px flex-1" style={{ backgroundColor: '#E8E8E8' }} />
       </div>
-
-      <button
-        type="button"
-        onClick={() => handleSocialAuth('google')}
-        disabled={Boolean(socialLoading)}
-        className="w-full h-12 rounded-[8px] border flex items-center justify-center gap-3 text-[14px] font-semibold disabled:opacity-60"
-        style={{ borderColor: '#E5E5E5', backgroundColor: '#FFFFFF', color: '#1F1F1F' }}
-      >
-        <GoogleIcon />
-        {socialLoading === 'google' ? 'Connecting…' : 'Continue with Google'}
+      <button type="button" onClick={() => handleSocialAuth('google')} disabled={Boolean(socialLoading)} className="w-full h-12 rounded-[8px] border flex items-center justify-center gap-3 text-[14px] font-semibold disabled:opacity-60" style={{ borderColor: '#E5E5E5', backgroundColor: '#FFFFFF', color: '#1F1F1F' }}>
+        <GoogleIcon />{socialLoading === 'google' ? 'Connecting…' : 'Continue with Google'}
       </button>
-
-      <button
-        type="button"
-        onClick={() => handleSocialAuth('apple')}
-        disabled={Boolean(socialLoading)}
-        className="w-full h-12 rounded-[8px] flex items-center justify-center gap-3 text-[14px] font-semibold disabled:opacity-60"
-        style={{ backgroundColor: '#000000', color: '#FFFFFF' }}
-      >
-        <AppleIcon />
-        {socialLoading === 'apple' ? 'Connecting…' : 'Continue with Apple'}
+      <button type="button" onClick={() => handleSocialAuth('apple')} disabled={Boolean(socialLoading)} className="w-full h-12 rounded-[8px] flex items-center justify-center gap-3 text-[14px] font-semibold disabled:opacity-60" style={{ backgroundColor: '#000000', color: '#FFFFFF' }}>
+        <AppleIcon />{socialLoading === 'apple' ? 'Connecting…' : 'Continue with Apple'}
       </button>
     </div>
   );
+
+  if (mode === 'forgot') {
+    return (
+      <div className="pb-28">
+        <div className="px-6 pt-[72px]">
+          <BackButton onClick={() => changeMode('signin')} />
+          <div className="flex justify-center mb-6"><img src="/assets/logo.png" alt="Pickle" className="w-[88px] h-[88px] rounded-[24px] object-cover" /></div>
+          <div className="text-center mb-7">
+            <h1 className="font-bold text-[24px]" style={{ color: '#1F1F1F' }}>Reset your password</h1>
+            <p className="text-[14px] mt-2" style={{ color: '#777777' }}>Enter your email and we'll send you a reset link.</p>
+          </div>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-[13px] font-semibold mb-2" style={{ color: '#444444' }}>Email</label>
+              <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]" style={{ borderColor: '#E5E5E5', backgroundColor: '#FAFAFA', color: '#1F1F1F' }} placeholder="you@example.com" autoCapitalize="none" autoComplete="email" />
+            </div>
+            {errorMessage && <p className="text-[13px] leading-5" style={{ color: '#C53D2E' }}>{errorMessage}</p>}
+            {message && <p className="text-[13px] leading-5" style={{ color: '#5F6F52' }}>{message}</p>}
+            <button type="submit" disabled={loading} className="w-full h-12 rounded-[8px] text-white text-[15px] font-semibold disabled:opacity-60" style={{ backgroundColor: '#F26B21' }}>
+              {loading ? 'Sending…' : 'Send reset link'}
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  if (mode === 'update') {
+    return (
+      <div className="pb-28">
+        <div className="px-6 pt-[72px]">
+          <div className="flex justify-center mb-6"><img src="/assets/logo.png" alt="Pickle" className="w-[88px] h-[88px] rounded-[24px] object-cover" /></div>
+          <div className="text-center mb-7">
+            <h1 className="font-bold text-[24px]" style={{ color: '#1F1F1F' }}>Choose a new password</h1>
+            <p className="text-[14px] mt-2" style={{ color: '#777777' }}>{recoveryReady ? 'Enter and confirm your new password.' : 'Verifying your reset link…'}</p>
+          </div>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-[13px] font-semibold mb-2" style={{ color: '#444444' }}>New password</label>
+              <input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]" style={{ borderColor: '#E5E5E5', backgroundColor: '#FAFAFA', color: '#1F1F1F' }} placeholder="At least 6 characters" autoComplete="new-password" />
+            </div>
+            <div>
+              <label className="block text-[13px] font-semibold mb-2" style={{ color: '#444444' }}>Confirm new password</label>
+              <input type="password" required minLength={6} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]" style={{ borderColor: '#E5E5E5', backgroundColor: '#FAFAFA', color: '#1F1F1F' }} placeholder="Enter it again" autoComplete="new-password" />
+            </div>
+            {errorMessage && <p className="text-[13px] leading-5" style={{ color: '#C53D2E' }}>{errorMessage}</p>}
+            {message && <p className="text-[13px] leading-5" style={{ color: '#5F6F52' }}>{message}</p>}
+            <button type="submit" disabled={loading || !recoveryReady} className="w-full h-12 rounded-[8px] text-white text-[15px] font-semibold disabled:opacity-50" style={{ backgroundColor: '#F26B21' }}>
+              {loading ? 'Updating…' : 'Update password'}
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
 
   if (mode === 'signup') {
     return (
       <div className="pb-28">
         <div className="px-6 pt-[72px]">
-          <button
-            type="button"
-            onClick={() => changeMode('signin')}
-            aria-label="Back to log in"
-            className="w-9 h-9 flex items-center justify-center mb-8"
-            style={{ color: '#1F1F1F' }}
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
-          </button>
-
-          <div className="flex justify-center mb-6">
-            <img src="/assets/logo.png" alt="Pickle" className="w-[88px] h-[88px] rounded-[24px] object-cover" />
-          </div>
-
+          <BackButton onClick={() => changeMode('signin')} />
+          <div className="flex justify-center mb-6"><img src="/assets/logo.png" alt="Pickle" className="w-[88px] h-[88px] rounded-[24px] object-cover" /></div>
           <div className="text-center mb-7">
             <h1 className="font-bold text-[24px]" style={{ color: '#1F1F1F' }}>Create your account</h1>
             <p className="text-[14px] mt-2" style={{ color: '#777777' }}>Save recipes and build your own Pickle profile.</p>
           </div>
-
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-[13px] font-semibold mb-2" style={{ color: '#444444' }}>Display name</label>
-              <input value={displayName} onChange={(e) => setDisplayName(e.target.value)} className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]" style={{ borderColor: '#E5E5E5', backgroundColor: '#FAFAFA', color: '#1F1F1F' }} placeholder="Your name" autoComplete="name" />
-            </div>
-            <div>
-              <label className="block text-[13px] font-semibold mb-2" style={{ color: '#444444' }}>Username</label>
-              <input value={username} onChange={(e) => setUsername(e.target.value.replace(/\s/g, ''))} className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]" style={{ borderColor: '#E5E5E5', backgroundColor: '#FAFAFA', color: '#1F1F1F' }} placeholder="picklefan" autoCapitalize="none" autoComplete="username" />
-            </div>
-            <div>
-              <label className="block text-[13px] font-semibold mb-2" style={{ color: '#444444' }}>Email</label>
-              <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]" style={{ borderColor: '#E5E5E5', backgroundColor: '#FAFAFA', color: '#1F1F1F' }} placeholder="you@example.com" autoCapitalize="none" autoComplete="email" />
-            </div>
-            <div>
-              <label className="block text-[13px] font-semibold mb-2" style={{ color: '#444444' }}>Password</label>
-              <input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]" style={{ borderColor: '#E5E5E5', backgroundColor: '#FAFAFA', color: '#1F1F1F' }} placeholder="At least 6 characters" autoComplete="new-password" />
-            </div>
-
+            <div><label className="block text-[13px] font-semibold mb-2" style={{ color: '#444444' }}>Display name</label><input value={displayName} onChange={(e) => setDisplayName(e.target.value)} className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]" style={{ borderColor: '#E5E5E5', backgroundColor: '#FAFAFA', color: '#1F1F1F' }} placeholder="Your name" autoComplete="name" /></div>
+            <div><label className="block text-[13px] font-semibold mb-2" style={{ color: '#444444' }}>Username</label><input value={username} onChange={(e) => setUsername(e.target.value.replace(/\s/g, ''))} className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]" style={{ borderColor: '#E5E5E5', backgroundColor: '#FAFAFA', color: '#1F1F1F' }} placeholder="picklefan" autoCapitalize="none" autoComplete="username" /></div>
+            <div><label className="block text-[13px] font-semibold mb-2" style={{ color: '#444444' }}>Email</label><input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]" style={{ borderColor: '#E5E5E5', backgroundColor: '#FAFAFA', color: '#1F1F1F' }} placeholder="you@example.com" autoCapitalize="none" autoComplete="email" /></div>
+            <div><label className="block text-[13px] font-semibold mb-2" style={{ color: '#444444' }}>Password</label><input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]" style={{ borderColor: '#E5E5E5', backgroundColor: '#FAFAFA', color: '#1F1F1F' }} placeholder="At least 6 characters" autoComplete="new-password" /></div>
             {errorMessage && <p className="text-[13px] leading-5" style={{ color: '#C53D2E' }}>{errorMessage}</p>}
             {message && <p className="text-[13px] leading-5" style={{ color: '#5F6F52' }}>{message}</p>}
-
-            <button type="submit" disabled={loading || Boolean(socialLoading)} className="w-full h-12 rounded-[8px] text-white text-[15px] font-semibold disabled:opacity-60" style={{ backgroundColor: '#F26B21' }}>
-              {loading ? 'Please wait…' : 'Create account'}
-            </button>
-
+            <button type="submit" disabled={loading || Boolean(socialLoading)} className="w-full h-12 rounded-[8px] text-white text-[15px] font-semibold disabled:opacity-60" style={{ backgroundColor: '#F26B21' }}>{loading ? 'Please wait…' : 'Create account'}</button>
             {socialButtons}
-
-            <div className="text-center">
-              <button type="button" onClick={() => changeMode('signin')} className="text-[12px] font-normal" style={{ color: '#A0A0A0' }}>
-                Already have an account? Log in
-              </button>
-            </div>
+            <div className="text-center"><button type="button" onClick={() => changeMode('signin')} className="text-[12px] font-normal" style={{ color: '#A0A0A0' }}>Already have an account? Log in</button></div>
           </form>
         </div>
       </div>
@@ -201,50 +285,23 @@ export default function AuthScreen({ onBack }: AuthScreenProps) {
     <div className="pb-28">
       <div className="px-4 pt-5">
         <button type="button" onClick={onBack} aria-label="Back" className="w-9 h-9 flex items-center justify-center" style={{ color: '#1F1F1F' }}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
         </button>
       </div>
-
       <div className="px-6 pt-[25px]">
-        <div className="flex justify-center mb-6">
-          <img src="/assets/logo.png" alt="Pickle" className="w-[88px] h-[88px] rounded-[24px] object-cover" />
-        </div>
-
-        <div className="text-center mb-7">
-          <h1 className="font-bold text-[24px]" style={{ color: '#1F1F1F' }}>Welcome back</h1>
-          <p className="text-[14px] mt-2" style={{ color: '#777777' }}>Sign in to keep your Pickle activity with you.</p>
-        </div>
-
+        <div className="flex justify-center mb-6"><img src="/assets/logo.png" alt="Pickle" className="w-[88px] h-[88px] rounded-[24px] object-cover" /></div>
+        <div className="text-center mb-7"><h1 className="font-bold text-[24px]" style={{ color: '#1F1F1F' }}>Welcome back</h1><p className="text-[14px] mt-2" style={{ color: '#777777' }}>Sign in to keep your Pickle activity with you.</p></div>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-[13px] font-semibold mb-2" style={{ color: '#444444' }}>Email</label>
-            <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]" style={{ borderColor: '#E5E5E5', backgroundColor: '#FAFAFA', color: '#1F1F1F' }} placeholder="you@example.com" autoCapitalize="none" autoComplete="email" />
-          </div>
-
-          <div>
-            <label className="block text-[13px] font-semibold mb-2" style={{ color: '#444444' }}>Password</label>
-            <input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]" style={{ borderColor: '#E5E5E5', backgroundColor: '#FAFAFA', color: '#1F1F1F' }} placeholder="At least 6 characters" autoComplete="current-password" />
-          </div>
-
+          <div><label className="block text-[13px] font-semibold mb-2" style={{ color: '#444444' }}>Email</label><input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]" style={{ borderColor: '#E5E5E5', backgroundColor: '#FAFAFA', color: '#1F1F1F' }} placeholder="you@example.com" autoCapitalize="none" autoComplete="email" /></div>
+          <div><label className="block text-[13px] font-semibold mb-2" style={{ color: '#444444' }}>Password</label><input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]" style={{ borderColor: '#E5E5E5', backgroundColor: '#FAFAFA', color: '#1F1F1F' }} placeholder="At least 6 characters" autoComplete="current-password" /></div>
           {errorMessage && <p className="text-[13px] leading-5" style={{ color: '#C53D2E' }}>{errorMessage}</p>}
           {message && <p className="text-[13px] leading-5" style={{ color: '#5F6F52' }}>{message}</p>}
-
-          <button type="submit" disabled={loading || Boolean(socialLoading)} className="w-full h-12 rounded-[8px] text-white text-[15px] font-semibold disabled:opacity-60" style={{ backgroundColor: '#F26B21' }}>
-            {loading ? 'Please wait…' : 'Log in'}
-          </button>
-
+          <button type="submit" disabled={loading || Boolean(socialLoading)} className="w-full h-12 rounded-[8px] text-white text-[15px] font-semibold disabled:opacity-60" style={{ backgroundColor: '#F26B21' }}>{loading ? 'Please wait…' : 'Log in'}</button>
           {socialButtons}
-
           <div className="flex items-center justify-center gap-3 text-[12px]">
-            <button type="button" onClick={() => changeMode('signup')} className="font-normal" style={{ color: '#A0A0A0' }}>
-              Sign up
-            </button>
+            <button type="button" onClick={() => changeMode('signup')} className="font-normal" style={{ color: '#A0A0A0' }}>Sign up</button>
             <span style={{ color: '#D0D0D0' }}>·</span>
-            <button type="button" className="font-normal" style={{ color: '#A0A0A0' }}>
-              Forgot password?
-            </button>
+            <button type="button" onClick={() => changeMode('forgot')} className="font-normal" style={{ color: '#A0A0A0' }}>Forgot password?</button>
           </div>
         </form>
       </div>
