@@ -332,7 +332,7 @@ export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScr
 
         {activeTab === 'Nutrition' && (
           <section className="mt-6">
-            <div className="flex items-end justify-between mb-4">
+            <div className="flex justify-between mb-4" style={{ alignItems: 'baseline' }}>
               <h2 className="font-semibold text-[20px] leading-none" style={{ color: '#1F1F1F' }}>Nutrition</h2>
               <span className="text-[12px] leading-none" style={{ color: '#8A8A8A' }}>Per serving</span>
             </div>
@@ -348,7 +348,7 @@ export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScr
                   ].map(([label, value, unit]) => (
                     <div key={label} className="rounded-[14px] p-4" style={{ backgroundColor: '#F9F9F9', border: '1px solid #EEEEEE' }}>
                       <p className="text-[13px] mb-2" style={{ color: '#6F6F6F' }}>{label}</p>
-                      <div className="flex items-end">
+                      <div className="flex" style={{ alignItems: 'baseline' }}>
                         <span className="font-semibold text-[22px] leading-none" style={{ color: '#1F1F1F' }}>{value}</span>
                         <span className="text-[12px] leading-none ml-1" style={{ color: '#8A8A8A' }}>{unit}</span>
                       </div>
