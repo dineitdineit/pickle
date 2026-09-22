@@ -4,6 +4,8 @@ import { supabase } from './lib/supabase';
 type RecipeDetailScreenProps = {
   recipeId: string;
   onBack: () => void;
+  onSelectRecipe: (id: string) => void;
+  onBrowse: () => void;
 };
 
 type Recipe = {
@@ -16,6 +18,14 @@ type Recipe = {
   servings: number | null;
   cover_image: string | null;
   ingredients_image: string | null;
+};
+
+type Recommendation = {
+  id: string;
+  title: string;
+  difficulty: string | null;
+  total_time_minutes: number | null;
+  cover_image: string | null;
 };
 
 type IngredientRow = {
@@ -72,11 +82,12 @@ function formatAmount(amount: number | null) {
   return fractions[amount] ?? String(amount);
 }
 
-export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScreenProps) {
+export default function RecipeDetailScreen({ recipeId, onBack, onSelectRecipe, onBrowse }: RecipeDetailScreenProps) {
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [ingredients, setIngredients] = useState<IngredientRow[]>([]);
   const [steps, setSteps] = useState<StepRow[]>([]);
   const [nutrition, setNutrition] = useState<Nutrition | null>(null);
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
   const [activeTab, setActiveTab] = useState<'Ingredients' | 'Steps' | 'Nutrition'>('Ingredients');
@@ -86,7 +97,7 @@ export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScr
       setLoading(true);
       setErrorMessage('');
 
-      const [recipeResult, ingredientResult, stepResult, nutritionResult] = await Promise.all([
+      const [recipeResult, ingredientResult, stepResult, nutritionResult, recommendationResult] = await Promise.all([
         supabase
           .from('recipes')
           .select('id, title, short_description, description, difficulty, total_time_minutes, servings, cover_image, ingredients_image')
@@ -107,6 +118,13 @@ export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScr
           .select('calories, protein_g, carbs_g, fat_g, is_estimated')
           .eq('recipe_id', recipeId)
           .maybeSingle(),
+        supabase
+          .from('recipes')
+          .select('id, title, difficulty, total_time_minutes, cover_image')
+          .neq('id', recipeId)
+          .not('cover_image', 'is', null)
+          .order('created_at', { ascending: false })
+          .limit(8),
       ]);
 
       if (recipeResult.error) {
@@ -125,6 +143,13 @@ export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScr
         setNutrition(null);
       } else {
         setNutrition((nutritionResult.data as Nutrition | null) ?? null);
+      }
+
+      if (recommendationResult.error) {
+        console.error('Failed to load recipe recommendations:', recommendationResult.error);
+        setRecommendations([]);
+      } else {
+        setRecommendations((recommendationResult.data ?? []) as Recommendation[]);
       }
 
       const viewKey = `pickle:viewed:${recipeId}`;
@@ -398,6 +423,42 @@ export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScr
             </div>
           </div>
         </section>
+
+        {recommendations.length > 0 && (
+          <section className="mt-10 pt-6 border-t" style={{ borderColor: '#EEEEEE' }}>
+            <h2 className="font-semibold text-[20px] mb-5" style={{ color: '#1F1F1F' }}>More recipes</h2>
+            <div className="grid grid-cols-2 gap-x-3 gap-y-5">
+              {recommendations.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => {
+                    onSelectRecipe(item.id);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  className="text-left min-w-0"
+                >
+                  <div className="w-full aspect-square rounded-[14px] overflow-hidden bg-gray-100 mb-2.5">
+                    <img src={imageUrl(item.cover_image)} alt={item.title} className="w-full h-full object-cover" />
+                  </div>
+                  <p className="font-semibold text-[15px] leading-[19px] line-clamp-2" style={{ color: '#1F1F1F' }}>{item.title}</p>
+                  <p className="text-[12px] mt-1" style={{ color: '#6F6F6F' }}>
+                    {item.difficulty || '—'} · {formatTime(item.total_time_minutes)}
+                  </p>
+                </button>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={onBrowse}
+              className="w-full h-12 mt-7 rounded-[14px] border text-[14px] font-semibold"
+              style={{ borderColor: '#F26B21', color: '#F26B21', backgroundColor: '#FFFFFF' }}
+            >
+              See more recipes
+            </button>
+          </section>
+        )}
       </div>
     </div>
   );
