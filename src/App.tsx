@@ -99,7 +99,7 @@ export default function App() {
   const [searchValue, setSearchValue] = useState('');
   const [showSearch, setShowSearch] = useState(false);
   const [showLikedRecipes, setShowLikedRecipes] = useState(false);
-  const [selectedRecipeId, setSelectedRecipeId] = useState<string | null>(null);
+  const [selectedRecipeId, setSelectedRecipeId] = useState<string | null>(() => new URLSearchParams(window.location.search).get('recipe'));
   const [selectedTagRecipeSection, setSelectedTagRecipeSection] = useState<string | null>(null);
   const [recipes, setRecipes] = useState<RecipeCard[]>([]);
   const [partyRecipeIds, setPartyRecipeIds] = useState<Set<string>>(new Set());
@@ -111,6 +111,13 @@ export default function App() {
   const [homeAvatarUrl, setHomeAvatarUrl] = useState<string | null>(null);
   const carouselScrollRef = useRef<HTMLDivElement>(null);
   const GAP = 16;
+
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (selectedRecipeId) url.searchParams.set('recipe', selectedRecipeId);
+    else url.searchParams.delete('recipe');
+    window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
+  }, [selectedRecipeId]);
 
   useEffect(() => {
     let mounted = true;
