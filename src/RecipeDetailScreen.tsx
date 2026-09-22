@@ -164,6 +164,20 @@ export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScr
             <polyline points="15 18 9 12 15 6" />
           </svg>
         </button>
+
+        <button
+          type="button"
+          aria-label="Share recipe"
+          className="absolute top-5 right-4 w-10 h-10 rounded-full bg-white/90 flex items-center justify-center"
+        >
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#1F1F1F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="18" cy="5" r="3" />
+            <circle cx="6" cy="12" r="3" />
+            <circle cx="18" cy="19" r="3" />
+            <line x1="8.59" y1="10.51" x2="15.42" y2="6.49" />
+            <line x1="8.59" y1="13.49" x2="15.42" y2="17.51" />
+          </svg>
+        </button>
       </div>
 
       <div className="px-4 pt-5">
@@ -174,11 +188,29 @@ export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScr
             )}
             <h1 className="font-bold text-[28px] leading-tight" style={{ color: '#1F1F1F' }}>{recipe.title}</h1>
           </div>
-          <button className="w-10 h-10 rounded-full border flex items-center justify-center flex-shrink-0" style={{ borderColor: '#EAEAEA' }} aria-label="Save recipe">
-            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#1F1F1F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/>
-            </svg>
-          </button>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              type="button"
+              className="w-10 h-10 rounded-full border flex items-center justify-center"
+              style={{ borderColor: '#EAEAEA' }}
+              aria-label="Like recipe"
+            >
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#1F1F1F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z" />
+              </svg>
+            </button>
+
+            <button
+              type="button"
+              className="w-10 h-10 rounded-full border flex items-center justify-center"
+              style={{ borderColor: '#EAEAEA' }}
+              aria-label="Save recipe"
+            >
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#1F1F1F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/>
+              </svg>
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-3 gap-2 mt-5">
