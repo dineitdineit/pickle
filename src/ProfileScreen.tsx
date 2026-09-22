@@ -37,7 +37,19 @@ function MenuIcon({ name }: { name: string }) {
     return <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z" /></svg>;
   }
   if (name === 'settings') {
-    return <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06-2.12 2.12-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V20h-3v-.08a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06-2.12-2.12.06-.06A1.65 1.65 0 006.6 15a1.65 1.65 0 00-1.51-1H5v-3h.08a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06L8.32 6l.06.06a1.65 1.65 0 001.82.33 1.65 1.65 0 001-1.51V5h3v.08a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06 2.12 2.12-.06.06a1.65 1.65 0 00-.33 1.82 1.65 1.65 0 001.51 1H20v3h-.08a1.65 1.65 0 00-1.52 1z" /></svg>;
+    return (
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="3" />
+        <path d="M12 2v3" />
+        <path d="M12 19v3" />
+        <path d="M4.93 4.93l2.12 2.12" />
+        <path d="M16.95 16.95l2.12 2.12" />
+        <path d="M2 12h3" />
+        <path d="M19 12h3" />
+        <path d="M4.93 19.07l2.12-2.12" />
+        <path d="M16.95 7.05l2.12-2.12" />
+      </svg>
+    );
   }
   if (name === 'mail') {
     return <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2z" /><polyline points="22 6 12 13 2 6" /></svg>;
