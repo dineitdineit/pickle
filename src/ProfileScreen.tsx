@@ -60,12 +60,12 @@ function MenuIcon({ name }: { name: string }) {
 export default function ProfileScreen({ onOpenSaved }: ProfileScreenProps) {
   return (
     <div className="pb-28">
-      <div className="px-4 pt-6 pb-6 text-center">
+      <div className="px-4 pt-6 text-center">
         <h1 className="font-bold text-[24px]" style={{ color: '#1F1F1F' }}>Profile</h1>
       </div>
 
-      <section className="px-4 pb-8 flex flex-col items-center">
-        <div className="w-24 h-24 rounded-full flex items-center justify-center text-[30px] font-bold mb-3" style={{ backgroundColor: '#FFF0E6', color: '#F26B21' }}>P</div>
+      <section className="px-4 pb-8 flex flex-col items-center" style={{ paddingTop: 50 }}>
+        <div className="w-[120px] h-[120px] rounded-full flex items-center justify-center text-[36px] font-bold mb-3" style={{ backgroundColor: '#FFF0E6', color: '#F26B21' }}>P</div>
         <h2 className="font-semibold text-[20px]" style={{ color: '#1F1F1F' }}>Pickle User</h2>
         <p className="text-[13px] mt-1" style={{ color: '#8A8A8A' }}>Profile details will be connected later.</p>
       </section>
