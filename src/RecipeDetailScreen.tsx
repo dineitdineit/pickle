@@ -239,7 +239,13 @@ export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScr
           </section>
         )}
 
-        <div className="mt-8 rounded-[20px] p-1 flex gap-1 overflow-hidden" style={{ backgroundColor: '#F5F5F5' }}>
+        <div
+          className="mt-8 p-2.5 flex gap-1"
+          style={{
+            backgroundColor: '#F5F5F5',
+            borderRadius: 24,
+          }}
+        >
           {(['Ingredients', 'Steps', 'Nutrition'] as const).map((tab) => (
             <button
               key={tab}
