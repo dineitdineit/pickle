@@ -361,7 +361,7 @@ export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScr
                     className="mt-3"
                     style={{
                       color: 'A0A0A0',
-                      fontsize: '7px'
+                      fontsize: '7px',
                       lineHeight: '10px',
                     }}
                   >
