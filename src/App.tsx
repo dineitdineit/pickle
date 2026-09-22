@@ -341,7 +341,20 @@ export default function App() {
   );
 
   if (selectedRecipeId) {
-    return <RecipeDetailScreen recipeId={selectedRecipeId} onBack={() => setSelectedRecipeId(null)} />;
+    return (
+      <RecipeDetailScreen
+        recipeId={selectedRecipeId}
+        onBack={() => setSelectedRecipeId(null)}
+        onSelectRecipe={setSelectedRecipeId}
+        onBrowse={() => {
+          setSelectedRecipeId(null);
+          setSelectedTagRecipeSection(null);
+          setShowSearch(false);
+          setActiveNav(1);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+      />
+    );
   }
 
   if (selectedTagRecipeSection) {
