@@ -122,7 +122,7 @@ export default function AuthScreen() {
 
   return (
     <div className="pb-28">
-      <div className="px-6 pt-[72px]">
+      <div className="px-6 pt-[70px]">
         <div className="flex justify-center mb-6">
           <img src="/assets/pickle-logo.png" alt="Pickle" className="w-[88px] h-[88px] rounded-[24px] object-cover" />
         </div>
@@ -151,12 +151,12 @@ export default function AuthScreen() {
           </button>
 
           <div className="flex items-center justify-center gap-3 text-[12px]">
-            <button type="button" className="font-normal" style={{ color: '#A0A0A0' }}>
-              Forgot password?
-            </button>
-            <span style={{ color: '#D0D0D0' }}>·</span>
             <button type="button" onClick={() => changeMode('signup')} className="font-normal" style={{ color: '#A0A0A0' }}>
               Sign up
+            </button>
+            <span style={{ color: '#D0D0D0' }}>·</span>
+            <button type="button" className="font-normal" style={{ color: '#A0A0A0' }}>
+              Forgot password?
             </button>
           </div>
         </form>
