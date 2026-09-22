@@ -14,8 +14,6 @@ type RecipeCard = {
   image: string;
 };
 
-const FILTERS = ['All', 'Easy', 'Intermediate', 'Under 30m'];
-
 const NAV_ICONS = [
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,
@@ -37,49 +35,165 @@ function publicImageUrl(path: string | null) {
   return supabase.storage.from('recipe_images').getPublicUrl(path).data.publicUrl;
 }
 
+function RecipeStrip({
+  title,
+  recipes,
+  onSelectRecipe,
+}: {
+  title: string;
+  recipes: RecipeCard[];
+  onSelectRecipe: (id: string) => void;
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const startX = useRef<number | null>(null);
+  const startScrollLeft = useRef(0);
+  const dragging = useRef(false);
+  const didDrag = useRef(false);
+
+  function handlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
+    const el = scrollRef.current;
+    if (!el) return;
+    dragging.current = true;
+    didDrag.current = false;
+    startX.current = e.clientX;
+    startScrollLeft.current = el.scrollLeft;
+    el.setPointerCapture(e.pointerId);
+  }
+
+  function handlePointerMove(e: React.PointerEvent<HTMLDivElement>) {
+    const el = scrollRef.current;
+    if (!el || !dragging.current || startX.current === null) return;
+    const deltaX = e.clientX - startX.current;
+    if (Math.abs(deltaX) > 5) didDrag.current = true;
+    el.scrollLeft = startScrollLeft.current - deltaX;
+  }
+
+  function finishDrag(e: React.PointerEvent<HTMLDivElement>) {
+    const el = scrollRef.current;
+    if (!el) return;
+    dragging.current = false;
+    startX.current = null;
+    try {
+      el.releasePointerCapture(e.pointerId);
+    } catch {}
+    window.setTimeout(() => {
+      didDrag.current = false;
+    }, 0);
+  }
+
+  return (
+    <section className="mb-8">
+      <div className="px-4 mb-3">
+        <h2 className="font-semibold text-[20px]" style={{ color: '#1F1F1F' }}>{title}</h2>
+      </div>
+
+      <div
+        ref={scrollRef}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={finishDrag}
+        onPointerCancel={finishDrag}
+        className="flex items-start gap-3 px-4 overflow-x-auto scrollbar-hide pb-1 cursor-grab active:cursor-grabbing"
+        style={{ touchAction: 'pan-y', WebkitOverflowScrolling: 'touch' }}
+      >
+        {recipes.map((recipe) => (
+          <button
+            key={recipe.id}
+            onClick={() => {
+              if (!didDrag.current) onSelectRecipe(recipe.id);
+            }}
+            className="flex-none w-[148px] text-left self-start"
+          >
+            <div className="w-[148px] h-[148px] rounded-[12px] overflow-hidden mb-2 bg-gray-100">
+              <img src={recipe.image} alt={recipe.title} className="w-full h-full object-cover block" draggable={false} />
+            </div>
+            <p className="font-semibold text-[16px] leading-[19px] min-h-[19px] line-clamp-2" style={{ color: '#1F1F1F' }}>{recipe.title}</p>
+            <p className="text-[13px] mt-1" style={{ color: '#6F6F6F' }}>{recipe.difficulty} · {formatTime(recipe.total_time_minutes)}</p>
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export default function App() {
   const [activeNav, setActiveNav] = useState(0);
-  const [activeFilter, setActiveFilter] = useState('All');
   const [searchValue, setSearchValue] = useState('');
   const [showSearch, setShowSearch] = useState(false);
   const [selectedRecipeId, setSelectedRecipeId] = useState<string | null>(null);
   const [recipes, setRecipes] = useState<RecipeCard[]>([]);
+  const [partyRecipeIds, setPartyRecipeIds] = useState<Set<string>>(new Set());
+  const [recentViewCounts, setRecentViewCounts] = useState<Map<string, number>>(new Map());
   const [featuredIndex, setFeaturedIndex] = useState(0);
   const [loadingRecipes, setLoadingRecipes] = useState(true);
   const carouselScrollRef = useRef<HTMLDivElement>(null);
-  const discoverScrollRef = useRef<HTMLDivElement>(null);
-  const discoverDragStartX = useRef<number | null>(null);
-  const discoverDragStartScrollLeft = useRef(0);
-  const discoverDragging = useRef(false);
 
   const GAP = 16;
 
   useEffect(() => {
-    async function loadRecipes() {
+    async function loadHomeData() {
       setLoadingRecipes(true);
-      const { data, error } = await supabase
-        .from('recipes')
-        .select('id, title, difficulty, total_time_minutes, servings, cover_image')
-        .not('cover_image', 'is', null)
-        .order('created_at', { ascending: true });
 
-      if (error) {
-        console.error('Failed to load recipes:', error);
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+      const [recipeResult, partyTagResult, viewsResult] = await Promise.all([
+        supabase
+          .from('recipes')
+          .select('id, title, difficulty, total_time_minutes, servings, cover_image')
+          .not('cover_image', 'is', null)
+          .order('created_at', { ascending: true }),
+        supabase
+          .from('tags')
+          .select('id')
+          .eq('name', 'Party')
+          .single(),
+        supabase
+          .from('recipe_views')
+          .select('recipe_id')
+          .gte('viewed_at', thirtyDaysAgo.toISOString()),
+      ]);
+
+      if (recipeResult.error) {
+        console.error('Failed to load recipes:', recipeResult.error);
         setLoadingRecipes(false);
         return;
       }
 
-      const mapped: RecipeCard[] = (data ?? []).map((recipe) => ({
+      const mapped: RecipeCard[] = (recipeResult.data ?? []).map((recipe) => ({
         ...recipe,
         image: publicImageUrl(recipe.cover_image),
       }));
-
       setRecipes(mapped);
+
+      if (!partyTagResult.error && partyTagResult.data) {
+        const { data: partyLinks, error: partyLinksError } = await supabase
+          .from('recipe_tags')
+          .select('recipe_id')
+          .eq('tag_id', partyTagResult.data.id);
+
+        if (partyLinksError) {
+          console.error('Failed to load Party recipes:', partyLinksError);
+        } else {
+          setPartyRecipeIds(new Set((partyLinks ?? []).map((row) => row.recipe_id)));
+        }
+      }
+
+      if (viewsResult.error) {
+        console.error('Failed to load recent recipe views:', viewsResult.error);
+      } else {
+        const counts = new Map<string, number>();
+        (viewsResult.data ?? []).forEach((row) => {
+          counts.set(row.recipe_id, (counts.get(row.recipe_id) ?? 0) + 1);
+        });
+        setRecentViewCounts(counts);
+      }
+
       setLoadingRecipes(false);
     }
 
-    loadRecipes();
-  }, []);
+    loadHomeData();
+  }, [selectedRecipeId]);
 
   const sortedRecipes = useMemo(
     () => [...recipes].sort((a, b) => a.title.localeCompare(b.title, 'en', { sensitivity: 'base' })),
@@ -88,7 +202,6 @@ export default function App() {
 
   const featuredRecipes = useMemo(() => {
     if (sortedRecipes.length <= 5) return sortedRecipes;
-
     const shuffled = [...sortedRecipes];
     for (let i = shuffled.length - 1; i > 0; i -= 1) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -97,17 +210,29 @@ export default function App() {
     return shuffled.slice(0, 5);
   }, [sortedRecipes]);
 
-  const filteredRecipes = useMemo(() => {
-    if (activeFilter === 'Easy') return sortedRecipes.filter((r) => r.difficulty === 'Easy');
-    if (activeFilter === 'Intermediate') return sortedRecipes.filter((r) => r.difficulty === 'Intermediate');
-    if (activeFilter === 'Under 30m') return sortedRecipes.filter((r) => r.total_time_minutes <= 30);
-    return sortedRecipes;
-  }, [sortedRecipes, activeFilter]);
+  const trendingRecipes = useMemo(
+    () =>
+      [...sortedRecipes]
+        .sort((a, b) => {
+          const viewDifference = (recentViewCounts.get(b.id) ?? 0) - (recentViewCounts.get(a.id) ?? 0);
+          return viewDifference || a.title.localeCompare(b.title, 'en', { sensitivity: 'base' });
+        })
+        .slice(0, 10),
+    [sortedRecipes, recentViewCounts],
+  );
 
-  useEffect(() => {
-    discoverScrollRef.current?.scrollTo({ left: 0, behavior: 'auto' });
-  }, [activeFilter]);
+  const under30Recipes = useMemo(
+    () => sortedRecipes.filter((recipe) => recipe.difficulty === 'Easy' && recipe.total_time_minutes < 30),
+    [sortedRecipes],
+  );
 
+  const partyRecipes = useMemo(
+    () =>
+      sortedRecipes
+        .filter((recipe) => partyRecipeIds.has(recipe.id))
+        .sort((a, b) => (b.servings ?? 0) - (a.servings ?? 0) || a.title.localeCompare(b.title, 'en')),
+    [sortedRecipes, partyRecipeIds],
+  );
 
   function submitSearch() {
     setShowSearch(true);
@@ -126,6 +251,7 @@ export default function App() {
     el.scrollTo({ left: index * (el.clientWidth + GAP), behavior: 'smooth' });
     setFeaturedIndex(index);
   }
+
   const dragStartX = useRef<number | null>(null);
   const dragStartScrollLeft = useRef(0);
   const isDragging = useRef(false);
@@ -133,7 +259,6 @@ export default function App() {
   function handlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
     const el = carouselScrollRef.current;
     if (!el) return;
-
     isDragging.current = true;
     dragStartX.current = e.clientX;
     dragStartScrollLeft.current = el.scrollLeft;
@@ -143,7 +268,6 @@ export default function App() {
   function handlePointerMove(e: React.PointerEvent<HTMLDivElement>) {
     const el = carouselScrollRef.current;
     if (!el || !isDragging.current || dragStartX.current === null) return;
-
     const deltaX = e.clientX - dragStartX.current;
     el.scrollLeft = dragStartScrollLeft.current - deltaX;
   }
@@ -151,7 +275,6 @@ export default function App() {
   function finishPointerDrag(e: React.PointerEvent<HTMLDivElement>) {
     const el = carouselScrollRef.current;
     if (!el || dragStartX.current === null) return;
-
     const deltaX = e.clientX - dragStartX.current;
     isDragging.current = false;
     dragStartX.current = null;
@@ -171,33 +294,6 @@ export default function App() {
         : Math.max(featuredIndex - 1, 0);
 
     scrollToCard(nextIndex);
-  }
-
-
-  function handleDiscoverPointerDown(e: React.PointerEvent<HTMLDivElement>) {
-    const el = discoverScrollRef.current;
-    if (!el) return;
-    discoverDragging.current = true;
-    discoverDragStartX.current = e.clientX;
-    discoverDragStartScrollLeft.current = el.scrollLeft;
-    el.setPointerCapture(e.pointerId);
-  }
-
-  function handleDiscoverPointerMove(e: React.PointerEvent<HTMLDivElement>) {
-    const el = discoverScrollRef.current;
-    if (!el || !discoverDragging.current || discoverDragStartX.current === null) return;
-    const deltaX = e.clientX - discoverDragStartX.current;
-    el.scrollLeft = discoverDragStartScrollLeft.current - deltaX;
-  }
-
-  function finishDiscoverPointerDrag(e: React.PointerEvent<HTMLDivElement>) {
-    const el = discoverScrollRef.current;
-    if (!el) return;
-    discoverDragging.current = false;
-    discoverDragStartX.current = null;
-    try {
-      el.releasePointerCapture(e.pointerId);
-    } catch {}
   }
 
   useEffect(() => {
@@ -291,7 +387,7 @@ export default function App() {
       ) : (
         <>
           <div className="mb-8">
-            <div className="flex items-center justify-between px-4 mb-4">
+            <div className="px-4 mb-4">
               <h2 className="font-semibold text-[20px]" style={{ color: '#1F1F1F' }}>Featured</h2>
             </div>
 
@@ -357,50 +453,9 @@ export default function App() {
             </div>
           </div>
 
-          <div className="mb-8">
-            <div className="px-4 mb-4">
-              <h2 className="font-semibold text-[20px]" style={{ color: '#1F1F1F' }}>Discover recipes</h2>
-            </div>
-
-            <div className="flex gap-2 px-4 mb-2.5 overflow-x-auto scrollbar-hide">
-              {FILTERS.map((filter) => (
-                <button
-                  key={filter}
-                  onClick={() => setActiveFilter(filter)}
-                  className="flex-shrink-0 px-3.5 py-1.5 rounded-full text-[14px] font-medium"
-                  style={activeFilter === filter
-                    ? { backgroundColor: '#F26B21', color: '#fff', border: '1.5px solid #F26B21' }
-                    : { backgroundColor: '#fff', color: '#6F6F6F', border: '1.5px solid #EAEAEA' }}
-                >
-                  {filter}
-                </button>
-              ))}
-            </div>
-
-            <div
-              ref={discoverScrollRef}
-              onPointerDown={handleDiscoverPointerDown}
-              onPointerMove={handleDiscoverPointerMove}
-              onPointerUp={finishDiscoverPointerDrag}
-              onPointerCancel={finishDiscoverPointerDrag}
-              className="flex items-start gap-3 px-4 overflow-x-auto scrollbar-hide pb-1 cursor-grab active:cursor-grabbing"
-              style={{ touchAction: 'pan-y', WebkitOverflowScrolling: 'touch' }}
-            >
-              {filteredRecipes.map((recipe) => (
-                <button
-                  key={recipe.id}
-                  onClick={() => setSelectedRecipeId(recipe.id)}
-                  className="flex-none w-[148px] text-left self-start"
-                >
-                  <div className="w-[148px] h-[148px] rounded-[12px] overflow-hidden mb-2 bg-gray-100">
-                    <img src={recipe.image} alt={recipe.title} className="w-full h-full object-cover block" />
-                  </div>
-                  <p className="font-semibold text-[16px] leading-[19px] min-h-[19px] line-clamp-2" style={{ color: '#1F1F1F' }}>{recipe.title}</p>
-                  <p className="text-[13px] mt-1" style={{ color: '#6F6F6F' }}>{recipe.difficulty} · {formatTime(recipe.total_time_minutes)}</p>
-                </button>
-              ))}
-            </div>
-          </div>
+          <RecipeStrip title="Trending Recipes" recipes={trendingRecipes} onSelectRecipe={setSelectedRecipeId} />
+          <RecipeStrip title="Under 30min" recipes={under30Recipes} onSelectRecipe={setSelectedRecipeId} />
+          <RecipeStrip title="Party Packs" recipes={partyRecipes} onSelectRecipe={setSelectedRecipeId} />
         </>
       )}
 
