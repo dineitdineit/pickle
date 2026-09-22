@@ -108,6 +108,7 @@ export default function App() {
   const [loadingRecipes, setLoadingRecipes] = useState(true);
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [loadingAuth, setLoadingAuth] = useState(true);
+  const [homeAvatarUrl, setHomeAvatarUrl] = useState<string | null>(null);
   const carouselScrollRef = useRef<HTMLDivElement>(null);
   const GAP = 16;
 
@@ -123,6 +124,7 @@ export default function App() {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setAuthUser(session?.user ? { id: session.user.id, email: session.user.email } : null);
+      if (!session?.user) setHomeAvatarUrl(null);
       setLoadingAuth(false);
     });
 
@@ -131,6 +133,33 @@ export default function App() {
       subscription.unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    let ignore = false;
+
+    async function loadHomeAvatar() {
+      if (!authUser) {
+        setHomeAvatarUrl(null);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('avatar_url')
+        .eq('id', authUser.id)
+        .maybeSingle();
+
+      if (ignore) return;
+      if (error) {
+        console.error('Failed to load home profile photo:', error);
+        return;
+      }
+      setHomeAvatarUrl(data?.avatar_url ?? null);
+    }
+
+    loadHomeAvatar();
+    return () => { ignore = true; };
+  }, [authUser, activeNav]);
 
   useEffect(() => {
     async function loadHomeData() {
@@ -252,7 +281,11 @@ export default function App() {
     <div className="bg-white min-h-screen max-w-md mx-auto relative pb-24">
       <div className="flex items-center justify-between px-4 pt-6 pb-2">
         <div className="flex items-center gap-2"><img src="/assets/logo.png" alt="Pickle logo" className="w-9 h-9 rounded-xl object-cover" /><span className="font-bold text-[17px]" style={{ color: '#1F1F1F' }}>Pickle</span></div>
-        <div className="w-9 h-9 rounded-full bg-[#FFF0E6] flex items-center justify-center font-semibold text-[14px]" style={{ color: '#F26B21' }}>P</div>
+        <button type="button" onClick={() => setActiveNav(4)} aria-label="Open profile" className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center font-semibold text-[14px]" style={{ backgroundColor: '#FFF0E6', color: '#F26B21' }}>
+          {homeAvatarUrl && /^https?:\/\//.test(homeAvatarUrl) ? (
+            <img src={homeAvatarUrl} alt="Profile" className="w-full h-full object-cover" />
+          ) : 'P'}
+        </button>
       </div>
       <div className="px-4 mt-4 mb-4"><h1 className="font-bold text-[28px] leading-tight" style={{ color: '#1F1F1F' }}>Hi, looking for<br />a recipe?</h1></div>
       <div className="px-4 mb-8">
