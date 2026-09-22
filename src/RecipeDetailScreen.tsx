@@ -357,8 +357,8 @@ export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScr
                 </div>
 
                 {nutrition.is_estimated && (
-                  <p className="mt-3 text-[8px] leading-3" style={{ color: '#A0A0A0' }}>
-                    *Nutrition values are estimates, and may not be accurate.
+                  <p className="mt-3 text-[6px] leading-[9px]" style={{ color: '#A0A0A0' }}>
+                    *Nutrition values are estimates and may not be accurate.
                   </p>
                 )}
               </>
