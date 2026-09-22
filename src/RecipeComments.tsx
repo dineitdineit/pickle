@@ -208,18 +208,18 @@ export default function RecipeComments({ recipeId, onRequireLogin, onCountChange
       {shareOpen && (
         <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center" style={{ backgroundColor: 'rgba(0,0,0,0.35)' }} onClick={closeShareMenu}>
           <div
-            className="w-full max-w-md bg-white px-5 pt-5 pb-7 shadow-xl"
+            className="w-full max-w-md bg-white px-6 pt-6 pb-7 shadow-xl"
             style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28 }}
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center justify-between mb-5 px-1">
               <h3 className="font-semibold text-[18px]" style={{ color: '#1F1F1F' }}>Share recipe</h3>
               <button type="button" onClick={closeShareMenu} aria-label="Close share menu" className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#F5F5F5', color: '#555555' }}>
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
               </button>
             </div>
 
-            <div className="flex flex-row items-start justify-between gap-2">
+            <div className="flex flex-row items-start justify-between gap-1">
               <button type="button" onClick={shareFacebook} className="flex min-w-0 flex-1 flex-col items-center gap-2 text-[12px]" style={{ color: '#555555' }}>
                 <span className="w-12 h-12 rounded-full flex items-center justify-center text-white text-[22px] font-bold" style={{ backgroundColor: '#1877F2' }}>f</span>
                 <span className="whitespace-nowrap">Facebook</span>
