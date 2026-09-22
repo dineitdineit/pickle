@@ -333,8 +333,8 @@ export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScr
         {activeTab === 'Nutrition' && (
           <section className="mt-6">
             <div className="flex items-end justify-between mb-4">
-              <h2 className="font-semibold text-[20px]" style={{ color: '#1F1F1F' }}>Nutrition</h2>
-              <span className="text-[12px]" style={{ color: '#8A8A8A' }}>Per serving</span>
+              <h2 className="font-semibold text-[20px] leading-none" style={{ color: '#1F1F1F' }}>Nutrition</h2>
+              <span className="text-[12px] leading-none pb-[1px]" style={{ color: '#8A8A8A' }}>Per serving</span>
             </div>
 
             {nutrition ? (
@@ -348,17 +348,17 @@ export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScr
                   ].map(([label, value, unit]) => (
                     <div key={label} className="rounded-[14px] p-4" style={{ backgroundColor: '#F9F9F9', border: '1px solid #EEEEEE' }}>
                       <p className="text-[13px] mb-2" style={{ color: '#6F6F6F' }}>{label}</p>
-                      <div className="flex items-end gap-1">
-                        <span className="font-semibold text-[22px]" style={{ color: '#1F1F1F' }}>{value}</span>
-                        <span className="text-[12px] mb-1" style={{ color: '#8A8A8A' }}>{unit}</span>
+                      <div className="flex items-end">
+                        <span className="font-semibold text-[22px] leading-none" style={{ color: '#1F1F1F' }}>{value}</span>
+                        <span className="text-[12px] leading-none ml-1" style={{ color: '#8A8A8A' }}>{unit}</span>
                       </div>
                     </div>
                   ))}
                 </div>
 
                 {nutrition.is_estimated && (
-                  <p className="mt-3 text-[10px] leading-4" style={{ color: '#9A9A9A' }}>
-                    Nutrition values are estimates and may not be accurate.
+                  <p className="mt-3 text-[8px] leading-3" style={{ color: '#A0A0A0' }}>
+                    *Nutrition values are estimates, and may not be accurate.
                   </p>
                 )}
               </>
