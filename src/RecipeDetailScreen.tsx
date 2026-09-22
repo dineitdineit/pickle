@@ -139,7 +139,6 @@ export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScr
           sessionStorage.setItem(viewKey, '1');
         }
       }
-
       setLoading(false);
     }
 
@@ -358,11 +357,9 @@ export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScr
                 </div>
 
                 {nutrition.is_estimated && (
-                  <div className="mt-4 rounded-[14px] px-4 py-4" style={{ backgroundColor: '#FFF8F3' }}>
-                    <p className="text-[13px] leading-5" style={{ color: '#6F6F6F' }}>
-                      Estimated nutrition per serving based on the listed ingredients. Actual values may vary by brand, portion, and cooking method.
-                    </p>
-                  </div>
+                  <p className="mt-3 text-[10px] leading-4" style={{ color: '#9A9A9A' }}>
+                    Nutrition values are estimates and may not be accurate.
+                  </p>
                 )}
               </>
             ) : (
