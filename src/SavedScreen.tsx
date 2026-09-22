@@ -11,6 +11,7 @@ type SavedRecipe = {
 interface SavedScreenProps {
   recipes: SavedRecipe[];
   onSelectRecipe: (id: string) => void;
+  onBack: () => void;
 }
 
 function formatTime(totalMinutes: number | null) {
@@ -21,7 +22,7 @@ function formatTime(totalMinutes: number | null) {
   return `${hours}h ${minutes}m`;
 }
 
-export default function SavedScreen({ recipes, onSelectRecipe }: SavedScreenProps) {
+export default function SavedScreen({ recipes, onSelectRecipe, onBack }: SavedScreenProps) {
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const initialized = useRef(false);
 
@@ -44,7 +45,18 @@ export default function SavedScreen({ recipes, onSelectRecipe }: SavedScreenProp
 
   return (
     <div className="pb-24">
-      <div className="px-4 pt-6 text-center" style={{ marginBottom: 50 }}>
+      <div className="relative px-4 pt-6 text-center" style={{ marginBottom: 40 }}>
+        <button
+          type="button"
+          onClick={onBack}
+          aria-label="Back"
+          className="absolute left-4 top-5 w-9 h-9 flex items-center justify-center rounded-full"
+          style={{ backgroundColor: '#F9F9F9', border: '1.5px solid #EAEAEA' }}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1F1F1F" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+        </button>
         <h1 className="font-bold text-[24px]" style={{ color: '#1F1F1F' }}>Saved Recipes</h1>
       </div>
 
