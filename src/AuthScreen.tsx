@@ -2,10 +2,30 @@ import { FormEvent, useState } from 'react';
 import { supabase } from './lib/supabase';
 
 type Mode = 'signin' | 'signup';
+type SocialProvider = 'google' | 'apple';
 
 type AuthScreenProps = {
   onBack: () => void;
 };
+
+function GoogleIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+      <path fill="#4285F4" d="M21.6 12.23c0-.71-.06-1.4-.18-2.07H12v3.92h5.38a4.6 4.6 0 0 1-2 3.02v2.51h3.23c1.89-1.74 2.99-4.3 2.99-7.38Z" />
+      <path fill="#34A853" d="M12 22c2.7 0 4.96-.9 6.61-2.39l-3.23-2.51c-.9.6-2.04.96-3.38.96-2.6 0-4.8-1.76-5.59-4.13H3.08v2.59A9.99 9.99 0 0 0 12 22Z" />
+      <path fill="#FBBC05" d="M6.41 13.93A6.02 6.02 0 0 1 6.1 12c0-.67.11-1.32.31-1.93V7.48H3.08A10 10 0 0 0 2 12c0 1.61.39 3.13 1.08 4.52l3.33-2.59Z" />
+      <path fill="#EA4335" d="M12 5.94c1.47 0 2.79.5 3.83 1.49l2.87-2.87A9.62 9.62 0 0 0 12 2a9.99 9.99 0 0 0-8.92 5.48l3.33 2.59C7.2 7.7 9.4 5.94 12 5.94Z" />
+    </svg>
+  );
+}
+
+function AppleIcon() {
+  return (
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.79 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.53 4.1v-.01ZM12.03 7.25C11.88 5.02 13.69 3.18 15.77 3c.29 2.58-2.34 4.5-3.74 4.25Z" />
+    </svg>
+  );
+}
 
 export default function AuthScreen({ onBack }: AuthScreenProps) {
   const [mode, setMode] = useState<Mode>('signin');
@@ -14,6 +34,7 @@ export default function AuthScreen({ onBack }: AuthScreenProps) {
   const [username, setUsername] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [socialLoading, setSocialLoading] = useState<SocialProvider | null>(null);
   const [message, setMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -57,11 +78,61 @@ export default function AuthScreen({ onBack }: AuthScreenProps) {
     setLoading(false);
   }
 
+  async function handleSocialAuth(provider: SocialProvider) {
+    setSocialLoading(provider);
+    setMessage('');
+    setErrorMessage('');
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: `${window.location.origin}/`,
+      },
+    });
+
+    if (error) {
+      setErrorMessage(error.message);
+      setSocialLoading(null);
+    }
+  }
+
   function changeMode(nextMode: Mode) {
     setMode(nextMode);
     setMessage('');
     setErrorMessage('');
   }
+
+  const socialButtons = (
+    <div className="space-y-3">
+      <div className="flex items-center gap-3 py-1">
+        <div className="h-px flex-1" style={{ backgroundColor: '#E8E8E8' }} />
+        <span className="text-[12px]" style={{ color: '#A0A0A0' }}>or continue with</span>
+        <div className="h-px flex-1" style={{ backgroundColor: '#E8E8E8' }} />
+      </div>
+
+      <button
+        type="button"
+        onClick={() => handleSocialAuth('google')}
+        disabled={Boolean(socialLoading)}
+        className="w-full h-12 rounded-[8px] border flex items-center justify-center gap-3 text-[14px] font-semibold disabled:opacity-60"
+        style={{ borderColor: '#E5E5E5', backgroundColor: '#FFFFFF', color: '#1F1F1F' }}
+      >
+        <GoogleIcon />
+        {socialLoading === 'google' ? 'Connecting…' : 'Continue with Google'}
+      </button>
+
+      <button
+        type="button"
+        onClick={() => handleSocialAuth('apple')}
+        disabled={Boolean(socialLoading)}
+        className="w-full h-12 rounded-[8px] flex items-center justify-center gap-3 text-[14px] font-semibold disabled:opacity-60"
+        style={{ backgroundColor: '#000000', color: '#FFFFFF' }}
+      >
+        <AppleIcon />
+        {socialLoading === 'apple' ? 'Connecting…' : 'Continue with Apple'}
+      </button>
+    </div>
+  );
 
   if (mode === 'signup') {
     return (
@@ -109,9 +180,11 @@ export default function AuthScreen({ onBack }: AuthScreenProps) {
             {errorMessage && <p className="text-[13px] leading-5" style={{ color: '#C53D2E' }}>{errorMessage}</p>}
             {message && <p className="text-[13px] leading-5" style={{ color: '#5F6F52' }}>{message}</p>}
 
-            <button type="submit" disabled={loading} className="w-full h-12 rounded-[8px] text-white text-[15px] font-semibold disabled:opacity-60" style={{ backgroundColor: '#F26B21' }}>
+            <button type="submit" disabled={loading || Boolean(socialLoading)} className="w-full h-12 rounded-[8px] text-white text-[15px] font-semibold disabled:opacity-60" style={{ backgroundColor: '#F26B21' }}>
               {loading ? 'Please wait…' : 'Create account'}
             </button>
+
+            {socialButtons}
 
             <div className="text-center">
               <button type="button" onClick={() => changeMode('signin')} className="text-[12px] font-normal" style={{ color: '#A0A0A0' }}>
@@ -158,9 +231,11 @@ export default function AuthScreen({ onBack }: AuthScreenProps) {
           {errorMessage && <p className="text-[13px] leading-5" style={{ color: '#C53D2E' }}>{errorMessage}</p>}
           {message && <p className="text-[13px] leading-5" style={{ color: '#5F6F52' }}>{message}</p>}
 
-          <button type="submit" disabled={loading} className="w-full h-12 rounded-[8px] text-white text-[15px] font-semibold disabled:opacity-60" style={{ backgroundColor: '#F26B21' }}>
+          <button type="submit" disabled={loading || Boolean(socialLoading)} className="w-full h-12 rounded-[8px] text-white text-[15px] font-semibold disabled:opacity-60" style={{ backgroundColor: '#F26B21' }}>
             {loading ? 'Please wait…' : 'Log in'}
           </button>
+
+          {socialButtons}
 
           <div className="flex items-center justify-center gap-3 text-[12px]">
             <button type="button" onClick={() => changeMode('signup')} className="font-normal" style={{ color: '#A0A0A0' }}>
