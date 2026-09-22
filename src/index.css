@@ -32,3 +32,12 @@ html {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* Recipe detail tab bar: keep the same style with less rounded corners. */
+div.mt-8.p-2\.5.flex.gap-1[style*="border-radius: 24px"] {
+  border-radius: 14px !important;
+}
+
+div.mt-8.p-2\.5.flex.gap-1[style*="border-radius: 24px"] > button {
+  border-radius: 9px !important;
+}
