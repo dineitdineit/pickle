@@ -151,12 +151,12 @@ export default function AuthScreen() {
           </button>
 
           <div className="flex items-center justify-center gap-3 text-[12px]">
-            <button type="button" className="font-normal" style={{ color: '#A0A0A0' }}>
-              Forgot password?
-            </button>
-            <span style={{ color: '#D0D0D0' }}>·</span>
             <button type="button" onClick={() => changeMode('signup')} className="font-normal" style={{ color: '#A0A0A0' }}>
               Sign up
+            </button>
+            <span style={{ color: '#D0D0D0' }}>·</span>
+            <button type="button" className="font-normal" style={{ color: '#A0A0A0' }}>
+              Forgot password?
             </button>
           </div>
         </form>
