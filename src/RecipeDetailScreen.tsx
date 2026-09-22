@@ -427,7 +427,7 @@ export default function RecipeDetailScreen({ recipeId, onBack, onSelectRecipe, o
         {recommendations.length > 0 && (
           <section className="pt-6 border-t" style={{ borderColor: '#EEEEEE', marginTop: 50 }}>
             <h2 className="font-semibold text-[20px] mb-5" style={{ color: '#1F1F1F' }}>More recipes</h2>
-            <div className="grid grid-cols-2 gap-x-3 gap-y-5">
+            <div className="grid grid-cols-2 gap-x-4 gap-y-7">
               {recommendations.map((item) => (
                 <button
                   key={item.id}
@@ -438,13 +438,10 @@ export default function RecipeDetailScreen({ recipeId, onBack, onSelectRecipe, o
                   }}
                   className="text-left min-w-0"
                 >
-                  <div className="w-full aspect-square rounded-[14px] overflow-hidden bg-gray-100 mb-2.5">
+                  <div className="w-full aspect-square rounded-[16px] overflow-hidden bg-gray-100 mb-2.5">
                     <img src={imageUrl(item.cover_image)} alt={item.title} className="w-full h-full object-cover" />
                   </div>
-                  <p className="font-semibold text-[15px] leading-[19px] line-clamp-2" style={{ color: '#1F1F1F' }}>{item.title}</p>
-                  <p className="text-[12px] mt-1" style={{ color: '#6F6F6F' }}>
-                    {item.difficulty || '—'} · {formatTime(item.total_time_minutes)}
-                  </p>
+                  <p className="font-medium text-[15px] leading-[19px] line-clamp-2" style={{ color: '#1F1F1F' }}>{item.title}</p>
                 </button>
               ))}
             </div>
@@ -452,7 +449,7 @@ export default function RecipeDetailScreen({ recipeId, onBack, onSelectRecipe, o
             <button
               type="button"
               onClick={onBrowse}
-              className="w-full h-12 mt-7 rounded-[14px] border text-[14px] font-semibold"
+              className="w-full h-12 mt-8 rounded-[14px] border text-[14px] font-semibold"
               style={{ borderColor: '#F26B21', color: '#F26B21', backgroundColor: '#FFFFFF' }}
             >
               See more recipes
