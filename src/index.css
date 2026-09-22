@@ -33,6 +33,34 @@ html {
   display: none;
 }
 
+/* Keep every back button visually consistent with the Profile screen back button. */
+button[aria-label="Back"],
+button[aria-label="Back to log in"],
+button[aria-label="Back to profile"] {
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  min-height: 36px !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  color: #1F1F1F !important;
+}
+
+button[aria-label="Back"] svg,
+button[aria-label="Back to log in"] svg,
+button[aria-label="Back to profile"] svg {
+  width: 20px !important;
+  height: 20px !important;
+  stroke: currentColor !important;
+  stroke-width: 2.2 !important;
+}
+
 /* Recipe detail tab bar: keep the same style with less rounded corners. */
 div.mt-8.p-2\.5.flex.gap-1[style*="border-radius: 24px"] {
   border-radius: 14px !important;
