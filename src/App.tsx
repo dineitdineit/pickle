@@ -233,9 +233,9 @@ export default function App() {
         {loadingAuth ? (
           <div className="px-4 py-20 text-center text-[15px]" style={{ color: '#6F6F6F' }}>Loading profile…</div>
         ) : authUser ? (
-          <ProfileScreen userId={authUser.id} email={authUser.email} onOpenSaved={() => setActiveNav(2)} />
+          <ProfileScreen userId={authUser.id} email={authUser.email} onOpenSaved={() => setActiveNav(2)} onBack={() => setActiveNav(0)} />
         ) : (
-          <AuthScreen />
+          <AuthScreen onBack={() => setActiveNav(0)} />
         )}
         {NavBar}
       </div>
