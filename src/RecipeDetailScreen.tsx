@@ -270,7 +270,9 @@ export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScr
             <div className="space-y-6">
               {groupedIngredients.map(([group, items]) => (
                 <div key={group}>
-                  <h3 className="font-semibold text-[15px] mb-2" style={{ color: '#1F1F1F' }}>{group}</h3>
+                  {group !== 'Main' && (
+                    <h3 className="font-semibold text-[15px] mb-2" style={{ color: '#1F1F1F' }}>{group}</h3>
+                  )}
                   <div className="divide-y" style={{ borderColor: '#EAEAEA' }}>
                     {items.map((item) => (
                       <div key={item.id} className="flex justify-between gap-4 py-3" style={{ borderColor: '#EAEAEA' }}>
