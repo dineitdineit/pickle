@@ -104,11 +104,6 @@ export default function AuthScreen() {
           <div>
             <label className="block text-[13px] font-semibold mb-2" style={{ color: '#444444' }}>Password</label>
             <input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]" style={{ borderColor: '#E5E5E5', backgroundColor: '#FAFAFA', color: '#1F1F1F' }} placeholder="At least 6 characters" autoComplete={mode === 'signin' ? 'current-password' : 'new-password'} />
-            {mode === 'signin' && (
-              <button type="button" className="mt-2 text-[13px] font-medium" style={{ color: '#F26B21' }}>
-                Forgot password?
-              </button>
-            )}
           </div>
 
           {errorMessage && <p className="text-[13px] leading-5" style={{ color: '#C53D2E' }}>{errorMessage}</p>}
@@ -117,6 +112,14 @@ export default function AuthScreen() {
           <button type="submit" disabled={loading} className="w-full h-12 rounded-[12px] text-white text-[15px] font-semibold disabled:opacity-60" style={{ backgroundColor: '#F26B21' }}>
             {loading ? 'Please wait…' : mode === 'signin' ? 'Log in' : 'Create account'}
           </button>
+
+          {mode === 'signin' && (
+            <div className="text-center">
+              <button type="button" className="text-[12px] font-normal" style={{ color: '#A0A0A0' }}>
+                Forgot password?
+              </button>
+            </div>
+          )}
         </form>
       </div>
     </div>
