@@ -15,6 +15,19 @@ type Profile = {
   avatar_url: string | null;
 };
 
+type MyComment = {
+  id: string;
+  recipe_id: string;
+  content: string;
+  created_at: string;
+};
+
+type RecipeSummary = {
+  id: string;
+  title: string;
+  cover_image: string | null;
+};
+
 const MAX_AVATAR_SIZE = 5 * 1024 * 1024;
 const ALLOWED_AVATAR_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
@@ -23,7 +36,7 @@ const MENU_SECTIONS = [
     title: 'Your activity',
     items: [
       { label: 'Saved Recipes', icon: 'bookmark', action: 'saved' },
-      { label: 'My Comments', icon: 'comment' },
+      { label: 'My Comments', icon: 'comment', action: 'comments' },
       { label: 'Liked Recipes', icon: 'heart', action: 'liked' },
     ],
   },
@@ -59,11 +72,21 @@ function avatarPathFromUrl(url: string | null) {
   return decodeURIComponent(url.slice(markerIndex + marker.length).split('?')[0]);
 }
 
+function recipeImageUrl(path: string | null) {
+  if (!path) return '';
+  return supabase.storage.from('recipe_images').getPublicUrl(path).data.publicUrl;
+}
+
 export default function ProfileScreen({ userId, email, onOpenSaved, onOpenLiked, onBack }: ProfileScreenProps) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [avatarMessage, setAvatarMessage] = useState('');
+  const [showMyComments, setShowMyComments] = useState(false);
+  const [commentsLoading, setCommentsLoading] = useState(false);
+  const [myComments, setMyComments] = useState<MyComment[]>([]);
+  const [commentRecipes, setCommentRecipes] = useState<Map<string, RecipeSummary>>(new Map());
+  const [commentsMessage, setCommentsMessage] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -87,6 +110,63 @@ export default function ProfileScreen({ userId, email, onOpenSaved, onOpenLiked,
     loadProfile();
     return () => { ignore = true; };
   }, [userId]);
+
+  async function openMyComments() {
+    setShowMyComments(true);
+    setCommentsLoading(true);
+    setCommentsMessage('');
+
+    const { data, error } = await supabase
+      .from('recipe_comments')
+      .select('id, recipe_id, content, created_at')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Failed to load comment history:', error);
+      setCommentsMessage('Could not load your comments.');
+      setMyComments([]);
+      setCommentsLoading(false);
+      return;
+    }
+
+    const rows = (data ?? []) as MyComment[];
+    setMyComments(rows);
+    const recipeIds = [...new Set(rows.map((comment) => comment.recipe_id))];
+
+    if (recipeIds.length > 0) {
+      const { data: recipeData, error: recipeError } = await supabase
+        .from('recipes')
+        .select('id, title, cover_image')
+        .in('id', recipeIds);
+
+      if (recipeError) {
+        console.error('Failed to load recipes for comments:', recipeError);
+      } else {
+        setCommentRecipes(new Map(((recipeData ?? []) as RecipeSummary[]).map((recipe) => [recipe.id, recipe])));
+      }
+    } else {
+      setCommentRecipes(new Map());
+    }
+
+    setCommentsLoading(false);
+  }
+
+  async function deleteMyComment(commentId: string) {
+    const { error } = await supabase
+      .from('recipe_comments')
+      .delete()
+      .eq('id', commentId)
+      .eq('user_id', userId);
+
+    if (error) {
+      console.error('Failed to delete comment:', error);
+      setCommentsMessage('Could not delete this comment.');
+      return;
+    }
+
+    setMyComments((current) => current.filter((comment) => comment.id !== commentId));
+  }
 
   async function handleAvatarChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -153,6 +233,56 @@ export default function ProfileScreen({ userId, email, onOpenSaved, onOpenLiked,
   const username = profile?.username ? `@${profile.username}` : email || '';
   const initial = profile?.username?.trim().charAt(0).toUpperCase() || 'P';
 
+  if (showMyComments) {
+    return (
+      <div className="pb-28">
+        <div className="relative px-4 pt-6 text-center mb-7">
+          <button type="button" onClick={() => setShowMyComments(false)} aria-label="Back to profile" className="absolute left-4 top-5 w-9 h-9 flex items-center justify-center" style={{ color: '#1F1F1F' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+          </button>
+          <h1 className="font-bold text-[24px]" style={{ color: '#1F1F1F' }}>My Comments</h1>
+        </div>
+
+        {commentsLoading ? (
+          <div className="px-4 py-16 text-center text-[14px]" style={{ color: '#6F6F6F' }}>Loading comments…</div>
+        ) : myComments.length === 0 ? (
+          <div className="px-6 py-20 text-center">
+            <div className="w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ backgroundColor: '#FFF0E6', color: '#F26B21' }}><MenuIcon name="comment" /></div>
+            <p className="font-semibold text-[17px]" style={{ color: '#1F1F1F' }}>No comments yet</p>
+            <p className="text-[14px] mt-1" style={{ color: '#6F6F6F' }}>Comments you leave on recipes will appear here.</p>
+            {commentsMessage && <p className="text-[12px] mt-3" style={{ color: '#C53D2E' }}>{commentsMessage}</p>}
+          </div>
+        ) : (
+          <div className="px-4 space-y-3">
+            {commentsMessage && <p className="text-[12px]" style={{ color: '#C53D2E' }}>{commentsMessage}</p>}
+            {myComments.map((comment) => {
+              const recipe = commentRecipes.get(comment.recipe_id);
+              return (
+                <article key={comment.id} className="rounded-[16px] border p-3.5" style={{ borderColor: '#EAEAEA', backgroundColor: '#FFFFFF' }}>
+                  <div className="flex gap-3">
+                    {recipe?.cover_image ? (
+                      <img src={recipeImageUrl(recipe.cover_image)} alt={recipe.title} className="w-14 h-14 rounded-[10px] object-cover flex-shrink-0" />
+                    ) : (
+                      <div className="w-14 h-14 rounded-[10px] flex-shrink-0" style={{ backgroundColor: '#F5F5F5' }} />
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[13px] font-semibold truncate" style={{ color: '#1F1F1F' }}>{recipe?.title || 'Recipe'}</p>
+                      <p className="text-[11px] mt-0.5" style={{ color: '#A0A0A0' }}>{new Date(comment.created_at).toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                  <p className="text-[14px] leading-5 mt-3 whitespace-pre-wrap break-words" style={{ color: '#555555' }}>{comment.content}</p>
+                  <div className="flex justify-end mt-2">
+                    <button type="button" onClick={() => deleteMyComment(comment.id)} className="text-[12px]" style={{ color: '#A0A0A0' }}>Delete</button>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="pb-28">
       <div className="relative px-4 pt-6 text-center">
@@ -165,15 +295,7 @@ export default function ProfileScreen({ userId, email, onOpenSaved, onOpenLiked,
       </div>
 
       <section className="px-4 pb-8 flex flex-col items-center" style={{ paddingTop: 50 }}>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          onChange={handleAvatarChange}
-          aria-hidden="true"
-          tabIndex={-1}
-          style={{ display: 'none' }}
-        />
+        <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handleAvatarChange} aria-hidden="true" tabIndex={-1} style={{ display: 'none' }} />
 
         {profile?.avatar_url && /^https?:\/\//.test(profile.avatar_url) ? (
           <img src={profile.avatar_url} alt={displayName} className="w-[120px] h-[120px] rounded-full object-cover" />
@@ -181,13 +303,7 @@ export default function ProfileScreen({ userId, email, onOpenSaved, onOpenLiked,
           <div className="w-[120px] h-[120px] rounded-full flex items-center justify-center text-[36px] font-bold" style={{ backgroundColor: '#FFF0E6', color: '#F26B21' }}>{initial}</div>
         )}
 
-        <button
-          type="button"
-          onClick={() => !uploadingAvatar && fileInputRef.current?.click()}
-          disabled={uploadingAvatar}
-          className="mt-3 text-[13px] font-semibold disabled:opacity-60"
-          style={{ color: '#F26B21' }}
-        >
+        <button type="button" onClick={() => !uploadingAvatar && fileInputRef.current?.click()} disabled={uploadingAvatar} className="mt-3 text-[13px] font-semibold disabled:opacity-60" style={{ color: '#F26B21' }}>
           {uploadingAvatar ? 'Uploading…' : 'Upload new photo'}
         </button>
         {avatarMessage && <p className="text-[12px] mt-2 text-center" style={{ color: avatarMessage === 'Profile photo updated.' ? '#5F6F52' : '#C53D2E' }}>{avatarMessage}</p>}
@@ -205,7 +321,7 @@ export default function ProfileScreen({ userId, email, onOpenSaved, onOpenLiked,
                 <button
                   key={item.label}
                   type="button"
-                  onClick={item.action === 'saved' ? onOpenSaved : item.action === 'liked' ? onOpenLiked : undefined}
+                  onClick={item.action === 'saved' ? onOpenSaved : item.action === 'liked' ? onOpenLiked : item.action === 'comments' ? openMyComments : undefined}
                   className="w-full h-[58px] px-4 flex items-center gap-3 text-left"
                   style={{ borderBottom: index < section.items.length - 1 ? '1px solid #EAEAEA' : undefined, backgroundColor: '#FFFFFF' }}
                 >
