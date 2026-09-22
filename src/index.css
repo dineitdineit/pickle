@@ -77,5 +77,5 @@ section.pt-6.border-t[style*="margin-top: 50px"] {
 
 /* Comments: make timestamps and the action row easier to read. */
 section.border-t .text-\[7px\] {
-  font-size: 10px !important;
+  font-size: 12px !important;
 }
