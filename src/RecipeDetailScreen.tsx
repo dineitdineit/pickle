@@ -372,7 +372,7 @@ export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScr
           </section>
         )}
 
-        <section className="mt-10 pt-8 border-t" style={{ borderColor: '#EEEEEE' }}>
+        <section className="mt-14 pt-10 border-t" style={{ borderColor: '#EEEEEE' }}>
           <h2 className="font-semibold text-[20px] mb-4" style={{ color: '#1F1F1F' }}>Comments</h2>
           <div className="flex items-start gap-3">
             <div className="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center text-[13px] font-semibold" style={{ backgroundColor: '#FFF0E6', color: '#F26B21' }}>
