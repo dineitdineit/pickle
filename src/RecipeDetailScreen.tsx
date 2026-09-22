@@ -371,6 +371,33 @@ export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScr
             )}
           </section>
         )}
+
+        <section className="mt-10 pt-8 border-t" style={{ borderColor: '#EEEEEE' }}>
+          <h2 className="font-semibold text-[20px] mb-4" style={{ color: '#1F1F1F' }}>Comments</h2>
+          <div className="flex items-start gap-3">
+            <div className="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center text-[13px] font-semibold" style={{ backgroundColor: '#FFF0E6', color: '#F26B21' }}>
+              P
+            </div>
+            <div className="flex-1 min-w-0">
+              <textarea
+                aria-label="Write a comment"
+                placeholder="Share your thoughts..."
+                rows={3}
+                className="w-full resize-none rounded-[16px] border px-4 py-3 text-[14px] leading-5 outline-none"
+                style={{ borderColor: '#E6E6E6', color: '#1F1F1F', backgroundColor: '#FAFAFA' }}
+              />
+              <div className="flex justify-end mt-2">
+                <button
+                  type="button"
+                  className="h-9 px-4 rounded-full text-[13px] font-semibold text-white"
+                  style={{ backgroundColor: '#F26B21' }}
+                >
+                  Post
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   );
