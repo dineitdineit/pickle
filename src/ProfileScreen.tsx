@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { supabase } from './lib/supabase';
 
 type ProfileScreenProps = {
@@ -13,6 +13,9 @@ type Profile = {
   display_name: string;
   avatar_url: string | null;
 };
+
+const MAX_AVATAR_SIZE = 5 * 1024 * 1024;
+const ALLOWED_AVATAR_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
 const MENU_SECTIONS = [
   {
@@ -47,9 +50,20 @@ function MenuIcon({ name }: { name: string }) {
   return <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M9.1 9a3 3 0 115.4 1.8c-.9 1.1-2.5 1.6-2.5 3.2" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>;
 }
 
+function avatarPathFromUrl(url: string | null) {
+  if (!url) return null;
+  const marker = '/storage/v1/object/public/avatars/';
+  const markerIndex = url.indexOf(marker);
+  if (markerIndex === -1) return null;
+  return decodeURIComponent(url.slice(markerIndex + marker.length).split('?')[0]);
+}
+
 export default function ProfileScreen({ userId, email, onOpenSaved, onBack }: ProfileScreenProps) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [avatarMessage, setAvatarMessage] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     let ignore = false;
@@ -73,6 +87,67 @@ export default function ProfileScreen({ userId, email, onOpenSaved, onBack }: Pr
     return () => { ignore = true; };
   }, [userId]);
 
+  async function handleAvatarChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+
+    setAvatarMessage('');
+
+    if (!ALLOWED_AVATAR_TYPES.includes(file.type)) {
+      setAvatarMessage('Please choose a JPG, PNG, or WebP image.');
+      return;
+    }
+
+    if (file.size > MAX_AVATAR_SIZE) {
+      setAvatarMessage('Profile photos must be 5 MB or smaller.');
+      return;
+    }
+
+    setUploadingAvatar(true);
+
+    const extension = file.type === 'image/png' ? 'png' : file.type === 'image/webp' ? 'webp' : 'jpg';
+    const filePath = `${userId}/avatar-${Date.now()}.${extension}`;
+    const previousPath = avatarPathFromUrl(profile?.avatar_url ?? null);
+
+    const { error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(filePath, file, { cacheControl: '3600', upsert: false, contentType: file.type });
+
+    if (uploadError) {
+      console.error('Failed to upload avatar:', uploadError);
+      setAvatarMessage('Could not upload this photo. Please try again.');
+      setUploadingAvatar(false);
+      return;
+    }
+
+    const { data: publicUrlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
+    const avatarUrl = publicUrlData.publicUrl;
+
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .update({ avatar_url: avatarUrl })
+      .eq('id', userId);
+
+    if (profileError) {
+      console.error('Failed to save avatar to profile:', profileError);
+      await supabase.storage.from('avatars').remove([filePath]);
+      setAvatarMessage('The photo uploaded, but your profile could not be updated.');
+      setUploadingAvatar(false);
+      return;
+    }
+
+    setProfile((current) => current ? { ...current, avatar_url: avatarUrl } : current);
+    setAvatarMessage('Profile photo updated.');
+
+    if (previousPath && previousPath !== filePath && previousPath.startsWith(`${userId}/`)) {
+      const { error: deleteError } = await supabase.storage.from('avatars').remove([previousPath]);
+      if (deleteError) console.error('Failed to remove previous avatar:', deleteError);
+    }
+
+    setUploadingAvatar(false);
+  }
+
   const displayName = profile?.display_name || profile?.username || 'Pickle User';
   const username = profile?.username ? `@${profile.username}` : email || '';
   const initial = displayName.trim().charAt(0).toUpperCase() || 'P';
@@ -89,12 +164,47 @@ export default function ProfileScreen({ userId, email, onOpenSaved, onBack }: Pr
       </div>
 
       <section className="px-4 pb-8 flex flex-col items-center" style={{ paddingTop: 50 }}>
-        {profile?.avatar_url && /^https?:\/\//.test(profile.avatar_url) ? (
-          <img src={profile.avatar_url} alt={displayName} className="w-[120px] h-[120px] rounded-full object-cover mb-3" />
-        ) : (
-          <div className="w-[120px] h-[120px] rounded-full flex items-center justify-center text-[36px] font-bold mb-3" style={{ backgroundColor: '#FFF0E6', color: '#F26B21' }}>{initial}</div>
-        )}
-        <h2 className="font-semibold text-[20px]" style={{ color: '#1F1F1F' }}>{loading ? 'Loading…' : displayName}</h2>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          onChange={handleAvatarChange}
+          className="hidden"
+        />
+
+        <button
+          type="button"
+          onClick={() => !uploadingAvatar && fileInputRef.current?.click()}
+          disabled={uploadingAvatar}
+          aria-label="Change profile photo"
+          className="relative rounded-full disabled:opacity-60"
+        >
+          {profile?.avatar_url && /^https?:\/\//.test(profile.avatar_url) ? (
+            <img src={profile.avatar_url} alt={displayName} className="w-[120px] h-[120px] rounded-full object-cover" />
+          ) : (
+            <div className="w-[120px] h-[120px] rounded-full flex items-center justify-center text-[36px] font-bold" style={{ backgroundColor: '#FFF0E6', color: '#F26B21' }}>{initial}</div>
+          )}
+          <span className="absolute right-0 bottom-1 w-9 h-9 rounded-full flex items-center justify-center border-[3px] border-white" style={{ backgroundColor: '#F26B21', color: '#FFFFFF' }}>
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" />
+              <circle cx="12" cy="13" r="4" />
+            </svg>
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => !uploadingAvatar && fileInputRef.current?.click()}
+          disabled={uploadingAvatar}
+          className="mt-3 text-[13px] font-semibold disabled:opacity-60"
+          style={{ color: '#F26B21' }}
+        >
+          {uploadingAvatar ? 'Uploading…' : profile?.avatar_url ? 'Change photo' : 'Add photo'}
+        </button>
+        <p className="text-[11px] mt-1" style={{ color: '#A0A0A0' }}>JPG, PNG or WebP · Max 5 MB</p>
+        {avatarMessage && <p className="text-[12px] mt-2 text-center" style={{ color: avatarMessage === 'Profile photo updated.' ? '#5F6F52' : '#C53D2E' }}>{avatarMessage}</p>}
+
+        <h2 className="font-semibold text-[20px] mt-4" style={{ color: '#1F1F1F' }}>{loading ? 'Loading…' : displayName}</h2>
         <p className="text-[13px] mt-1" style={{ color: '#8A8A8A' }}>{loading ? '' : username}</p>
       </section>
 
