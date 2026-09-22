@@ -39,6 +39,14 @@ type StepRow = {
   is_final: boolean | null;
 };
 
+type Nutrition = {
+  calories: number;
+  protein_g: number;
+  carbs_g: number;
+  fat_g: number;
+  is_estimated: boolean;
+};
+
 function formatTime(totalMinutes: number | null) {
   if (totalMinutes === null) return '—';
   const hours = Math.floor(totalMinutes / 60);
@@ -68,6 +76,7 @@ export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScr
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [ingredients, setIngredients] = useState<IngredientRow[]>([]);
   const [steps, setSteps] = useState<StepRow[]>([]);
+  const [nutrition, setNutrition] = useState<Nutrition | null>(null);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
   const [activeTab, setActiveTab] = useState<'Ingredients' | 'Steps' | 'Nutrition'>('Ingredients');
@@ -77,7 +86,7 @@ export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScr
       setLoading(true);
       setErrorMessage('');
 
-      const [recipeResult, ingredientResult, stepResult] = await Promise.all([
+      const [recipeResult, ingredientResult, stepResult, nutritionResult] = await Promise.all([
         supabase
           .from('recipes')
           .select('id, title, short_description, description, difficulty, total_time_minutes, servings, cover_image, ingredients_image')
@@ -93,6 +102,11 @@ export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScr
           .select('id, step_number, title, instruction, step_image, step_time_minutes, is_final')
           .eq('recipe_id', recipeId)
           .order('step_number', { ascending: true }),
+        supabase
+          .from('recipe_nutrition')
+          .select('calories, protein_g, carbs_g, fat_g, is_estimated')
+          .eq('recipe_id', recipeId)
+          .maybeSingle(),
       ]);
 
       if (recipeResult.error) {
@@ -105,6 +119,13 @@ export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScr
       setRecipe(recipeResult.data as Recipe);
       setIngredients((ingredientResult.data ?? []) as IngredientRow[]);
       setSteps((stepResult.data ?? []) as StepRow[]);
+
+      if (nutritionResult.error) {
+        console.error('Failed to load nutrition:', nutritionResult.error);
+        setNutrition(null);
+      } else {
+        setNutrition((nutritionResult.data as Nutrition | null) ?? null);
+      }
 
       const viewKey = `pickle:viewed:${recipeId}`;
       if (!sessionStorage.getItem(viewKey)) {
@@ -191,27 +212,13 @@ export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScr
             )}
             <h1 className="font-bold text-[28px] leading-tight" style={{ color: '#1F1F1F' }}>{recipe.title}</h1>
           </div>
-          <div
-            className="flex items-center gap-2 flex-shrink-0"
-            style={{ alignSelf: 'flex-end', marginBottom: 4 }}
-          >
-            <button
-              type="button"
-              className="w-10 h-10 rounded-full border flex items-center justify-center"
-              style={{ borderColor: '#EAEAEA' }}
-              aria-label="Like recipe"
-            >
+          <div className="flex items-center gap-2 flex-shrink-0" style={{ alignSelf: 'flex-end', marginBottom: 4 }}>
+            <button type="button" className="w-10 h-10 rounded-full border flex items-center justify-center" style={{ borderColor: '#EAEAEA' }} aria-label="Like recipe">
               <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#1F1F1F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z" />
               </svg>
             </button>
-
-            <button
-              type="button"
-              className="w-10 h-10 rounded-full border flex items-center justify-center"
-              style={{ borderColor: '#EAEAEA' }}
-              aria-label="Save recipe"
-            >
+            <button type="button" className="w-10 h-10 rounded-full border flex items-center justify-center" style={{ borderColor: '#EAEAEA' }} aria-label="Save recipe">
               <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#1F1F1F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/>
               </svg>
@@ -239,24 +246,16 @@ export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScr
           </section>
         )}
 
-        <div
-          className="mt-8 p-2.5 flex gap-1"
-          style={{
-            backgroundColor: '#F5F5F5',
-            borderRadius: 24,
-          }}
-        >
+        <div className="mt-8 p-2.5 flex gap-1" style={{ backgroundColor: '#F5F5F5', borderRadius: 24 }}>
           {(['Ingredients', 'Steps', 'Nutrition'] as const).map((tab) => (
             <button
               key={tab}
               type="button"
               onClick={() => setActiveTab(tab)}
               className="flex-1 h-10 rounded-[16px] text-[14px] font-semibold transition-colors"
-              style={
-                activeTab === tab
-                  ? { backgroundColor: '#FFFFFF', color: '#F26B21', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }
-                  : { color: '#6F6F6F' }
-              }
+              style={activeTab === tab
+                ? { backgroundColor: '#FFFFFF', color: '#F26B21', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }
+                : { color: '#6F6F6F' }}
             >
               {tab}
             </button>
@@ -266,13 +265,11 @@ export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScr
         {activeTab === 'Ingredients' && (
           <section className="mt-6">
             <h2 className="font-semibold text-[20px] mb-4" style={{ color: '#1F1F1F' }}>Ingredients</h2>
-
             {recipe.ingredients_image && (
               <div className="rounded-[16px] overflow-hidden mb-5 bg-gray-100">
                 <img src={imageUrl(recipe.ingredients_image)} alt={`${recipe.title} ingredients`} className="w-full aspect-[4/3] object-cover" />
               </div>
             )}
-
             <div className="space-y-6">
               {groupedIngredients.map(([group, items]) => (
                 <div key={group}>
@@ -306,7 +303,6 @@ export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScr
         {activeTab === 'Steps' && (
           <section className="mt-6">
             <h2 className="font-semibold text-[20px] mb-4" style={{ color: '#1F1F1F' }}>Steps</h2>
-
             <div className="space-y-7">
               {steps.map((step) => (
                 <article key={step.id}>
@@ -315,7 +311,6 @@ export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScr
                       <img src={imageUrl(step.step_image)} alt={step.title || `Step ${step.step_number}`} className="w-full aspect-[4/3] object-cover" />
                     </div>
                   )}
-
                   <div className="flex gap-3">
                     <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-white text-[14px] font-semibold" style={{ backgroundColor: '#F26B21' }}>
                       {step.step_number}
@@ -343,28 +338,40 @@ export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScr
               <span className="text-[12px]" style={{ color: '#8A8A8A' }}>Per serving</span>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                ['Calories', '—', 'kcal'],
-                ['Protein', '—', 'g'],
-                ['Carbs', '—', 'g'],
-                ['Fat', '—', 'g'],
-              ].map(([label, value, unit]) => (
-                <div key={label} className="rounded-[14px] p-4" style={{ backgroundColor: '#F9F9F9', border: '1px solid #EEEEEE' }}>
-                  <p className="text-[13px] mb-2" style={{ color: '#6F6F6F' }}>{label}</p>
-                  <div className="flex items-end gap-1">
-                    <span className="font-semibold text-[22px]" style={{ color: '#1F1F1F' }}>{value}</span>
-                    <span className="text-[12px] mb-1" style={{ color: '#8A8A8A' }}>{unit}</span>
-                  </div>
+            {nutrition ? (
+              <>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    ['Calories', nutrition.calories, 'kcal'],
+                    ['Protein', nutrition.protein_g, 'g'],
+                    ['Carbs', nutrition.carbs_g, 'g'],
+                    ['Fat', nutrition.fat_g, 'g'],
+                  ].map(([label, value, unit]) => (
+                    <div key={label} className="rounded-[14px] p-4" style={{ backgroundColor: '#F9F9F9', border: '1px solid #EEEEEE' }}>
+                      <p className="text-[13px] mb-2" style={{ color: '#6F6F6F' }}>{label}</p>
+                      <div className="flex items-end gap-1">
+                        <span className="font-semibold text-[22px]" style={{ color: '#1F1F1F' }}>{value}</span>
+                        <span className="text-[12px] mb-1" style={{ color: '#8A8A8A' }}>{unit}</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
 
-            <div className="mt-4 rounded-[14px] px-4 py-4" style={{ backgroundColor: '#FFF8F3' }}>
-              <p className="text-[13px] leading-5" style={{ color: '#6F6F6F' }}>
-                Nutrition information has not been added for this recipe yet.
-              </p>
-            </div>
+                {nutrition.is_estimated && (
+                  <div className="mt-4 rounded-[14px] px-4 py-4" style={{ backgroundColor: '#FFF8F3' }}>
+                    <p className="text-[13px] leading-5" style={{ color: '#6F6F6F' }}>
+                      Estimated nutrition per serving based on the listed ingredients. Actual values may vary by brand, portion, and cooking method.
+                    </p>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="rounded-[14px] px-4 py-4" style={{ backgroundColor: '#FFF8F3' }}>
+                <p className="text-[13px] leading-5" style={{ color: '#6F6F6F' }}>
+                  Nutrition information is not available for this recipe yet.
+                </p>
+              </div>
+            )}
           </section>
         )}
       </div>
