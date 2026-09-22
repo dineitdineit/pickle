@@ -256,7 +256,7 @@ export default function App() {
     <div className="bg-white min-h-screen max-w-md mx-auto relative pb-24">
       <div className="flex items-center justify-between px-4 pt-6 pb-2">
         <div className="flex items-center gap-2">
-          <img src="/assets/logo.png" alt="Pickle logo" className="w-9 h-9 rounded-xl object-cover" />
+          <img src="/assets/pickle-logo.png" alt="Pickle logo" className="w-9 h-9 rounded-xl object-cover" />
           <span className="font-bold text-[17px]" style={{ color: '#1F1F1F' }}>Pickle</span>
         </div>
         <div className="w-9 h-9 rounded-full bg-[#FFF0E6] flex items-center justify-center font-semibold text-[14px]" style={{ color: '#F26B21' }}>P</div>
