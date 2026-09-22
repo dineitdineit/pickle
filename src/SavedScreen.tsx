@@ -61,7 +61,7 @@ export default function SavedScreen({ recipes, onSelectRecipe }: SavedScreenProp
                 onClick={() => onSelectRecipe(recipe.id)}
                 className="flex items-center gap-4 flex-1 min-w-0 text-left active:bg-gray-50"
               >
-                <div className="flex-shrink-0 rounded-[12px] overflow-hidden bg-gray-100" style={{ width: 64, height: 64 }}>
+                <div className="flex-shrink-0 rounded-[8px] overflow-hidden bg-gray-100" style={{ width: 64, height: 64 }}>
                   <img src={recipe.image} alt={recipe.title} className="w-full h-full object-cover" />
                 </div>
 
