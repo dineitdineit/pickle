@@ -172,25 +172,11 @@ export default function ProfileScreen({ userId, email, onOpenSaved, onBack }: Pr
           className="hidden"
         />
 
-        <button
-          type="button"
-          onClick={() => !uploadingAvatar && fileInputRef.current?.click()}
-          disabled={uploadingAvatar}
-          aria-label="Change profile photo"
-          className="relative rounded-full disabled:opacity-60"
-        >
-          {profile?.avatar_url && /^https?:\/\//.test(profile.avatar_url) ? (
-            <img src={profile.avatar_url} alt={displayName} className="w-[120px] h-[120px] rounded-full object-cover" />
-          ) : (
-            <div className="w-[120px] h-[120px] rounded-full flex items-center justify-center text-[36px] font-bold" style={{ backgroundColor: '#FFF0E6', color: '#F26B21' }}>{initial}</div>
-          )}
-          <span className="absolute right-0 bottom-1 w-9 h-9 rounded-full flex items-center justify-center border-[3px] border-white" style={{ backgroundColor: '#F26B21', color: '#FFFFFF' }}>
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" />
-              <circle cx="12" cy="13" r="4" />
-            </svg>
-          </span>
-        </button>
+        {profile?.avatar_url && /^https?:\/\//.test(profile.avatar_url) ? (
+          <img src={profile.avatar_url} alt={displayName} className="w-[120px] h-[120px] rounded-full object-cover" />
+        ) : (
+          <div className="w-[120px] h-[120px] rounded-full flex items-center justify-center text-[36px] font-bold" style={{ backgroundColor: '#FFF0E6', color: '#F26B21' }}>{initial}</div>
+        )}
 
         <button
           type="button"
@@ -199,9 +185,8 @@ export default function ProfileScreen({ userId, email, onOpenSaved, onBack }: Pr
           className="mt-3 text-[13px] font-semibold disabled:opacity-60"
           style={{ color: '#F26B21' }}
         >
-          {uploadingAvatar ? 'Uploading…' : profile?.avatar_url ? 'Change photo' : 'Add photo'}
+          {uploadingAvatar ? 'Uploading…' : 'Upload new photo'}
         </button>
-        <p className="text-[11px] mt-1" style={{ color: '#A0A0A0' }}>JPG, PNG or WebP · Max 5 MB</p>
         {avatarMessage && <p className="text-[12px] mt-2 text-center" style={{ color: avatarMessage === 'Profile photo updated.' ? '#5F6F52' : '#C53D2E' }}>{avatarMessage}</p>}
 
         <h2 className="font-semibold text-[20px] mt-4" style={{ color: '#1F1F1F' }}>{loading ? 'Loading…' : displayName}</h2>
