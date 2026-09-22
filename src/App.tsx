@@ -252,21 +252,25 @@ export default function App() {
   const dragStartX = useRef<number | null>(null);
   const dragStartScrollLeft = useRef(0);
   const isDragging = useRef(false);
+  const featuredDidDrag = useRef(false);
 
   function handlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
     const el = carouselScrollRef.current;
     if (!el) return;
     isDragging.current = true;
+    featuredDidDrag.current = false;
     dragStartX.current = e.clientX;
     dragStartScrollLeft.current = el.scrollLeft;
-    el.setPointerCapture(e.pointerId);
   }
 
   function handlePointerMove(e: React.PointerEvent<HTMLDivElement>) {
     const el = carouselScrollRef.current;
     if (!el || !isDragging.current || dragStartX.current === null) return;
     const deltaX = e.clientX - dragStartX.current;
-    el.scrollLeft = dragStartScrollLeft.current - deltaX;
+    if (Math.abs(deltaX) > 5) featuredDidDrag.current = true;
+    if (featuredDidDrag.current) {
+      el.scrollLeft = dragStartScrollLeft.current - deltaX;
+    }
   }
 
   function finishPointerDrag(e: React.PointerEvent<HTMLDivElement>) {
@@ -275,10 +279,6 @@ export default function App() {
     const deltaX = e.clientX - dragStartX.current;
     isDragging.current = false;
     dragStartX.current = null;
-
-    try {
-      el.releasePointerCapture(e.pointerId);
-    } catch {}
 
     if (Math.abs(deltaX) < 40) {
       scrollToCard(featuredIndex);
@@ -291,6 +291,9 @@ export default function App() {
         : Math.max(featuredIndex - 1, 0);
 
     scrollToCard(nextIndex);
+    window.setTimeout(() => {
+      featuredDidDrag.current = false;
+    }, 0);
   }
 
   useEffect(() => {
@@ -411,7 +414,9 @@ export default function App() {
                     <button
                       key={recipe.id}
                       type="button"
-                      onClick={() => setSelectedRecipeId(recipe.id)}
+                      onClick={() => {
+                        if (!featuredDidDrag.current) setSelectedRecipeId(recipe.id);
+                      }}
                       className="relative w-full rounded-[16px] overflow-hidden text-left"
                       style={{
                         scrollSnapAlign: 'start',
