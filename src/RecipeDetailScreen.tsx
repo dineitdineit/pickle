@@ -334,7 +334,7 @@ export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScr
           <section className="mt-6">
             <div className="flex items-end justify-between mb-4">
               <h2 className="font-semibold text-[20px] leading-none" style={{ color: '#1F1F1F' }}>Nutrition</h2>
-              <span className="text-[12px] leading-none pb-[1px]" style={{ color: '#8A8A8A' }}>Per serving</span>
+              <span className="text-[12px] leading-none" style={{ color: '#8A8A8A' }}>Per serving</span>
             </div>
 
             {nutrition ? (
