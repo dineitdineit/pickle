@@ -44,7 +44,7 @@ export default function SavedScreen({ recipes, onSelectRecipe }: SavedScreenProp
 
   return (
     <div className="pb-24">
-      <div className="px-4 pt-6 pb-5">
+      <div className="px-4 pt-6 text-center" style={{ marginBottom: 50 }}>
         <h1 className="font-bold text-[24px]" style={{ color: '#1F1F1F' }}>Saved Recipes</h1>
       </div>
 
