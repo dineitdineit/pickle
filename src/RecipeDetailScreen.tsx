@@ -168,8 +168,10 @@ export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScr
 
       <div className="px-4 pt-5">
         <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="text-[13px] font-semibold mb-1" style={{ color: '#F26B21' }}>Filipino</p>
+          <div className="min-w-0">
+            {recipe.short_description && (
+              <p className="text-[13px] leading-5 mb-1.5" style={{ color: '#6F6F6F' }}>{recipe.short_description}</p>
+            )}
             <h1 className="font-bold text-[28px] leading-tight" style={{ color: '#1F1F1F' }}>{recipe.title}</h1>
           </div>
           <button className="w-10 h-10 rounded-full border flex items-center justify-center flex-shrink-0" style={{ borderColor: '#EAEAEA' }} aria-label="Save recipe">
@@ -178,10 +180,6 @@ export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScr
             </svg>
           </button>
         </div>
-
-        {recipe.short_description && (
-          <p className="text-[15px] leading-6 mt-3" style={{ color: '#6F6F6F' }}>{recipe.short_description}</p>
-        )}
 
         <div className="grid grid-cols-3 gap-2 mt-5">
           {[
