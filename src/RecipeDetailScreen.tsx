@@ -255,13 +255,14 @@ export default function RecipeDetailScreen({ recipeId, onBack, onSelectRecipe, o
         {recommendations.length > 0 && (
           <section className="pt-6 border-t" style={{ borderColor: '#EEEEEE', marginTop: 50 }}>
             <h2 className="font-semibold text-[20px] mb-5" style={{ color: '#1F1F1F' }}>More recipes</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 160px)', justifyContent: 'space-between', columnGap: 16, rowGap: 28 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 200px)', justifyContent: 'space-between', columnGap: 16, rowGap: 28 }}>
               {recommendations.map((item) => (
-                <button key={item.id} type="button" onClick={() => { onSelectRecipe(item.id); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="text-left" style={{ width: 160 }}>
-                  <div className="overflow-hidden bg-gray-100 mb-2.5" style={{ width: 160, height: 160, borderRadius: 16 }}>
+                <button key={item.id} type="button" onClick={() => { onSelectRecipe(item.id); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="text-left" style={{ width: 200 }}>
+                  <div className="overflow-hidden bg-gray-100 mb-2.5" style={{ width: 200, height: 200, borderRadius: 16 }}>
                     <img src={imageUrl(item.cover_image)} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                   </div>
-                  <p className="font-medium text-[15px] leading-[19px] line-clamp-2" style={{ color: '#1F1F1F' }}>{item.title}</p>
+                  <p className="font-semibold text-[16px] leading-[19px] line-clamp-2" style={{ color: '#1F1F1F' }}>{item.title}</p>
+                  <p className="text-[13px] mt-1" style={{ color: '#6F6F6F' }}>{item.difficulty || '—'} · {formatTime(item.total_time_minutes)}</p>
                 </button>
               ))}
             </div>
