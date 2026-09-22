@@ -3,7 +3,11 @@ import { supabase } from './lib/supabase';
 
 type Mode = 'signin' | 'signup';
 
-export default function AuthScreen() {
+type AuthScreenProps = {
+  onBack: () => void;
+};
+
+export default function AuthScreen({ onBack }: AuthScreenProps) {
   const [mode, setMode] = useState<Mode>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -122,7 +126,15 @@ export default function AuthScreen() {
 
   return (
     <div className="pb-28">
-      <div className="px-6 pt-[70px]">
+      <div className="px-4 pt-5">
+        <button type="button" onClick={onBack} aria-label="Back" className="w-9 h-9 flex items-center justify-center" style={{ color: '#1F1F1F' }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+        </button>
+      </div>
+
+      <div className="px-6 pt-[25px]">
         <div className="flex justify-center mb-6">
           <img src="/assets/logo.png" alt="Pickle" className="w-[88px] h-[88px] rounded-[24px] object-cover" />
         </div>
