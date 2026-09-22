@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import BrowseScreen from './BrowseScreen';
 import SearchScreen from './SearchScreen';
 import RecipeDetailScreen from './RecipeDetailScreen';
+import TagRecipeListScreen from './TagRecipeListScreen';
 import { supabase } from './lib/supabase';
 
 type RecipeCard = {
@@ -39,10 +40,12 @@ function RecipeStrip({
   title,
   recipes,
   onSelectRecipe,
+  onSeeMore,
 }: {
   title: string;
   recipes: RecipeCard[];
   onSelectRecipe: (id: string) => void;
+  onSeeMore: () => void;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const startX = useRef<number | null>(null);
@@ -79,8 +82,16 @@ function RecipeStrip({
 
   return (
     <section className="mb-8">
-      <div className="px-4 mb-3">
+      <div className="px-4 mb-3 flex items-center justify-between gap-3">
         <h2 className="font-semibold text-[20px]" style={{ color: '#1F1F1F' }}>{title}</h2>
+        <button
+          type="button"
+          onClick={onSeeMore}
+          className="flex-shrink-0 text-[13px] font-medium"
+          style={{ color: '#6F6F6F' }}
+        >
+          See more &gt;
+        </button>
       </div>
 
       <div
@@ -118,6 +129,7 @@ export default function App() {
   const [searchValue, setSearchValue] = useState('');
   const [showSearch, setShowSearch] = useState(false);
   const [selectedRecipeId, setSelectedRecipeId] = useState<string | null>(null);
+  const [selectedTagRecipeSection, setSelectedTagRecipeSection] = useState<string | null>(null);
   const [recipes, setRecipes] = useState<RecipeCard[]>([]);
   const [partyRecipeIds, setPartyRecipeIds] = useState<Set<string>>(new Set());
   const [recentViewCounts, setRecentViewCounts] = useState<Map<string, number>>(new Map());
@@ -209,14 +221,14 @@ export default function App() {
 
   const trendingRecipes = useMemo(
     () =>
-      [...sortedRecipes]
-        .sort((a, b) => {
-          const viewDifference = (recentViewCounts.get(b.id) ?? 0) - (recentViewCounts.get(a.id) ?? 0);
-          return viewDifference || a.title.localeCompare(b.title, 'en', { sensitivity: 'base' });
-        })
-        .slice(0, 10),
+      [...sortedRecipes].sort((a, b) => {
+        const viewDifference = (recentViewCounts.get(b.id) ?? 0) - (recentViewCounts.get(a.id) ?? 0);
+        return viewDifference || a.title.localeCompare(b.title, 'en', { sensitivity: 'base' });
+      }),
     [sortedRecipes, recentViewCounts],
   );
+
+  const trendingPreview = useMemo(() => trendingRecipes.slice(0, 10), [trendingRecipes]);
 
   const under30Recipes = useMemo(
     () => sortedRecipes.filter((recipe) => recipe.difficulty === 'Easy' && recipe.total_time_minutes < 30),
@@ -230,6 +242,13 @@ export default function App() {
         .sort((a, b) => (b.servings ?? 0) - (a.servings ?? 0) || a.title.localeCompare(b.title, 'en')),
     [sortedRecipes, partyRecipeIds],
   );
+
+  const selectedTagRecipes = useMemo(() => {
+    if (selectedTagRecipeSection === 'Trending Recipes') return trendingRecipes;
+    if (selectedTagRecipeSection === 'Under 30min') return under30Recipes;
+    if (selectedTagRecipeSection === 'Party Packs') return partyRecipes;
+    return [];
+  }, [selectedTagRecipeSection, trendingRecipes, under30Recipes, partyRecipes]);
 
   function submitSearch() {
     setShowSearch(true);
@@ -323,6 +342,17 @@ export default function App() {
 
   if (selectedRecipeId) {
     return <RecipeDetailScreen recipeId={selectedRecipeId} onBack={() => setSelectedRecipeId(null)} />;
+  }
+
+  if (selectedTagRecipeSection) {
+    return (
+      <TagRecipeListScreen
+        title={selectedTagRecipeSection}
+        recipes={selectedTagRecipes}
+        onBack={() => setSelectedTagRecipeSection(null)}
+        onSelectRecipe={setSelectedRecipeId}
+      />
+    );
   }
 
   if (showSearch) {
@@ -455,9 +485,24 @@ export default function App() {
             </div>
           </div>
 
-          <RecipeStrip title="Trending Recipes" recipes={trendingRecipes} onSelectRecipe={setSelectedRecipeId} />
-          <RecipeStrip title="Under 30min" recipes={under30Recipes} onSelectRecipe={setSelectedRecipeId} />
-          <RecipeStrip title="Party Packs" recipes={partyRecipes} onSelectRecipe={setSelectedRecipeId} />
+          <RecipeStrip
+            title="Trending Recipes"
+            recipes={trendingPreview}
+            onSelectRecipe={setSelectedRecipeId}
+            onSeeMore={() => setSelectedTagRecipeSection('Trending Recipes')}
+          />
+          <RecipeStrip
+            title="Under 30min"
+            recipes={under30Recipes}
+            onSelectRecipe={setSelectedRecipeId}
+            onSeeMore={() => setSelectedTagRecipeSection('Under 30min')}
+          />
+          <RecipeStrip
+            title="Party Packs"
+            recipes={partyRecipes}
+            onSelectRecipe={setSelectedRecipeId}
+            onSeeMore={() => setSelectedTagRecipeSection('Party Packs')}
+          />
         </>
       )}
 
