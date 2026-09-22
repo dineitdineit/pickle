@@ -3,6 +3,7 @@ import BrowseScreen from './BrowseScreen';
 import SearchScreen from './SearchScreen';
 import SavedScreen from './SavedScreen';
 import ProfileScreen from './ProfileScreen';
+import AuthScreen from './AuthScreen';
 import RecipeDetailScreen from './RecipeDetailScreen';
 import TagRecipeListScreen from './TagRecipeListScreen';
 import { supabase } from './lib/supabase';
@@ -15,6 +16,11 @@ type RecipeCard = {
   servings: number | null;
   cover_image: string | null;
   image: string;
+};
+
+type AuthUser = {
+  id: string;
+  email?: string;
 };
 
 const NAV_ICONS = [
@@ -98,8 +104,31 @@ export default function App() {
   const [recentViewCounts, setRecentViewCounts] = useState<Map<string, number>>(new Map());
   const [featuredIndex, setFeaturedIndex] = useState(0);
   const [loadingRecipes, setLoadingRecipes] = useState(true);
+  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+  const [loadingAuth, setLoadingAuth] = useState(true);
   const carouselScrollRef = useRef<HTMLDivElement>(null);
   const GAP = 16;
+
+  useEffect(() => {
+    let mounted = true;
+
+    supabase.auth.getUser().then(({ data }) => {
+      if (mounted) {
+        setAuthUser(data.user ? { id: data.user.id, email: data.user.email } : null);
+        setLoadingAuth(false);
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setAuthUser(session?.user ? { id: session.user.id, email: session.user.email } : null);
+      setLoadingAuth(false);
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
 
   useEffect(() => {
     async function loadHomeData() {
@@ -199,7 +228,18 @@ export default function App() {
   }
 
   if (activeNav === 4) {
-    return <div className="bg-white min-h-screen max-w-md mx-auto relative"><ProfileScreen onOpenSaved={() => setActiveNav(2)} />{NavBar}</div>;
+    return (
+      <div className="bg-white min-h-screen max-w-md mx-auto relative">
+        {loadingAuth ? (
+          <div className="px-4 py-20 text-center text-[15px]" style={{ color: '#6F6F6F' }}>Loading profile…</div>
+        ) : authUser ? (
+          <ProfileScreen userId={authUser.id} email={authUser.email} onOpenSaved={() => setActiveNav(2)} />
+        ) : (
+          <AuthScreen />
+        )}
+        {NavBar}
+      </div>
+    );
   }
 
   return (
