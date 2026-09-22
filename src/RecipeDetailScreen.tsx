@@ -158,7 +158,7 @@ export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScr
         <button
           onClick={onBack}
           aria-label="Back"
-          className="absolute top-5 left-4 w-10 h-10 rounded-full bg-white/90 flex items-center justify-center"
+          className="absolute top-5 left-4 w-10 h-10 rounded-full bg-white/90 flex items-center justify-center z-10"
         >
           <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#1F1F1F" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="15 18 9 12 15 6" />
@@ -168,7 +168,7 @@ export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScr
         <button
           type="button"
           aria-label="Share recipe"
-          className="absolute top-5 right-4 w-10 h-10 rounded-full bg-white/90 flex items-center justify-center"
+          className="absolute top-5 right-4 w-10 h-10 rounded-full bg-white/90 flex items-center justify-center z-10"
         >
           <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#1F1F1F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="18" cy="5" r="3" />
@@ -181,7 +181,7 @@ export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScr
       </div>
 
       <div className="px-4 pt-5">
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex items-end justify-between gap-4">
           <div className="min-w-0">
             {recipe.short_description && (
               <p className="text-[13px] leading-5 mb-1.5" style={{ color: '#6F6F6F' }}>{recipe.short_description}</p>
