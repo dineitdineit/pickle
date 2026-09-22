@@ -425,7 +425,7 @@ export default function RecipeDetailScreen({ recipeId, onBack, onSelectRecipe, o
         </section>
 
         {recommendations.length > 0 && (
-          <section className="mt-10 pt-6 border-t" style={{ borderColor: '#EEEEEE' }}>
+          <section className="pt-6 border-t" style={{ borderColor: '#EEEEEE', marginTop: 50 }}>
             <h2 className="font-semibold text-[20px] mb-5" style={{ color: '#1F1F1F' }}>More recipes</h2>
             <div className="grid grid-cols-2 gap-x-3 gap-y-5">
               {recommendations.map((item) => (
