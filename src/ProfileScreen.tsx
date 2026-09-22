@@ -1,0 +1,87 @@
+type ProfileScreenProps = {
+  onOpenSaved: () => void;
+};
+
+const MENU_SECTIONS = [
+  {
+    title: 'Your activity',
+    items: [
+      { label: 'Saved Recipes', icon: 'bookmark', action: 'saved' },
+      { label: 'My Comments', icon: 'comment' },
+      { label: 'Liked Recipes', icon: 'heart' },
+    ],
+  },
+  {
+    title: 'Account',
+    items: [
+      { label: 'Settings', icon: 'settings' },
+    ],
+  },
+  {
+    title: 'Support',
+    items: [
+      { label: 'Contact Us', icon: 'mail' },
+      { label: 'FAQ', icon: 'help' },
+    ],
+  },
+] as const;
+
+function MenuIcon({ name }: { name: string }) {
+  if (name === 'bookmark') {
+    return <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" /></svg>;
+  }
+  if (name === 'comment') {
+    return <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a4 4 0 01-4 4H8l-5 3V7a4 4 0 014-4h10a4 4 0 014 4z" /></svg>;
+  }
+  if (name === 'heart') {
+    return <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z" /></svg>;
+  }
+  if (name === 'settings') {
+    return <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06-2.12 2.12-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V20h-3v-.08a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06-2.12-2.12.06-.06A1.65 1.65 0 006.6 15a1.65 1.65 0 00-1.51-1H5v-3h.08a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06L8.32 6l.06.06a1.65 1.65 0 001.82.33 1.65 1.65 0 001-1.51V5h3v.08a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06 2.12 2.12-.06.06a1.65 1.65 0 00-.33 1.82 1.65 1.65 0 001.51 1H20v3h-.08a1.65 1.65 0 00-1.52 1z" /></svg>;
+  }
+  if (name === 'mail') {
+    return <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2z" /><polyline points="22 6 12 13 2 6" /></svg>;
+  }
+  return <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M9.1 9a3 3 0 115.4 1.8c-.9 1.1-2.5 1.6-2.5 3.2" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>;
+}
+
+export default function ProfileScreen({ onOpenSaved }: ProfileScreenProps) {
+  return (
+    <div className="pb-28">
+      <div className="px-4 pt-6 pb-6 text-center">
+        <h1 className="font-bold text-[24px]" style={{ color: '#1F1F1F' }}>Profile</h1>
+      </div>
+
+      <section className="px-4 pb-8 flex flex-col items-center">
+        <div className="w-24 h-24 rounded-full flex items-center justify-center text-[30px] font-bold mb-3" style={{ backgroundColor: '#FFF0E6', color: '#F26B21' }}>P</div>
+        <h2 className="font-semibold text-[20px]" style={{ color: '#1F1F1F' }}>Pickle User</h2>
+        <p className="text-[13px] mt-1" style={{ color: '#8A8A8A' }}>Profile details will be connected later.</p>
+      </section>
+
+      <div className="px-4 space-y-7">
+        {MENU_SECTIONS.map((section) => (
+          <section key={section.title}>
+            <p className="text-[13px] font-semibold mb-2 px-1" style={{ color: '#8A8A8A' }}>{section.title}</p>
+            <div className="rounded-[16px] border overflow-hidden" style={{ borderColor: '#EAEAEA' }}>
+              {section.items.map((item, index) => (
+                <button
+                  key={item.label}
+                  type="button"
+                  onClick={item.action === 'saved' ? onOpenSaved : undefined}
+                  className="w-full h-[58px] px-4 flex items-center gap-3 text-left"
+                  style={{ borderBottom: index < section.items.length - 1 ? '1px solid #EAEAEA' : undefined, backgroundColor: '#FFFFFF' }}
+                >
+                  <span className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#F9F9F9', color: '#5F5F5F' }}>
+                    <MenuIcon name={item.icon} />
+                  </span>
+                  <span className="flex-1 text-[15px] font-medium" style={{ color: '#1F1F1F' }}>{item.label}</span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B0B0B0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
+                </button>
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
+    </div>
+  );
+}
