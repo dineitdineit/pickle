@@ -6,6 +6,7 @@ type RecipeDetailScreenProps = {
   onBack: () => void;
   onSelectRecipe: (id: string) => void;
   onBrowse: () => void;
+  onRequireLogin: () => void;
 };
 
 type Recipe = {
@@ -82,7 +83,7 @@ function formatAmount(amount: number | null) {
   return fractions[amount] ?? String(amount);
 }
 
-export default function RecipeDetailScreen({ recipeId, onBack, onSelectRecipe, onBrowse }: RecipeDetailScreenProps) {
+export default function RecipeDetailScreen({ recipeId, onBack, onSelectRecipe, onBrowse, onRequireLogin }: RecipeDetailScreenProps) {
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [ingredients, setIngredients] = useState<IngredientRow[]>([]);
   const [steps, setSteps] = useState<StepRow[]>([]);
@@ -91,6 +92,10 @@ export default function RecipeDetailScreen({ recipeId, onBack, onSelectRecipe, o
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
   const [activeTab, setActiveTab] = useState<'Ingredients' | 'Steps' | 'Nutrition'>('Ingredients');
+  const [userId, setUserId] = useState<string | null>(null);
+  const [isSaved, setIsSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState('');
 
   useEffect(() => {
     async function loadRecipe() {
@@ -170,6 +175,79 @@ export default function RecipeDetailScreen({ recipeId, onBack, onSelectRecipe, o
     loadRecipe();
   }, [recipeId]);
 
+  useEffect(() => {
+    let ignore = false;
+
+    async function loadSavedState() {
+      setSaveMessage('');
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      if (ignore) return;
+
+      if (userError || !userData.user) {
+        setUserId(null);
+        setIsSaved(false);
+        return;
+      }
+
+      setUserId(userData.user.id);
+      const { data, error } = await supabase
+        .from('saved_recipes')
+        .select('recipe_id')
+        .eq('user_id', userData.user.id)
+        .eq('recipe_id', recipeId)
+        .maybeSingle();
+
+      if (ignore) return;
+      if (error) {
+        console.error('Failed to load saved state:', error);
+        setIsSaved(false);
+      } else {
+        setIsSaved(Boolean(data));
+      }
+    }
+
+    loadSavedState();
+    return () => { ignore = true; };
+  }, [recipeId]);
+
+  async function toggleSaved() {
+    if (!userId) {
+      onRequireLogin();
+      return;
+    }
+
+    setSaving(true);
+    setSaveMessage('');
+
+    if (isSaved) {
+      const { error } = await supabase
+        .from('saved_recipes')
+        .delete()
+        .eq('user_id', userId)
+        .eq('recipe_id', recipeId);
+
+      if (error) {
+        console.error('Failed to remove saved recipe:', error);
+        setSaveMessage('Could not update saved recipes.');
+      } else {
+        setIsSaved(false);
+      }
+    } else {
+      const { error } = await supabase
+        .from('saved_recipes')
+        .insert({ user_id: userId, recipe_id: recipeId });
+
+      if (error) {
+        console.error('Failed to save recipe:', error);
+        setSaveMessage('Could not save this recipe.');
+      } else {
+        setIsSaved(true);
+      }
+    }
+
+    setSaving(false);
+  }
+
   const groupedIngredients = useMemo(() => {
     const groups = new Map<string, IngredientRow[]>();
     ingredients.forEach((item) => {
@@ -217,9 +295,21 @@ export default function RecipeDetailScreen({ recipeId, onBack, onSelectRecipe, o
           </div>
           <div className="flex items-center gap-2 flex-shrink-0" style={{ alignSelf: 'flex-end', marginBottom: 4 }}>
             <button type="button" className="w-10 h-10 rounded-full border flex items-center justify-center" style={{ borderColor: '#EAEAEA' }} aria-label="Like recipe"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#1F1F1F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z" /></svg></button>
-            <button type="button" className="w-10 h-10 rounded-full border flex items-center justify-center" style={{ borderColor: '#EAEAEA' }} aria-label="Save recipe"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#1F1F1F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg></button>
+            <button
+              type="button"
+              onClick={toggleSaved}
+              disabled={saving}
+              className="w-10 h-10 rounded-full border flex items-center justify-center disabled:opacity-60"
+              style={isSaved
+                ? { borderColor: '#F26B21', backgroundColor: '#F26B21', color: '#FFFFFF' }
+                : { borderColor: '#EAEAEA', backgroundColor: '#FFFFFF', color: '#1F1F1F' }}
+              aria-label={isSaved ? 'Remove recipe from saved recipes' : 'Save recipe'}
+            >
+              <svg width="19" height="19" viewBox="0 0 24 24" fill={isSaved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+            </button>
           </div>
         </div>
+        {saveMessage && <p className="text-[12px] mt-2 text-right" style={{ color: '#C53D2E' }}>{saveMessage}</p>}
 
         <div className="flex items-center gap-4 mt-3 text-[12px]" style={{ color: '#6F6F6F' }}>
           <div className="flex items-center gap-1.5">
