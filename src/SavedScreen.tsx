@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 type SavedRecipe = {
   id: string;
@@ -23,9 +23,11 @@ function formatTime(totalMinutes: number | null) {
 
 export default function SavedScreen({ recipes, onSelectRecipe }: SavedScreenProps) {
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
+  const initialized = useRef(false);
 
   useEffect(() => {
-    if (recipes.length > 0 && savedIds.size === 0) {
+    if (!initialized.current && recipes.length > 0) {
+      initialized.current = true;
       setSavedIds(new Set(recipes.slice(0, 8).map((recipe) => recipe.id)));
     }
   }, [recipes]);
