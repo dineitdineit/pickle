@@ -76,7 +76,7 @@ export default function AuthScreen() {
           </button>
 
           <div className="flex justify-center mb-6">
-            <img src="/assets/pickle-logo.png" alt="Pickle" className="w-[88px] h-[88px] rounded-[24px] object-cover" />
+            <img src="/assets/logo.png" alt="Pickle" className="w-[88px] h-[88px] rounded-[24px] object-cover" />
           </div>
 
           <div className="text-center mb-7">
@@ -124,7 +124,7 @@ export default function AuthScreen() {
     <div className="pb-28">
       <div className="px-6 pt-[70px]">
         <div className="flex justify-center mb-6">
-          <img src="/assets/pickle-logo.png" alt="Pickle" className="w-[88px] h-[88px] rounded-[24px] object-cover" />
+          <img src="/assets/logo.png" alt="Pickle" className="w-[88px] h-[88px] rounded-[24px] object-cover" />
         </div>
 
         <div className="text-center mb-7">
