@@ -5,6 +5,7 @@ type ProfileScreenProps = {
   userId: string;
   email?: string;
   onOpenSaved: () => void;
+  onOpenLiked: () => void;
   onBack: () => void;
 };
 
@@ -23,7 +24,7 @@ const MENU_SECTIONS = [
     items: [
       { label: 'Saved Recipes', icon: 'bookmark', action: 'saved' },
       { label: 'My Comments', icon: 'comment' },
-      { label: 'Liked Recipes', icon: 'heart' },
+      { label: 'Liked Recipes', icon: 'heart', action: 'liked' },
     ],
   },
   {
@@ -58,7 +59,7 @@ function avatarPathFromUrl(url: string | null) {
   return decodeURIComponent(url.slice(markerIndex + marker.length).split('?')[0]);
 }
 
-export default function ProfileScreen({ userId, email, onOpenSaved, onBack }: ProfileScreenProps) {
+export default function ProfileScreen({ userId, email, onOpenSaved, onOpenLiked, onBack }: ProfileScreenProps) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -204,7 +205,7 @@ export default function ProfileScreen({ userId, email, onOpenSaved, onBack }: Pr
                 <button
                   key={item.label}
                   type="button"
-                  onClick={item.action === 'saved' ? onOpenSaved : undefined}
+                  onClick={item.action === 'saved' ? onOpenSaved : item.action === 'liked' ? onOpenLiked : undefined}
                   className="w-full h-[58px] px-4 flex items-center gap-3 text-left"
                   style={{ borderBottom: index < section.items.length - 1 ? '1px solid #EAEAEA' : undefined, backgroundColor: '#FFFFFF' }}
                 >
