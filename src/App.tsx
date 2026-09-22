@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import BrowseScreen from './BrowseScreen';
 import SearchScreen from './SearchScreen';
 import SavedScreen from './SavedScreen';
+import LikedScreen from './LikedScreen';
 import ProfileScreen from './ProfileScreen';
 import AuthScreen from './AuthScreen';
 import RecipeDetailScreen from './RecipeDetailScreen';
@@ -97,6 +98,7 @@ export default function App() {
   const [activeNav, setActiveNav] = useState(0);
   const [searchValue, setSearchValue] = useState('');
   const [showSearch, setShowSearch] = useState(false);
+  const [showLikedRecipes, setShowLikedRecipes] = useState(false);
   const [selectedRecipeId, setSelectedRecipeId] = useState<string | null>(null);
   const [selectedTagRecipeSection, setSelectedTagRecipeSection] = useState<string | null>(null);
   const [recipes, setRecipes] = useState<RecipeCard[]>([]);
@@ -199,7 +201,7 @@ export default function App() {
   const NavBar = (
     <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md border-t flex items-center justify-around py-3 bg-white z-50" style={{ borderColor: '#EAEAEA' }}>
       {NAV_ICONS.map((icon, i) => (
-        <button key={i} onClick={() => { setActiveNav(i); setShowSearch(false); }} className="flex flex-col items-center justify-center w-12 h-10 transition-colors" style={{ color: activeNav === i && !showSearch ? '#F26B21' : '#6F6F6F' }}>
+        <button key={i} onClick={() => { setActiveNav(i); setShowSearch(false); setShowLikedRecipes(false); }} className="flex flex-col items-center justify-center w-12 h-10 transition-colors" style={{ color: activeNav === i && !showSearch ? '#F26B21' : '#6F6F6F' }}>
           {icon}
           {activeNav === i && !showSearch && <div className="w-1 h-1 rounded-full mt-1" style={{ backgroundColor: '#F26B21' }} />}
         </button>
@@ -208,11 +210,15 @@ export default function App() {
   );
 
   if (selectedRecipeId) {
-    return <RecipeDetailScreen recipeId={selectedRecipeId} onBack={() => setSelectedRecipeId(null)} onSelectRecipe={setSelectedRecipeId} onBrowse={() => { setSelectedRecipeId(null); setSelectedTagRecipeSection(null); setShowSearch(false); setActiveNav(1); window.scrollTo({ top: 0, behavior: 'smooth' }); }} onRequireLogin={() => { setSelectedRecipeId(null); setSelectedTagRecipeSection(null); setShowSearch(false); setActiveNav(4); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />;
+    return <RecipeDetailScreen recipeId={selectedRecipeId} onBack={() => setSelectedRecipeId(null)} onSelectRecipe={setSelectedRecipeId} onBrowse={() => { setSelectedRecipeId(null); setSelectedTagRecipeSection(null); setShowSearch(false); setShowLikedRecipes(false); setActiveNav(1); window.scrollTo({ top: 0, behavior: 'smooth' }); }} onRequireLogin={() => { setSelectedRecipeId(null); setSelectedTagRecipeSection(null); setShowSearch(false); setShowLikedRecipes(false); setActiveNav(4); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />;
   }
 
   if (selectedTagRecipeSection) {
     return <TagRecipeListScreen title={selectedTagRecipeSection} recipes={selectedTagRecipes} onBack={() => setSelectedTagRecipeSection(null)} onSelectRecipe={setSelectedRecipeId} />;
+  }
+
+  if (showLikedRecipes) {
+    return <div className="bg-white min-h-screen max-w-md mx-auto relative"><LikedScreen recipes={sortedRecipes} onSelectRecipe={setSelectedRecipeId} onBack={() => setShowLikedRecipes(false)} />{NavBar}</div>;
   }
 
   if (showSearch) {
@@ -233,7 +239,7 @@ export default function App() {
         {loadingAuth ? (
           <div className="px-4 py-20 text-center text-[15px]" style={{ color: '#6F6F6F' }}>Loading profile…</div>
         ) : authUser ? (
-          <ProfileScreen userId={authUser.id} email={authUser.email} onOpenSaved={() => setActiveNav(2)} onBack={() => setActiveNav(0)} />
+          <ProfileScreen userId={authUser.id} email={authUser.email} onOpenSaved={() => setActiveNav(2)} onOpenLiked={() => setShowLikedRecipes(true)} onBack={() => setActiveNav(0)} />
         ) : (
           <AuthScreen onBack={() => setActiveNav(0)} />
         )}
