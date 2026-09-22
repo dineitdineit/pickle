@@ -5,6 +5,7 @@ type ProfileScreenProps = {
   userId: string;
   email?: string;
   onOpenSaved: () => void;
+  onBack: () => void;
 };
 
 type Profile = {
@@ -46,7 +47,7 @@ function MenuIcon({ name }: { name: string }) {
   return <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M9.1 9a3 3 0 115.4 1.8c-.9 1.1-2.5 1.6-2.5 3.2" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>;
 }
 
-export default function ProfileScreen({ userId, email, onOpenSaved }: ProfileScreenProps) {
+export default function ProfileScreen({ userId, email, onOpenSaved, onBack }: ProfileScreenProps) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -78,7 +79,12 @@ export default function ProfileScreen({ userId, email, onOpenSaved }: ProfileScr
 
   return (
     <div className="pb-28">
-      <div className="px-4 pt-6 text-center">
+      <div className="relative px-4 pt-6 text-center">
+        <button type="button" onClick={onBack} aria-label="Back" className="absolute left-4 top-5 w-9 h-9 flex items-center justify-center" style={{ color: '#1F1F1F' }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+        </button>
         <h1 className="font-bold text-[24px]" style={{ color: '#1F1F1F' }}>Profile</h1>
       </div>
 
