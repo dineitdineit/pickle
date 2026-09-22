@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { supabase } from './lib/supabase';
+import RecipeComments from './RecipeComments';
 
 type RecipeDetailScreenProps = {
   recipeId: string;
@@ -100,6 +101,7 @@ export default function RecipeDetailScreen({ recipeId, onBack, onSelectRecipe, o
   const [isLiked, setIsLiked] = useState(false);
   const [liking, setLiking] = useState(false);
   const [likeMessage, setLikeMessage] = useState('');
+  const [commentCount, setCommentCount] = useState(0);
 
   useEffect(() => {
     async function loadRecipe() {
@@ -365,7 +367,7 @@ export default function RecipeDetailScreen({ recipeId, onBack, onSelectRecipe, o
           </div>
           <div className="flex items-center gap-1.5">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a4 4 0 01-4 4H8l-5 3V7a4 4 0 014-4h10a4 4 0 014 4z" /></svg>
-            <span>0</span>
+            <span>{commentCount}</span>
           </div>
         </div>
 
@@ -395,10 +397,7 @@ export default function RecipeDetailScreen({ recipeId, onBack, onSelectRecipe, o
 
         {activeTab === 'Nutrition' && <section className="mt-6"><div className="flex justify-between mb-4" style={{ alignItems: 'baseline' }}><h2 className="font-semibold text-[20px] leading-none" style={{ color: '#1F1F1F' }}>Nutrition</h2><span className="text-[12px] leading-none" style={{ color: '#8A8A8A' }}>Per serving</span></div>{nutrition ? <><div className="grid grid-cols-2 gap-3">{[[ 'Calories', nutrition.calories, 'kcal' ], [ 'Protein', nutrition.protein_g, 'g' ], [ 'Carbs', nutrition.carbs_g, 'g' ], [ 'Fat', nutrition.fat_g, 'g' ]].map(([label, value, unit]) => <div key={label} className="rounded-[14px] p-4" style={{ backgroundColor: '#F9F9F9', border: '1px solid #EEEEEE' }}><p className="text-[13px] mb-2" style={{ color: '#6F6F6F' }}>{label}</p><div className="flex" style={{ alignItems: 'baseline' }}><span className="font-semibold text-[22px] leading-none" style={{ color: '#1F1F1F' }}>{value}</span><span className="text-[12px] leading-none ml-1" style={{ color: '#8A8A8A' }}>{unit}</span></div></div>)}</div>{nutrition.is_estimated && <p className="mt-3 text-[7px] leading-[10px]" style={{ color: '#A0A0A0' }}>*Nutrition values are estimates and may not be accurate.</p>}</> : <div className="rounded-[14px] px-4 py-4" style={{ backgroundColor: '#FFF8F3' }}><p className="text-[13px] leading-5" style={{ color: '#6F6F6F' }}>Nutrition information is not available for this recipe yet.</p></div>}</section>}
 
-        <section className="border-t" style={{ borderColor: '#EEEEEE', marginTop: 30, paddingTop: 15 }}>
-          <h2 className="font-semibold text-[20px] mb-4" style={{ color: '#1F1F1F' }}>Comments</h2>
-          <div className="flex items-start gap-3"><div className="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center text-[13px] font-semibold" style={{ backgroundColor: '#FFF0E6', color: '#F26B21' }}>P</div><div className="flex-1 min-w-0"><textarea aria-label="Write a comment" placeholder="Share your thoughts..." rows={3} className="w-full resize-none rounded-[16px] border px-4 py-3 text-[14px] leading-5 outline-none" style={{ borderColor: '#E6E6E6', color: '#1F1F1F', backgroundColor: '#FAFAFA' }} /><div className="flex justify-end mt-2"><button type="button" className="h-9 px-4 rounded-full text-[13px] font-semibold text-white" style={{ backgroundColor: '#F26B21' }}>Post</button></div></div></div>
-        </section>
+        <RecipeComments recipeId={recipeId} onRequireLogin={onRequireLogin} onCountChange={setCommentCount} />
 
         {recommendations.length > 0 && (
           <section className="pt-6 border-t" style={{ borderColor: '#EEEEEE', marginTop: 50 }}>
