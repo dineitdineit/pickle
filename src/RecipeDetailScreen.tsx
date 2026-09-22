@@ -221,6 +221,17 @@ export default function RecipeDetailScreen({ recipeId, onBack, onSelectRecipe, o
           </div>
         </div>
 
+        <div className="flex items-center gap-4 mt-3 text-[12px]" style={{ color: '#6F6F6F' }}>
+          <div className="flex items-center gap-1.5">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z" /></svg>
+            <span>0</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a4 4 0 01-4 4H8l-5 3V7a4 4 0 014-4h10a4 4 0 014 4z" /></svg>
+            <span>0</span>
+          </div>
+        </div>
+
         <div className="grid grid-cols-3 gap-2 mt-5">
           {[[ 'Time', formatTime(recipe.total_time_minutes) ], [ 'Difficulty', recipe.difficulty || '—' ], [ 'Servings', recipe.servings ? `${recipe.servings}` : '—' ]].map(([label, value]) => (
             <div key={label} className="rounded-[12px] p-3 text-center" style={{ backgroundColor: '#F9F9F9' }}><p className="text-[12px] mb-1" style={{ color: '#6F6F6F' }}>{label}</p><p className="font-semibold text-[14px]" style={{ color: '#1F1F1F' }}>{value}</p></div>
