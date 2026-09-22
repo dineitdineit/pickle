@@ -5,13 +5,6 @@ const RECENT_SEARCHES = ['Easy', 'Quick', 'One Pan', 'Party'];
 // Temporary UI data until search analytics are stored in Supabase.
 const TRENDING_SEARCHES = ['Chicken', 'Adobo', 'Easy', 'Pork', 'Quick'];
 
-const ALL_FILTERS: { label: string; items: string[] }[] = [
-  { label: 'Lifestyle',   items: ['Healthy', 'Vegan', 'Protein Packed', 'Party'] },
-  { label: 'Difficulty',  items: ['Easy', 'Intermediate', 'Quick'] },
-  { label: 'Protein',     items: ['Chicken', 'Pork', 'Beef', 'Egg', 'Fish'] },
-  { label: 'Dish Type',   items: ['Soup', 'Stew', 'Stir-fried', 'Baked', 'Raw'] },
-];
-
 interface BrowseScreenProps {
   searchValue: string;
   setSearchValue: (v: string) => void;
@@ -19,16 +12,6 @@ interface BrowseScreenProps {
 }
 
 export default function BrowseScreen({ searchValue, setSearchValue, onSearch }: BrowseScreenProps) {
-  const [selected, setSelected] = useState<Set<string>>(new Set());
-
-  function toggle(item: string) {
-    setSelected((prev) => {
-      const next = new Set(prev);
-      next.has(item) ? next.delete(item) : next.add(item);
-      return next;
-    });
-  }
-
   function removeRecent(item: string) {
     // no-op for now, kept interactive
   }
@@ -37,17 +20,6 @@ export default function BrowseScreen({ searchValue, setSearchValue, onSearch }: 
     setSearchValue(keyword);
     requestAnimationFrame(() => onSearch());
   }
-
-  const chipBase: React.CSSProperties = {
-    border: '1.5px solid #EAEAEA',
-    backgroundColor: '#fff',
-    color: '#6F6F6F',
-  };
-  const chipActive: React.CSSProperties = {
-    border: '1.5px solid #F26B21',
-    backgroundColor: '#FFF0E6',
-    color: '#F26B21',
-  };
 
   return (
     <div className="pb-24">
@@ -150,46 +122,6 @@ export default function BrowseScreen({ searchValue, setSearchValue, onSearch }: 
           ))}
         </div>
       </div>
-
-      {/* All Filters */}
-      <div className="px-4">
-        <h2 className="font-semibold text-[20px] mb-4" style={{ color: '#1F1F1F' }}>All Filters</h2>
-        <div className="space-y-6">
-          {ALL_FILTERS.map(({ label, items }) => (
-            <div key={label}>
-              <p className="font-semibold text-[15px] mb-3" style={{ color: '#1F1F1F' }}>{label}</p>
-              <div className="flex flex-wrap gap-2">
-                {items.map((item) => (
-                  <button
-                    key={item}
-                    onClick={() => toggle(item)}
-                    className="px-3.5 py-1.5 rounded-full text-[14px] font-medium transition-colors"
-                    style={selected.has(item) ? chipActive : chipBase}
-                  >
-                    {item}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Active filter summary */}
-      {selected.size > 0 && (
-        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 w-[calc(100%-32px)] max-w-sm z-40">
-          <button
-            className="w-full h-12 rounded-[12px] font-semibold text-[16px] text-white flex items-center justify-center gap-2 shadow-lg"
-            style={{ backgroundColor: '#F26B21' }}
-            onClick={() => setSelected(new Set())}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/>
-            </svg>
-            Apply {selected.size} Filter{selected.size > 1 ? 's' : ''}
-          </button>
-        </div>
-      )}
     </div>
   );
 }
