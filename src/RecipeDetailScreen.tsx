@@ -70,6 +70,7 @@ export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScr
   const [steps, setSteps] = useState<StepRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
+  const [activeTab, setActiveTab] = useState<'Ingredients' | 'Steps' | 'Nutrition'>('Ingredients');
 
   useEffect(() => {
     async function loadRecipe() {
@@ -238,72 +239,126 @@ export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScr
           </section>
         )}
 
-        <section className="mt-8">
-          <h2 className="font-semibold text-[20px] mb-4" style={{ color: '#1F1F1F' }}>Ingredients</h2>
+        <div className="mt-8 rounded-[14px] p-1 flex gap-1" style={{ backgroundColor: '#F5F5F5' }}>
+          {(['Ingredients', 'Steps', 'Nutrition'] as const).map((tab) => (
+            <button
+              key={tab}
+              type="button"
+              onClick={() => setActiveTab(tab)}
+              className="flex-1 h-10 rounded-[10px] text-[14px] font-semibold transition-colors"
+              style={
+                activeTab === tab
+                  ? { backgroundColor: '#FFFFFF', color: '#F26B21', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }
+                  : { color: '#6F6F6F' }
+              }
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
 
-          {recipe.ingredients_image && (
-            <div className="rounded-[16px] overflow-hidden mb-5 bg-gray-100">
-              <img src={imageUrl(recipe.ingredients_image)} alt={`${recipe.title} ingredients`} className="w-full aspect-[4/3] object-cover" />
-            </div>
-          )}
+        {activeTab === 'Ingredients' && (
+          <section className="mt-6">
+            <h2 className="font-semibold text-[20px] mb-4" style={{ color: '#1F1F1F' }}>Ingredients</h2>
 
-          <div className="space-y-6">
-            {groupedIngredients.map(([group, items]) => (
-              <div key={group}>
-                <h3 className="font-semibold text-[15px] mb-2" style={{ color: '#1F1F1F' }}>{group}</h3>
-                <div className="divide-y" style={{ borderColor: '#EAEAEA' }}>
-                  {items.map((item) => (
-                    <div key={item.id} className="flex justify-between gap-4 py-3" style={{ borderColor: '#EAEAEA' }}>
-                      <div className="min-w-0">
-                        <p className="text-[15px]" style={{ color: '#1F1F1F' }}>
-                          {item.ingredients?.name || 'Ingredient'}
-                          {item.optional ? <span className="text-[12px] ml-1" style={{ color: '#6F6F6F' }}>(optional)</span> : null}
-                        </p>
-                        {item.substitute && (
-                          <p className="text-[12px] mt-0.5" style={{ color: '#6F6F6F' }}>Sub: {item.substitute}</p>
-                        )}
-                      </div>
-                      <p className="text-[14px] whitespace-nowrap font-medium" style={{ color: '#1F1F1F' }}>
-                        {formatAmount(item.amount)} {item.unit || ''}
-                      </p>
-                    </div>
-                  ))}
-                </div>
+            {recipe.ingredients_image && (
+              <div className="rounded-[16px] overflow-hidden mb-5 bg-gray-100">
+                <img src={imageUrl(recipe.ingredients_image)} alt={`${recipe.title} ingredients`} className="w-full aspect-[4/3] object-cover" />
               </div>
-            ))}
-          </div>
-        </section>
+            )}
 
-        <section className="mt-9">
-          <h2 className="font-semibold text-[20px] mb-4" style={{ color: '#1F1F1F' }}>Steps</h2>
-
-          <div className="space-y-7">
-            {steps.map((step) => (
-              <article key={step.id}>
-                {step.step_image && (
-                  <div className="rounded-[16px] overflow-hidden bg-gray-100 mb-3">
-                    <img src={imageUrl(step.step_image)} alt={step.title || `Step ${step.step_number}`} className="w-full aspect-[4/3] object-cover" />
-                  </div>
-                )}
-
-                <div className="flex gap-3">
-                  <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-white text-[14px] font-semibold" style={{ backgroundColor: '#F26B21' }}>
-                    {step.step_number}
-                  </div>
-                  <div className="pt-0.5">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="font-semibold text-[17px]" style={{ color: '#1F1F1F' }}>{step.title || `Step ${step.step_number}`}</h3>
-                      {step.step_time_minutes ? (
-                        <span className="text-[12px] px-2 py-0.5 rounded-full" style={{ backgroundColor: '#FFF0E6', color: '#F26B21' }}>{formatTime(step.step_time_minutes)}</span>
-                      ) : null}
-                    </div>
-                    <p className="text-[15px] leading-6 mt-1.5" style={{ color: '#6F6F6F' }}>{step.instruction}</p>
+            <div className="space-y-6">
+              {groupedIngredients.map(([group, items]) => (
+                <div key={group}>
+                  <h3 className="font-semibold text-[15px] mb-2" style={{ color: '#1F1F1F' }}>{group}</h3>
+                  <div className="divide-y" style={{ borderColor: '#EAEAEA' }}>
+                    {items.map((item) => (
+                      <div key={item.id} className="flex justify-between gap-4 py-3" style={{ borderColor: '#EAEAEA' }}>
+                        <div className="min-w-0">
+                          <p className="text-[15px]" style={{ color: '#1F1F1F' }}>
+                            {item.ingredients?.name || 'Ingredient'}
+                            {item.optional ? <span className="text-[12px] ml-1" style={{ color: '#6F6F6F' }}>(optional)</span> : null}
+                          </p>
+                          {item.substitute && (
+                            <p className="text-[12px] mt-0.5" style={{ color: '#6F6F6F' }}>Sub: {item.substitute}</p>
+                          )}
+                        </div>
+                        <p className="text-[14px] whitespace-nowrap font-medium" style={{ color: '#1F1F1F' }}>
+                          {formatAmount(item.amount)} {item.unit || ''}
+                        </p>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              </article>
-            ))}
-          </div>
-        </section>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {activeTab === 'Steps' && (
+          <section className="mt-6">
+            <h2 className="font-semibold text-[20px] mb-4" style={{ color: '#1F1F1F' }}>Steps</h2>
+
+            <div className="space-y-7">
+              {steps.map((step) => (
+                <article key={step.id}>
+                  {step.step_image && (
+                    <div className="rounded-[16px] overflow-hidden bg-gray-100 mb-3">
+                      <img src={imageUrl(step.step_image)} alt={step.title || `Step ${step.step_number}`} className="w-full aspect-[4/3] object-cover" />
+                    </div>
+                  )}
+
+                  <div className="flex gap-3">
+                    <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-white text-[14px] font-semibold" style={{ backgroundColor: '#F26B21' }}>
+                      {step.step_number}
+                    </div>
+                    <div className="pt-0.5">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="font-semibold text-[17px]" style={{ color: '#1F1F1F' }}>{step.title || `Step ${step.step_number}`}</h3>
+                        {step.step_time_minutes ? (
+                          <span className="text-[12px] px-2 py-0.5 rounded-full" style={{ backgroundColor: '#FFF0E6', color: '#F26B21' }}>{formatTime(step.step_time_minutes)}</span>
+                        ) : null}
+                      </div>
+                      <p className="text-[15px] leading-6 mt-1.5" style={{ color: '#6F6F6F' }}>{step.instruction}</p>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {activeTab === 'Nutrition' && (
+          <section className="mt-6">
+            <div className="flex items-end justify-between mb-4">
+              <h2 className="font-semibold text-[20px]" style={{ color: '#1F1F1F' }}>Nutrition</h2>
+              <span className="text-[12px]" style={{ color: '#8A8A8A' }}>Per serving</span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                ['Calories', '—', 'kcal'],
+                ['Protein', '—', 'g'],
+                ['Carbs', '—', 'g'],
+                ['Fat', '—', 'g'],
+              ].map(([label, value, unit]) => (
+                <div key={label} className="rounded-[14px] p-4" style={{ backgroundColor: '#F9F9F9', border: '1px solid #EEEEEE' }}>
+                  <p className="text-[13px] mb-2" style={{ color: '#6F6F6F' }}>{label}</p>
+                  <div className="flex items-end gap-1">
+                    <span className="font-semibold text-[22px]" style={{ color: '#1F1F1F' }}>{value}</span>
+                    <span className="text-[12px] mb-1" style={{ color: '#8A8A8A' }}>{unit}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-4 rounded-[14px] px-4 py-4" style={{ backgroundColor: '#FFF8F3' }}>
+              <p className="text-[13px] leading-5" style={{ color: '#6F6F6F' }}>
+                Nutrition information has not been added for this recipe yet.
+              </p>
+            </div>
+          </section>
+        )}
       </div>
     </div>
   );
