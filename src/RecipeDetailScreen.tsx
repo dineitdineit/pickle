@@ -183,14 +183,17 @@ export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScr
       </div>
 
       <div className="px-4 pt-5">
-        <div className="flex items-end justify-between gap-4">
+        <div className="flex justify-between gap-4" style={{ alignItems: 'flex-end' }}>
           <div className="min-w-0">
             {recipe.short_description && (
               <p className="text-[13px] leading-5 mb-1.5" style={{ color: '#6F6F6F' }}>{recipe.short_description}</p>
             )}
             <h1 className="font-bold text-[28px] leading-tight" style={{ color: '#1F1F1F' }}>{recipe.title}</h1>
           </div>
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div
+            className="flex items-center gap-2 flex-shrink-0"
+            style={{ alignSelf: 'flex-end', marginBottom: 4 }}
+          >
             <button
               type="button"
               className="w-10 h-10 rounded-full border flex items-center justify-center"
