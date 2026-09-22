@@ -77,11 +77,11 @@ export default function AuthScreen() {
           </p>
         </div>
 
-        <div className="p-2.5 flex gap-1 mb-6" style={{ backgroundColor: '#F5F5F5', borderRadius: 24 }}>
+        <div className="p-2.5 flex gap-1 mb-6" style={{ backgroundColor: '#F5F5F5', borderRadius: 14 }}>
           <button
             type="button"
             onClick={() => changeMode('signin')}
-            className="flex-1 h-10 rounded-[16px] text-[14px] font-semibold transition-colors"
+            className="flex-1 h-10 rounded-[9px] text-[14px] font-semibold transition-colors"
             style={mode === 'signin'
               ? { backgroundColor: '#FFFFFF', color: '#F26B21', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }
               : { color: '#6F6F6F' }}
@@ -91,7 +91,7 @@ export default function AuthScreen() {
           <button
             type="button"
             onClick={() => changeMode('signup')}
-            className="flex-1 h-10 rounded-[16px] text-[14px] font-semibold transition-colors"
+            className="flex-1 h-10 rounded-[9px] text-[14px] font-semibold transition-colors"
             style={mode === 'signup'
               ? { backgroundColor: '#FFFFFF', color: '#F26B21', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }
               : { color: '#6F6F6F' }}
@@ -127,7 +127,7 @@ export default function AuthScreen() {
           {errorMessage && <p className="text-[13px] leading-5" style={{ color: '#C53D2E' }}>{errorMessage}</p>}
           {message && <p className="text-[13px] leading-5" style={{ color: '#5F6F52' }}>{message}</p>}
 
-          <button type="submit" disabled={loading} className="w-full h-12 rounded-[12px] text-white text-[15px] font-semibold disabled:opacity-60" style={{ backgroundColor: '#F26B21' }}>
+          <button type="submit" disabled={loading} className="w-full h-12 rounded-[8px] text-white text-[15px] font-semibold disabled:opacity-60" style={{ backgroundColor: '#F26B21' }}>
             {loading ? 'Please wait…' : mode === 'signin' ? 'Log in' : 'Create account'}
           </button>
 
