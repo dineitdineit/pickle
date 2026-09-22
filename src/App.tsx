@@ -57,7 +57,6 @@ function RecipeStrip({
     didDrag.current = false;
     startX.current = e.clientX;
     startScrollLeft.current = el.scrollLeft;
-    el.setPointerCapture(e.pointerId);
   }
 
   function handlePointerMove(e: React.PointerEvent<HTMLDivElement>) {
@@ -73,9 +72,6 @@ function RecipeStrip({
     if (!el) return;
     dragging.current = false;
     startX.current = null;
-    try {
-      el.releasePointerCapture(e.pointerId);
-    } catch {}
     window.setTimeout(() => {
       didDrag.current = false;
     }, 0);
@@ -99,6 +95,7 @@ function RecipeStrip({
         {recipes.map((recipe) => (
           <button
             key={recipe.id}
+            type="button"
             onClick={() => {
               if (!didDrag.current) onSelectRecipe(recipe.id);
             }}
