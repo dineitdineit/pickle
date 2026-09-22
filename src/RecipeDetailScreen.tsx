@@ -104,6 +104,20 @@ export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScr
       setRecipe(recipeResult.data as Recipe);
       setIngredients((ingredientResult.data ?? []) as IngredientRow[]);
       setSteps((stepResult.data ?? []) as StepRow[]);
+
+      const viewKey = `pickle:viewed:${recipeId}`;
+      if (!sessionStorage.getItem(viewKey)) {
+        const { error: viewError } = await supabase
+          .from('recipe_views')
+          .insert({ recipe_id: recipeId });
+
+        if (viewError) {
+          console.error('Failed to record recipe view:', viewError);
+        } else {
+          sessionStorage.setItem(viewKey, '1');
+        }
+      }
+
       setLoading(false);
     }
 
