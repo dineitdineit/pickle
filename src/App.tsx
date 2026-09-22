@@ -82,12 +82,12 @@ function RecipeStrip({
 
   return (
     <section className="mb-8">
-      <div className="px-4 mb-3 flex items-center justify-between gap-3">
-        <h2 className="font-semibold text-[20px]" style={{ color: '#1F1F1F' }}>{title}</h2>
+      <div className="px-4 mb-3 flex items-end justify-between gap-3">
+        <h2 className="font-semibold text-[20px] leading-none" style={{ color: '#1F1F1F' }}>{title}</h2>
         <button
           type="button"
           onClick={onSeeMore}
-          className="flex-shrink-0 text-[13px] font-medium"
+          className="flex-shrink-0 text-[13px] font-medium leading-none pb-[1px]"
           style={{ color: '#6F6F6F' }}
         >
           See more &gt;
