@@ -19,6 +19,7 @@ type Recipe = {
   servings: number | null;
   cover_image: string | null;
   ingredients_image: string | null;
+  like_count: number;
 };
 
 type Recommendation = {
@@ -96,6 +97,9 @@ export default function RecipeDetailScreen({ recipeId, onBack, onSelectRecipe, o
   const [isSaved, setIsSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState('');
+  const [isLiked, setIsLiked] = useState(false);
+  const [liking, setLiking] = useState(false);
+  const [likeMessage, setLikeMessage] = useState('');
 
   useEffect(() => {
     async function loadRecipe() {
@@ -105,7 +109,7 @@ export default function RecipeDetailScreen({ recipeId, onBack, onSelectRecipe, o
       const [recipeResult, ingredientResult, stepResult, nutritionResult, recommendationResult] = await Promise.all([
         supabase
           .from('recipes')
-          .select('id, title, short_description, description, difficulty, total_time_minutes, servings, cover_image, ingredients_image')
+          .select('id, title, short_description, description, difficulty, total_time_minutes, servings, cover_image, ingredients_image, like_count')
           .eq('id', recipeId)
           .single(),
         supabase
@@ -159,15 +163,9 @@ export default function RecipeDetailScreen({ recipeId, onBack, onSelectRecipe, o
 
       const viewKey = `pickle:viewed:${recipeId}`;
       if (!sessionStorage.getItem(viewKey)) {
-        const { error: viewError } = await supabase
-          .from('recipe_views')
-          .insert({ recipe_id: recipeId });
-
-        if (viewError) {
-          console.error('Failed to record recipe view:', viewError);
-        } else {
-          sessionStorage.setItem(viewKey, '1');
-        }
+        const { error: viewError } = await supabase.from('recipe_views').insert({ recipe_id: recipeId });
+        if (viewError) console.error('Failed to record recipe view:', viewError);
+        else sessionStorage.setItem(viewKey, '1');
       }
       setLoading(false);
     }
@@ -178,35 +176,53 @@ export default function RecipeDetailScreen({ recipeId, onBack, onSelectRecipe, o
   useEffect(() => {
     let ignore = false;
 
-    async function loadSavedState() {
+    async function loadUserState() {
       setSaveMessage('');
+      setLikeMessage('');
       const { data: userData, error: userError } = await supabase.auth.getUser();
       if (ignore) return;
 
       if (userError || !userData.user) {
         setUserId(null);
         setIsSaved(false);
+        setIsLiked(false);
         return;
       }
 
       setUserId(userData.user.id);
-      const { data, error } = await supabase
-        .from('saved_recipes')
-        .select('recipe_id')
-        .eq('user_id', userData.user.id)
-        .eq('recipe_id', recipeId)
-        .maybeSingle();
+      const [savedResult, likedResult] = await Promise.all([
+        supabase
+          .from('saved_recipes')
+          .select('recipe_id')
+          .eq('user_id', userData.user.id)
+          .eq('recipe_id', recipeId)
+          .maybeSingle(),
+        supabase
+          .from('recipe_likes')
+          .select('recipe_id')
+          .eq('user_id', userData.user.id)
+          .eq('recipe_id', recipeId)
+          .maybeSingle(),
+      ]);
 
       if (ignore) return;
-      if (error) {
-        console.error('Failed to load saved state:', error);
+
+      if (savedResult.error) {
+        console.error('Failed to load saved state:', savedResult.error);
         setIsSaved(false);
       } else {
-        setIsSaved(Boolean(data));
+        setIsSaved(Boolean(savedResult.data));
+      }
+
+      if (likedResult.error) {
+        console.error('Failed to load liked state:', likedResult.error);
+        setIsLiked(false);
+      } else {
+        setIsLiked(Boolean(likedResult.data));
       }
     }
 
-    loadSavedState();
+    loadUserState();
     return () => { ignore = true; };
   }, [recipeId]);
 
@@ -220,12 +236,7 @@ export default function RecipeDetailScreen({ recipeId, onBack, onSelectRecipe, o
     setSaveMessage('');
 
     if (isSaved) {
-      const { error } = await supabase
-        .from('saved_recipes')
-        .delete()
-        .eq('user_id', userId)
-        .eq('recipe_id', recipeId);
-
+      const { error } = await supabase.from('saved_recipes').delete().eq('user_id', userId).eq('recipe_id', recipeId);
       if (error) {
         console.error('Failed to remove saved recipe:', error);
         setSaveMessage('Could not update saved recipes.');
@@ -233,10 +244,7 @@ export default function RecipeDetailScreen({ recipeId, onBack, onSelectRecipe, o
         setIsSaved(false);
       }
     } else {
-      const { error } = await supabase
-        .from('saved_recipes')
-        .insert({ user_id: userId, recipe_id: recipeId });
-
+      const { error } = await supabase.from('saved_recipes').insert({ user_id: userId, recipe_id: recipeId });
       if (error) {
         console.error('Failed to save recipe:', error);
         setSaveMessage('Could not save this recipe.');
@@ -246,6 +254,38 @@ export default function RecipeDetailScreen({ recipeId, onBack, onSelectRecipe, o
     }
 
     setSaving(false);
+  }
+
+  async function toggleLike() {
+    if (!userId) {
+      onRequireLogin();
+      return;
+    }
+
+    setLiking(true);
+    setLikeMessage('');
+
+    if (isLiked) {
+      const { error } = await supabase.from('recipe_likes').delete().eq('user_id', userId).eq('recipe_id', recipeId);
+      if (error) {
+        console.error('Failed to unlike recipe:', error);
+        setLikeMessage('Could not update your like.');
+      } else {
+        setIsLiked(false);
+        setRecipe((current) => current ? { ...current, like_count: Math.max(current.like_count - 1, 0) } : current);
+      }
+    } else {
+      const { error } = await supabase.from('recipe_likes').insert({ user_id: userId, recipe_id: recipeId });
+      if (error) {
+        console.error('Failed to like recipe:', error);
+        setLikeMessage('Could not like this recipe.');
+      } else {
+        setIsLiked(true);
+        setRecipe((current) => current ? { ...current, like_count: current.like_count + 1 } : current);
+      }
+    }
+
+    setLiking(false);
   }
 
   const groupedIngredients = useMemo(() => {
@@ -258,11 +298,7 @@ export default function RecipeDetailScreen({ recipeId, onBack, onSelectRecipe, o
   }, [ingredients]);
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-white max-w-md mx-auto flex items-center justify-center">
-        <p className="text-[15px]" style={{ color: '#6F6F6F' }}>Loading recipe…</p>
-      </div>
-    );
+    return <div className="min-h-screen bg-white max-w-md mx-auto flex items-center justify-center"><p className="text-[15px]" style={{ color: '#6F6F6F' }}>Loading recipe…</p></div>;
   }
 
   if (!recipe || errorMessage) {
@@ -294,7 +330,18 @@ export default function RecipeDetailScreen({ recipeId, onBack, onSelectRecipe, o
             <h1 className="font-bold text-[28px] leading-tight" style={{ color: '#1F1F1F' }}>{recipe.title}</h1>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0" style={{ alignSelf: 'flex-end', marginBottom: 4 }}>
-            <button type="button" className="w-10 h-10 rounded-full border flex items-center justify-center" style={{ borderColor: '#EAEAEA' }} aria-label="Like recipe"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#1F1F1F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z" /></svg></button>
+            <button
+              type="button"
+              onClick={toggleLike}
+              disabled={liking}
+              className="w-10 h-10 rounded-full border flex items-center justify-center disabled:opacity-60"
+              style={isLiked
+                ? { borderColor: '#F26B21', backgroundColor: '#FFF0E6', color: '#F26B21' }
+                : { borderColor: '#EAEAEA', backgroundColor: '#FFFFFF', color: '#1F1F1F' }}
+              aria-label={isLiked ? 'Unlike recipe' : 'Like recipe'}
+            >
+              <svg width="19" height="19" viewBox="0 0 24 24" fill={isLiked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z" /></svg>
+            </button>
             <button
               type="button"
               onClick={toggleSaved}
@@ -309,12 +356,12 @@ export default function RecipeDetailScreen({ recipeId, onBack, onSelectRecipe, o
             </button>
           </div>
         </div>
-        {saveMessage && <p className="text-[12px] mt-2 text-right" style={{ color: '#C53D2E' }}>{saveMessage}</p>}
+        {(saveMessage || likeMessage) && <p className="text-[12px] mt-2 text-right" style={{ color: '#C53D2E' }}>{likeMessage || saveMessage}</p>}
 
         <div className="flex items-center gap-4 mt-3 text-[12px]" style={{ color: '#6F6F6F' }}>
           <div className="flex items-center gap-1.5">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z" /></svg>
-            <span>0</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill={isLiked ? '#F26B21' : 'none'} stroke={isLiked ? '#F26B21' : 'currentColor'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z" /></svg>
+            <span>{recipe.like_count}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a4 4 0 01-4 4H8l-5 3V7a4 4 0 014-4h10a4 4 0 014 4z" /></svg>
