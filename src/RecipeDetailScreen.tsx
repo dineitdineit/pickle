@@ -158,7 +158,8 @@ export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScr
         <button
           onClick={onBack}
           aria-label="Back"
-          className="absolute top-5 left-4 w-10 h-10 rounded-full bg-white/90 flex items-center justify-center z-10"
+          className="w-10 h-10 rounded-full bg-white/90 flex items-center justify-center"
+          style={{ position: 'absolute', top: 20, left: 16, zIndex: 20 }}
         >
           <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#1F1F1F" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="15 18 9 12 15 6" />
@@ -168,7 +169,8 @@ export default function RecipeDetailScreen({ recipeId, onBack }: RecipeDetailScr
         <button
           type="button"
           aria-label="Share recipe"
-          className="absolute top-5 right-4 w-10 h-10 rounded-full bg-white/90 flex items-center justify-center z-10"
+          className="w-10 h-10 rounded-full bg-white/90 flex items-center justify-center"
+          style={{ position: 'absolute', top: 20, right: 16, zIndex: 20 }}
         >
           <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#1F1F1F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="18" cy="5" r="3" />
