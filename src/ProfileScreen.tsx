@@ -150,7 +150,7 @@ export default function ProfileScreen({ userId, email, onOpenSaved, onBack }: Pr
 
   const displayName = profile?.display_name || profile?.username || 'Pickle User';
   const username = profile?.username ? `@${profile.username}` : email || '';
-  const initial = displayName.trim().charAt(0).toUpperCase() || 'P';
+  const initial = profile?.username?.trim().charAt(0).toUpperCase() || 'P';
 
   return (
     <div className="pb-28">
@@ -169,7 +169,9 @@ export default function ProfileScreen({ userId, email, onOpenSaved, onBack }: Pr
           type="file"
           accept="image/jpeg,image/png,image/webp"
           onChange={handleAvatarChange}
-          className="hidden"
+          aria-hidden="true"
+          tabIndex={-1}
+          style={{ display: 'none' }}
         />
 
         {profile?.avatar_url && /^https?:\/\//.test(profile.avatar_url) ? (
