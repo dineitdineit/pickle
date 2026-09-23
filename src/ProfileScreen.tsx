@@ -43,7 +43,7 @@ const MENU_SECTIONS = [
   {
     title: 'Account',
     items: [
-      { label: 'Settings', icon: 'settings' },
+      { label: 'Settings', icon: 'settings', action: 'settings' },
     ],
   },
   {
@@ -87,7 +87,24 @@ export default function ProfileScreen({ userId, email, onOpenSaved, onOpenLiked,
   const [myComments, setMyComments] = useState<MyComment[]>([]);
   const [commentRecipes, setCommentRecipes] = useState<Map<string, RecipeSummary>>(new Map());
   const [commentsMessage, setCommentsMessage] = useState('');
-  const [supportScreen, setSupportScreen] = useState<'contact' | 'faq' | null>(null);
+  const [supportScreen, setSupportScreen] = useState<'contact' | 'faq' | 'settings' | null>(null);
+  const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(() => {
+    try {
+      const stored = localStorage.getItem(`pickle:settings:${userId}`);
+      return stored ? JSON.parse(stored).notificationsEnabled ?? true : true;
+    } catch {
+      return true;
+    }
+  });
+  const [language, setLanguage] = useState<'English' | 'Tagalog'>(() => {
+    try {
+      const stored = localStorage.getItem(`pickle:settings:${userId}`);
+      const value = stored ? JSON.parse(stored).language : null;
+      return value === 'Tagalog' ? 'Tagalog' : 'English';
+    } catch {
+      return 'English';
+    }
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -111,6 +128,27 @@ export default function ProfileScreen({ userId, email, onOpenSaved, onOpenLiked,
     loadProfile();
     return () => { ignore = true; };
   }, [userId]);
+
+  function saveSettings(nextNotifications: boolean, nextLanguage: 'English' | 'Tagalog') {
+    localStorage.setItem(
+      `pickle:settings:${userId}`,
+      JSON.stringify({
+        notificationsEnabled: nextNotifications,
+        language: nextLanguage,
+      }),
+    );
+  }
+
+  function toggleNotifications() {
+    const next = !notificationsEnabled;
+    setNotificationsEnabled(next);
+    saveSettings(next, language);
+  }
+
+  function chooseLanguage(nextLanguage: 'English' | 'Tagalog') {
+    setLanguage(nextLanguage);
+    saveSettings(notificationsEnabled, nextLanguage);
+  }
 
   async function openMyComments() {
     setShowMyComments(true);
@@ -233,6 +271,75 @@ export default function ProfileScreen({ userId, email, onOpenSaved, onOpenLiked,
   const displayName = profile?.display_name || profile?.username || 'Pickle User';
   const username = profile?.username ? `@${profile.username}` : email || '';
   const initial = profile?.username?.trim().charAt(0).toUpperCase() || 'P';
+
+  if (supportScreen === 'settings') {
+    return (
+      <div className="pb-28">
+        <div className="relative px-4 pt-6 text-center mb-8">
+          <button type="button" onClick={() => setSupportScreen(null)} aria-label="Back to profile" className="absolute left-4 top-5 w-9 h-9 flex items-center justify-center" style={{ color: '#1F1F1F' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+          </button>
+          <h1 className="font-bold text-[24px]" style={{ color: '#1F1F1F' }}>Settings</h1>
+        </div>
+
+        <div className="px-4 space-y-7">
+          <section>
+            <p className="text-[13px] font-semibold mb-2 px-1" style={{ color: '#8A8A8A' }}>Notifications</p>
+            <div className="rounded-[16px] border px-4 py-4 flex items-center gap-4" style={{ borderColor: '#EAEAEA', backgroundColor: '#FFFFFF' }}>
+              <div className="flex-1">
+                <p className="text-[15px] font-medium" style={{ color: '#1F1F1F' }}>Notifications</p>
+                <p className="text-[13px] leading-5 mt-1" style={{ color: '#8A8A8A' }}>
+                  Get updates about activity related to your Pickle account.
+                </p>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={notificationsEnabled}
+                onClick={toggleNotifications}
+                className="relative w-[48px] h-[28px] rounded-full flex-shrink-0 transition-colors"
+                style={{ backgroundColor: notificationsEnabled ? '#F26B21' : '#D9D9D9' }}
+              >
+                <span
+                  className="absolute top-[3px] w-[22px] h-[22px] rounded-full bg-white shadow-sm transition-all"
+                  style={{ left: notificationsEnabled ? 23 : 3 }}
+                />
+              </button>
+            </div>
+          </section>
+
+          <section>
+            <p className="text-[13px] font-semibold mb-2 px-1" style={{ color: '#8A8A8A' }}>Language</p>
+            <div className="rounded-[16px] border overflow-hidden" style={{ borderColor: '#EAEAEA', backgroundColor: '#FFFFFF' }}>
+              {(['English', 'Tagalog'] as const).map((option, index) => {
+                const selected = language === option;
+                return (
+                  <button
+                    key={option}
+                    type="button"
+                    onClick={() => chooseLanguage(option)}
+                    className="w-full min-h-[58px] px-4 flex items-center gap-3 text-left"
+                    style={{ borderBottom: index === 0 ? '1px solid #EAEAEA' : undefined, backgroundColor: '#FFFFFF' }}
+                  >
+                    <span className="flex-1 text-[15px] font-medium" style={{ color: '#1F1F1F' }}>{option}</span>
+                    <span
+                      className="w-5 h-5 rounded-full border flex items-center justify-center"
+                      style={{ borderColor: selected ? '#F26B21' : '#CFCFCF' }}
+                    >
+                      {selected && <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#F26B21' }} />}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-[12px] leading-5 mt-2 px-1" style={{ color: '#A0A0A0' }}>
+              Language preference is saved now. Full Tagalog translation can be applied as the localization system is added.
+            </p>
+          </section>
+        </div>
+      </div>
+    );
+  }
 
   if (supportScreen === 'contact') {
     return (
@@ -430,7 +537,7 @@ export default function ProfileScreen({ userId, email, onOpenSaved, onOpenLiked,
                 <button
                   key={item.label}
                   type="button"
-                  onClick={item.action === 'saved' ? onOpenSaved : item.action === 'liked' ? onOpenLiked : item.action === 'comments' ? openMyComments : item.action === 'contact' ? () => setSupportScreen('contact') : item.action === 'faq' ? () => setSupportScreen('faq') : undefined}
+                  onClick={item.action === 'saved' ? onOpenSaved : item.action === 'liked' ? onOpenLiked : item.action === 'comments' ? openMyComments : item.action === 'settings' ? () => setSupportScreen('settings') : item.action === 'contact' ? () => setSupportScreen('contact') : item.action === 'faq' ? () => setSupportScreen('faq') : undefined}
                   className="w-full h-[58px] px-4 flex items-center gap-3 text-left"
                   style={{ borderBottom: index < section.items.length - 1 ? '1px solid #EAEAEA' : undefined, backgroundColor: '#FFFFFF' }}
                 >
