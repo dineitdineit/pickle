@@ -1,5 +1,5 @@
 const RECENT_SEARCHES_KEY = 'pickle:recent-searches';
-const MAX_RECENT_SEARCHES = 8;
+const MAX_RECENT_SEARCHES = 4;
 
 function normalizeSearchTerm(value: string) {
   return value.trim().replace(/\s+/g, ' ');
