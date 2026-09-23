@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { supabase } from './lib/supabase';
+import { addRecentSearch } from './recentSearches';
 
 const PAGE_SIZE = 8;
 
@@ -76,6 +77,15 @@ export default function SearchScreen({ query, setQuery, onBack, onSelectRecipe }
   const visible = filtered.slice(0, visibleCount);
   const remaining = Math.max(0, filtered.length - visibleCount);
 
+  function saveCurrentSearch() {
+    addRecentSearch(query);
+  }
+
+  function openRecipe(recipeId: string) {
+    saveCurrentSearch();
+    onSelectRecipe(recipeId);
+  }
+
   return (
     <div className="pb-24">
       <div className="flex items-center gap-3 px-4 pt-5 pb-4">
@@ -99,6 +109,7 @@ export default function SearchScreen({ query, setQuery, onBack, onSelectRecipe }
             placeholder="Search recipes..."
             value={query}
             onChange={(e) => { setQuery(e.target.value); setVisibleCount(PAGE_SIZE); }}
+            onKeyDown={(e) => e.key === 'Enter' && saveCurrentSearch()}
             autoFocus
             className="flex-1 bg-transparent outline-none text-[16px] placeholder:text-[#6F6F6F]"
             style={{ color: '#1F1F1F' }}
@@ -124,7 +135,7 @@ export default function SearchScreen({ query, setQuery, onBack, onSelectRecipe }
           {visible.map((recipe, i) => (
             <button
               key={recipe.id}
-              onClick={() => onSelectRecipe(recipe.id)}
+              onClick={() => openRecipe(recipe.id)}
               className="flex items-center gap-4 py-3.5 w-full text-left active:bg-gray-50"
               style={{ borderBottom: i < visible.length - 1 ? '1px solid #EAEAEA' : undefined }}
             >
