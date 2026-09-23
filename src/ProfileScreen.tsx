@@ -49,8 +49,8 @@ const MENU_SECTIONS = [
   {
     title: 'Support',
     items: [
-      { label: 'Contact Us', icon: 'mail' },
-      { label: 'FAQ', icon: 'help' },
+      { label: 'Contact Us', icon: 'mail', action: 'contact' },
+      { label: 'FAQ', icon: 'help', action: 'faq' },
     ],
   },
 ] as const;
@@ -87,6 +87,7 @@ export default function ProfileScreen({ userId, email, onOpenSaved, onOpenLiked,
   const [myComments, setMyComments] = useState<MyComment[]>([]);
   const [commentRecipes, setCommentRecipes] = useState<Map<string, RecipeSummary>>(new Map());
   const [commentsMessage, setCommentsMessage] = useState('');
+  const [supportScreen, setSupportScreen] = useState<'contact' | 'faq' | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -233,6 +234,114 @@ export default function ProfileScreen({ userId, email, onOpenSaved, onOpenLiked,
   const username = profile?.username ? `@${profile.username}` : email || '';
   const initial = profile?.username?.trim().charAt(0).toUpperCase() || 'P';
 
+  if (supportScreen === 'contact') {
+    return (
+      <div className="pb-28">
+        <div className="relative px-4 pt-6 text-center mb-8">
+          <button type="button" onClick={() => setSupportScreen(null)} aria-label="Back to profile" className="absolute left-4 top-5 w-9 h-9 flex items-center justify-center" style={{ color: '#1F1F1F' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+          </button>
+          <h1 className="font-bold text-[24px]" style={{ color: '#1F1F1F' }}>Contact Us</h1>
+        </div>
+
+        <div className="px-4 space-y-5">
+          <section className="rounded-[18px] border p-5" style={{ borderColor: '#EAEAEA', backgroundColor: '#FFFFFF' }}>
+            <div className="w-11 h-11 rounded-full flex items-center justify-center mb-4" style={{ backgroundColor: '#FFF0E6', color: '#F26B21' }}>
+              <MenuIcon name="mail" />
+            </div>
+            <h2 className="font-semibold text-[18px]" style={{ color: '#1F1F1F' }}>How can we help?</h2>
+            <p className="text-[14px] leading-6 mt-2" style={{ color: '#6F6F6F' }}>
+              Questions, recipe feedback, bug reports, and general suggestions are all welcome.
+            </p>
+          </section>
+
+          <section className="rounded-[18px] border overflow-hidden" style={{ borderColor: '#EAEAEA', backgroundColor: '#FFFFFF' }}>
+            <div className="px-5 py-4 border-b" style={{ borderColor: '#EAEAEA' }}>
+              <p className="text-[12px] font-semibold" style={{ color: '#8A8A8A' }}>EMAIL</p>
+              <p className="text-[15px] font-medium mt-1" style={{ color: '#1F1F1F' }}>support@pickle.app</p>
+            </div>
+            <div className="px-5 py-4 border-b" style={{ borderColor: '#EAEAEA' }}>
+              <p className="text-[12px] font-semibold" style={{ color: '#8A8A8A' }}>RESPONSE TIME</p>
+              <p className="text-[15px] font-medium mt-1" style={{ color: '#1F1F1F' }}>Usually within 2–3 business days</p>
+            </div>
+            <div className="px-5 py-4">
+              <p className="text-[12px] font-semibold" style={{ color: '#8A8A8A' }}>SUPPORT HOURS</p>
+              <p className="text-[15px] font-medium mt-1" style={{ color: '#1F1F1F' }}>Monday–Friday, 9:00 AM–6:00 PM</p>
+            </div>
+          </section>
+
+          <p className="text-[12px] leading-5 px-1" style={{ color: '#A0A0A0' }}>
+            Contact information on this preview screen is temporary and can be replaced before launch.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (supportScreen === 'faq') {
+    const faqs = [
+      {
+        question: 'What is Pickle?',
+        answer: 'Pickle is a recipe discovery app designed to help you find, save, and cook recipes more easily.',
+      },
+      {
+        question: 'Do I need an account to browse recipes?',
+        answer: 'No. You can browse and view recipes without signing in. An account is needed for features such as saving, liking, and commenting.',
+      },
+      {
+        question: 'Where can I find recipes I saved?',
+        answer: 'Open the Saved tab from the bottom navigation, or go to Profile and choose Saved Recipes.',
+      },
+      {
+        question: 'Can I remove a saved or liked recipe?',
+        answer: 'Yes. Tap the bookmark or heart again on the recipe page to remove it from your saved or liked recipes.',
+      },
+      {
+        question: 'How do I change or delete my comments?',
+        answer: 'Open the menu next to your comment to edit or delete it. You can also review your comments from Profile > My Comments.',
+      },
+      {
+        question: 'Are nutrition values exact?',
+        answer: 'Nutrition information may be estimated and can vary depending on ingredients, brands, serving sizes, and preparation methods.',
+      },
+      {
+        question: 'How do I report a problem with a recipe?',
+        answer: 'Use Contact Us and include the recipe name along with a short description of the issue so the Pickle team can review it.',
+      },
+    ];
+
+    return (
+      <div className="pb-28">
+        <div className="relative px-4 pt-6 text-center mb-8">
+          <button type="button" onClick={() => setSupportScreen(null)} aria-label="Back to profile" className="absolute left-4 top-5 w-9 h-9 flex items-center justify-center" style={{ color: '#1F1F1F' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+          </button>
+          <h1 className="font-bold text-[24px]" style={{ color: '#1F1F1F' }}>FAQ</h1>
+        </div>
+
+        <div className="px-4">
+          <p className="text-[14px] leading-6 mb-5" style={{ color: '#6F6F6F' }}>
+            Quick answers to common questions about using Pickle.
+          </p>
+
+          <div className="rounded-[18px] border overflow-hidden" style={{ borderColor: '#EAEAEA', backgroundColor: '#FFFFFF' }}>
+            {faqs.map((faq, index) => (
+              <details key={faq.question} className="group" style={{ borderBottom: index < faqs.length - 1 ? '1px solid #EAEAEA' : undefined }}>
+                <summary className="list-none cursor-pointer px-5 py-4 flex items-center gap-3">
+                  <span className="flex-1 text-[15px] font-semibold leading-5" style={{ color: '#1F1F1F' }}>{faq.question}</span>
+                  <svg className="transition-transform group-open:rotate-180 flex-shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8A8A8A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
+                </summary>
+                <p className="px-5 pb-4 text-[14px] leading-6" style={{ color: '#6F6F6F' }}>{faq.answer}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (showMyComments) {
     return (
       <div className="pb-28">
@@ -321,7 +430,7 @@ export default function ProfileScreen({ userId, email, onOpenSaved, onOpenLiked,
                 <button
                   key={item.label}
                   type="button"
-                  onClick={item.action === 'saved' ? onOpenSaved : item.action === 'liked' ? onOpenLiked : item.action === 'comments' ? openMyComments : undefined}
+                  onClick={item.action === 'saved' ? onOpenSaved : item.action === 'liked' ? onOpenLiked : item.action === 'comments' ? openMyComments : item.action === 'contact' ? () => setSupportScreen('contact') : item.action === 'faq' ? () => setSupportScreen('faq') : undefined}
                   className="w-full h-[58px] px-4 flex items-center gap-3 text-left"
                   style={{ borderBottom: index < section.items.length - 1 ? '1px solid #EAEAEA' : undefined, backgroundColor: '#FFFFFF' }}
                 >
