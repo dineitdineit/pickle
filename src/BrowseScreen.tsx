@@ -1,6 +1,5 @@
 import { useState } from 'react';
-
-const RECENT_SEARCHES = ['Easy', 'Quick', 'One Pan', 'Party'];
+import { addRecentSearch, clearRecentSearches, getRecentSearches, removeRecentSearch } from './recentSearches';
 
 // Temporary UI data until search analytics are stored in Supabase.
 const TRENDING_SEARCHES = ['Chicken', 'Adobo', 'Easy', 'Pork', 'Quick'];
@@ -12,12 +11,25 @@ interface BrowseScreenProps {
 }
 
 export default function BrowseScreen({ searchValue, setSearchValue, onSearch }: BrowseScreenProps) {
+  const [recentSearches, setRecentSearches] = useState<string[]>(() => getRecentSearches());
+
   function removeRecent(item: string) {
-    // no-op for now, kept interactive
+    setRecentSearches(removeRecentSearch(item));
+  }
+
+  function clearRecent() {
+    setRecentSearches(clearRecentSearches());
   }
 
   function searchKeyword(keyword: string) {
-    setSearchValue(keyword);
+    const term = keyword.trim();
+    if (!term) {
+      onSearch();
+      return;
+    }
+
+    setRecentSearches(addRecentSearch(term));
+    setSearchValue(term);
     requestAnimationFrame(() => onSearch());
   }
 
@@ -42,7 +54,7 @@ export default function BrowseScreen({ searchValue, setSearchValue, onSearch }: 
             placeholder="Search recipes..."
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && onSearch()}
+            onKeyDown={(e) => e.key === 'Enter' && searchKeyword(searchValue)}
             className="flex-1 bg-transparent outline-none text-[16px] placeholder:text-[#6F6F6F]"
             style={{ color: '#1F1F1F' }}
           />
@@ -60,22 +72,30 @@ export default function BrowseScreen({ searchValue, setSearchValue, onSearch }: 
       <div className="px-4 mb-8">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-semibold text-[20px]" style={{ color: '#1F1F1F' }}>Recently Searched</h2>
-          <button className="text-[14px] font-medium" style={{ color: '#F26B21' }}>Clear</button>
+          {recentSearches.length > 0 && <button type="button" onClick={clearRecent} className="text-[14px] font-medium" style={{ color: '#F26B21' }}>Clear</button>}
         </div>
         <div className="flex flex-wrap gap-2">
-          {RECENT_SEARCHES.map((item) => (
+          {recentSearches.length > 0 ? recentSearches.map((item) => (
             <div
               key={item}
-              className="flex items-center gap-1.5 pl-3.5 pr-2 py-1.5 rounded-full text-[14px] font-medium"
+              className="flex items-center gap-1 rounded-full text-[14px] font-medium overflow-hidden"
               style={{ backgroundColor: '#F9F9F9', border: '1.5px solid #EAEAEA', color: '#1F1F1F' }}
             >
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6F6F6F" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="12 8 12 12 14 14"/><circle cx="12" cy="12" r="10"/>
-              </svg>
-              <span>{item}</span>
               <button
+                type="button"
+                onClick={() => searchKeyword(item)}
+                className="flex items-center gap-1.5 pl-3.5 pr-1 py-1.5"
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6F6F6F" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="12 8 12 12 14 14"/><circle cx="12" cy="12" r="10"/>
+                </svg>
+                <span>{item}</span>
+              </button>
+              <button
+                type="button"
                 onClick={() => removeRecent(item)}
-                className="ml-0.5"
+                aria-label={`Remove ${item} from recent searches`}
+                className="w-7 h-7 flex items-center justify-center mr-0.5"
                 style={{ color: '#6F6F6F' }}
               >
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -83,7 +103,9 @@ export default function BrowseScreen({ searchValue, setSearchValue, onSearch }: 
                 </svg>
               </button>
             </div>
-          ))}
+          )) : (
+            <p className="text-[13px]" style={{ color: '#A0A0A0' }}>Your recent searches will appear here.</p>
+          )}
         </div>
       </div>
 
