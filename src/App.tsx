@@ -8,6 +8,7 @@ import AuthScreen from './AuthScreen';
 import RecipeDetailScreen from './RecipeDetailScreen';
 import TagRecipeListScreen from './TagRecipeListScreen';
 import { supabase } from './lib/supabase';
+import { addRecentSearch } from './recentSearches';
 
 type RecipeCard = {
   id: string;
@@ -298,7 +299,12 @@ export default function App() {
       <div className="px-4 mb-8">
         <div className="flex items-center gap-3 px-4 h-12 rounded-[12px] border" style={{ backgroundColor: '#F9F9F9', borderColor: '#EAEAEA' }}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6F6F6F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" placeholder="Search recipes..." value={searchValue} onChange={(e) => setSearchValue(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && submitSearch()} onFocus={() => setShowSearch(true)} className="flex-1 bg-transparent outline-none text-[16px] placeholder:text-[#6F6F6F]" style={{ color: '#1F1F1F' }} />
+          <input type="text" placeholder="Search recipes..." value={searchValue} onChange={(e) => setSearchValue(e.target.value)} onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              addRecentSearch(searchValue);
+              submitSearch();
+            }
+          }} onFocus={() => setShowSearch(true)} className="flex-1 bg-transparent outline-none text-[16px] placeholder:text-[#6F6F6F]" style={{ color: '#1F1F1F' }} />
         </div>
       </div>
       {loadingRecipes ? <div className="px-4 py-10 text-center text-[15px]" style={{ color: '#6F6F6F' }}>Loading recipes…</div> : <>
