@@ -98,6 +98,9 @@ export default function ProfileScreen({ userId, email, onOpenSaved, onOpenLiked,
   const [commentRecipes, setCommentRecipes] = useState<Map<string, RecipeSummary>>(new Map());
   const [commentsMessage, setCommentsMessage] = useState('');
   const [supportScreen, setSupportScreen] = useState<'contact' | 'faq' | 'settings' | 'privacy' | 'terms' | null>(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
+  const [deleteAccountError, setDeleteAccountError] = useState('');
   const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(() => {
     try {
       const stored = localStorage.getItem(`pickle:settings:${userId}`);
@@ -171,6 +174,28 @@ export default function ProfileScreen({ userId, email, onOpenSaved, onOpenLiked,
     document.documentElement.dataset.theme = dark ? 'dark' : 'light';
     document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
   }, [theme]);
+
+  async function deleteAccount() {
+    if (deletingAccount) return;
+
+    setDeletingAccount(true);
+    setDeleteAccountError('');
+
+    const { error } = await supabase.functions.invoke('delete-account', {
+      body: {},
+    });
+
+    if (error) {
+      console.error('Failed to delete account:', error);
+      setDeleteAccountError('Could not delete your account. Please try again.');
+      setDeletingAccount(false);
+      return;
+    }
+
+    localStorage.removeItem(`pickle:settings:${userId}`);
+    await supabase.auth.signOut({ scope: 'local' });
+    window.location.replace('/');
+  }
 
   async function openMyComments() {
     setShowMyComments(true);
@@ -364,8 +389,80 @@ export default function ProfileScreen({ userId, email, onOpenSaved, onOpenLiked,
             </div>
           </section>
 
-
+          <section>
+            <p className="text-[13px] font-semibold mb-2 px-1" style={{ color: '#8A8A8A' }}>Account</p>
+            <div className="rounded-[16px] border overflow-hidden" style={{ borderColor: '#EAEAEA', backgroundColor: '#FFFFFF' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setDeleteAccountError('');
+                  setDeleteConfirmOpen(true);
+                }}
+                className="w-full min-h-[58px] px-4 flex items-center gap-3 text-left"
+              >
+                <span className="flex-1">
+                  <span className="block text-[15px] font-medium" style={{ color: '#C53D2E' }}>Delete account</span>
+                  <span className="block text-[12px] leading-5 mt-0.5" style={{ color: '#8A8A8A' }}>
+                    Permanently delete your Pickle account and activity.
+                  </span>
+                </span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C53D2E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </button>
+            </div>
+          </section>
         </div>
+
+        {deleteConfirmOpen && (
+          <div
+            className="fixed inset-0 z-[120] flex items-end justify-center sm:items-center px-4"
+            style={{ backgroundColor: 'rgba(0,0,0,0.45)' }}
+            onClick={() => !deletingAccount && setDeleteConfirmOpen(false)}
+          >
+            <div
+              className="w-full max-w-sm rounded-[20px] border p-5 mb-4 sm:mb-0"
+              style={{ borderColor: '#EAEAEA', backgroundColor: '#FFFFFF' }}
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="w-11 h-11 rounded-full flex items-center justify-center mb-4" style={{ backgroundColor: '#FFF0F0', color: '#C53D2E' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="3 6 5 6 21 6" />
+                  <path d="M19 6l-1 14H6L5 6m3 0V4h8v2M10 11v5M14 11v5" />
+                </svg>
+              </div>
+              <h2 className="font-semibold text-[18px]" style={{ color: '#1F1F1F' }}>Delete your account?</h2>
+              <p className="text-[14px] leading-6 mt-2" style={{ color: '#6F6F6F' }}>
+                This permanently deletes your profile, saved recipes, likes, comments, and account. This action cannot be undone.
+              </p>
+
+              {deleteAccountError && (
+                <p className="text-[12px] leading-5 mt-3" style={{ color: '#C53D2E' }}>{deleteAccountError}</p>
+              )}
+
+              <div className="flex gap-2 mt-5">
+                <button
+                  type="button"
+                  onClick={() => setDeleteConfirmOpen(false)}
+                  disabled={deletingAccount}
+                  className="flex-1 h-11 rounded-[12px] border text-[14px] font-semibold disabled:opacity-50"
+                  style={{ borderColor: '#E5E5E5', color: '#6F6F6F', backgroundColor: '#FFFFFF' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={deleteAccount}
+                  disabled={deletingAccount}
+                  className="flex-1 h-11 rounded-[12px] text-[14px] font-semibold text-white disabled:opacity-50"
+                  style={{ backgroundColor: '#C53D2E' }}
+                >
+                  {deletingAccount ? 'Deleting…' : 'Delete account'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
