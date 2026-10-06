@@ -1,8 +1,23 @@
 import { useState } from 'react';
 import { addRecentSearch, clearRecentSearches, getRecentSearches, removeRecentSearch } from './recentSearches';
 
-// Temporary UI data until search analytics are stored in Supabase.
-const TRENDING_SEARCHES = ['Chicken', 'Adobo', 'Easy', 'Pork', 'Quick'];
+const BROWSE_CATEGORIES = [
+  {
+    title: 'Ingredients',
+    subtitle: 'Browse by what you have',
+    items: ['Chicken', 'Pork', 'Beef', 'Seafood', 'Garlic', 'Coconut Milk', 'Eggplant'],
+  },
+  {
+    title: 'Type',
+    subtitle: 'Find the kind of dish you want',
+    items: ['Dessert', 'Soup', 'Breakfast', 'Noodles', 'Stew', 'Grilled', 'Snack'],
+  },
+  {
+    title: 'Time & occasion',
+    subtitle: 'Pick something that fits the moment',
+    items: ['Easy', 'Quick', 'Party'],
+  },
+] as const;
 
 interface BrowseScreenProps {
   searchValue: string;
@@ -109,40 +124,33 @@ export default function BrowseScreen({ searchValue, setSearchValue, onSearch }: 
         </div>
       </div>
 
-      {/* Trending searches */}
-      <div className="px-4 mb-8">
-        <div className="mb-4">
-          <h2 className="font-semibold text-[20px]" style={{ color: '#1F1F1F' }}>What's trending</h2>
-          <p className="text-[13px] mt-1" style={{ color: '#8A8A8A' }}>Most searched this week</p>
-        </div>
-        <div className="rounded-[16px] overflow-hidden border" style={{ borderColor: '#EAEAEA' }}>
-          {TRENDING_SEARCHES.map((item, i) => (
-            <button
-              key={item}
-              type="button"
-              onClick={() => searchKeyword(item)}
-              className="w-full flex items-center justify-between px-4 py-3.5 text-left"
-              style={{
-                borderBottom: i < TRENDING_SEARCHES.length - 1 ? '1px solid #EAEAEA' : undefined,
-                backgroundColor: '#FFFFFF',
-              }}
-            >
-              <div className="flex items-center gap-3 min-w-0">
-                <span
-                  className="w-6 h-6 rounded-full flex items-center justify-center text-[12px] font-semibold flex-shrink-0"
-                  style={{ backgroundColor: i === 0 ? '#FFF0E6' : '#F5F5F5', color: i === 0 ? '#F26B21' : '#6F6F6F' }}
+      {/* Browse categories */}
+      <div className="px-4 space-y-8 mb-8">
+        {BROWSE_CATEGORIES.map((section) => (
+          <section key={section.title}>
+            <div className="mb-3">
+              <h2 className="font-semibold text-[20px]" style={{ color: '#1F1F1F' }}>{section.title}</h2>
+              <p className="text-[13px] mt-1" style={{ color: '#8A8A8A' }}>{section.subtitle}</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2.5">
+              {section.items.map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() => searchKeyword(item)}
+                  className="min-h-[48px] rounded-[14px] border px-3.5 flex items-center justify-between gap-2 text-left"
+                  style={{ borderColor: '#EAEAEA', backgroundColor: '#FFFFFF' }}
                 >
-                  {i + 1}
-                </span>
-                <span className="text-[16px] truncate" style={{ color: '#1F1F1F' }}>{item}</span>
-              </div>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A0A0A0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="11" cy="11" r="7" />
-                <line x1="20" y1="20" x2="16.5" y2="16.5" />
-              </svg>
-            </button>
-          ))}
-        </div>
+                  <span className="text-[15px] font-medium truncate" style={{ color: '#1F1F1F' }}>{item}</span>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#B0B0B0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg>
+                </button>
+              ))}
+            </div>
+          </section>
+        ))}
       </div>
     </div>
   );
