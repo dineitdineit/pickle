@@ -6,6 +6,7 @@ import LikedScreen from './LikedScreen';
 import ProfileScreen from './ProfileScreen';
 import AuthScreen from './AuthScreen';
 import RecipeDetailScreen from './RecipeDetailScreen';
+import RetryState from './RetryState';
 import TagRecipeListScreen from './TagRecipeListScreen';
 import { supabase } from './lib/supabase';
 import { addRecentSearch } from './recentSearches';
@@ -107,8 +108,12 @@ export default function App() {
   const [recentViewCounts, setRecentViewCounts] = useState<Map<string, number>>(new Map());
   const [featuredIndex, setFeaturedIndex] = useState(0);
   const [loadingRecipes, setLoadingRecipes] = useState(true);
+  const [homeError, setHomeError] = useState('');
+  const [homeRetryKey, setHomeRetryKey] = useState(0);
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [loadingAuth, setLoadingAuth] = useState(true);
+  const [authError, setAuthError] = useState('');
+  const [authRetryKey, setAuthRetryKey] = useState(0);
   const [homeAvatarUrl, setHomeAvatarUrl] = useState<string | null>(null);
   const carouselScrollRef = useRef<HTMLDivElement>(null);
   const GAP = 16;
@@ -118,19 +123,28 @@ export default function App() {
     if (selectedRecipeId) url.searchParams.set('recipe', selectedRecipeId);
     else url.searchParams.delete('recipe');
     window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
-  }, [selectedRecipeId]);
+  }, [selectedRecipeId, homeRetryKey]);
 
   useEffect(() => {
     let mounted = true;
+    setLoadingAuth(true);
+    setAuthError('');
 
-    supabase.auth.getUser().then(({ data }) => {
+    supabase.auth.getUser().then(({ data, error }) => {
       if (mounted) {
-        setAuthUser(data.user ? { id: data.user.id, email: data.user.email } : null);
+        if (error) {
+          console.error('Failed to load auth state:', error);
+          setAuthUser(null);
+          setAuthError('Could not load your account.');
+        } else {
+          setAuthUser(data.user ? { id: data.user.id, email: data.user.email } : null);
+        }
         setLoadingAuth(false);
       }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setAuthError('');
       setAuthUser(session?.user ? { id: session.user.id, email: session.user.email } : null);
       if (!session?.user) setHomeAvatarUrl(null);
       setLoadingAuth(false);
@@ -140,7 +154,7 @@ export default function App() {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [authRetryKey]);
 
   useEffect(() => {
     let ignore = false;
@@ -172,6 +186,7 @@ export default function App() {
   useEffect(() => {
     async function loadHomeData() {
       setLoadingRecipes(true);
+      setHomeError('');
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       const [recipeResult, partyTagResult, viewsResult] = await Promise.all([
@@ -179,7 +194,13 @@ export default function App() {
         supabase.from('tags').select('id').eq('name', 'Party').single(),
         supabase.from('recipe_views').select('recipe_id').gte('viewed_at', thirtyDaysAgo.toISOString()),
       ]);
-      if (recipeResult.error) { console.error('Failed to load recipes:', recipeResult.error); setLoadingRecipes(false); return; }
+      if (recipeResult.error) {
+        console.error('Failed to load recipes:', recipeResult.error);
+        setRecipes([]);
+        setHomeError('Could not load recipes.');
+        setLoadingRecipes(false);
+        return;
+      }
       const mapped: RecipeCard[] = (recipeResult.data ?? []).map((recipe) => ({ ...recipe, image: publicImageUrl(recipe.cover_image) }));
       setRecipes(mapped);
       if (!partyTagResult.error && partyTagResult.data) {
@@ -217,6 +238,7 @@ export default function App() {
   }, [selectedTagRecipeSection, trendingRecipes, under30Recipes, partyRecipes]);
 
   function submitSearch() { setShowSearch(true); }
+  function retryHomeData() { setHomeRetryKey((current) => current + 1); }
   function handleCarouselScroll() { const el = carouselScrollRef.current; if (!el || el.clientWidth === 0) return; const index = Math.round(el.scrollLeft / (el.clientWidth + GAP)); setFeaturedIndex(Math.max(0, Math.min(index, featuredRecipes.length - 1))); }
   function scrollToCard(index: number) { const el = carouselScrollRef.current; if (!el) return; el.scrollTo({ left: index * (el.clientWidth + GAP), behavior: 'smooth' }); setFeaturedIndex(index); }
 
@@ -263,7 +285,7 @@ export default function App() {
   }
 
   if (activeNav === 1) {
-    return <div className="bg-white min-h-screen max-w-md mx-auto relative"><BrowseScreen searchValue={searchValue} setSearchValue={setSearchValue} onSearch={submitSearch} />{NavBar}</div>;
+    return <div className="bg-white min-h-screen max-w-md mx-auto relative"><BrowseScreen searchValue={searchValue} setSearchValue={setSearchValue} onSearch={submitSearch} dataError={homeError} onRetry={retryHomeData} />{NavBar}</div>;
   }
 
   if (activeNav === 2) {
@@ -275,6 +297,12 @@ export default function App() {
       <div className="bg-white min-h-screen max-w-md mx-auto relative">
         {loadingAuth ? (
           <div className="px-4 py-20 text-center text-[15px]" style={{ color: '#6F6F6F' }}>Loading profile…</div>
+        ) : authError ? (
+          <RetryState
+            title="Couldn't load your account"
+            message="Please check your connection and try again."
+            onRetry={() => setAuthRetryKey((current) => current + 1)}
+          />
         ) : authUser ? (
           <ProfileScreen userId={authUser.id} email={authUser.email} onOpenSaved={() => setActiveNav(2)} onOpenLiked={() => setShowLikedRecipes(true)} onBack={() => setActiveNav(0)} />
         ) : (
@@ -307,7 +335,15 @@ export default function App() {
           }} onFocus={() => setShowSearch(true)} className="flex-1 bg-transparent outline-none text-[16px] placeholder:text-[#6F6F6F]" style={{ color: '#1F1F1F' }} />
         </div>
       </div>
-      {loadingRecipes ? <div className="px-4 py-10 text-center text-[15px]" style={{ color: '#6F6F6F' }}>Loading recipes…</div> : <>
+      {loadingRecipes ? (
+        <div className="px-4 py-10 text-center text-[15px]" style={{ color: '#6F6F6F' }}>Loading recipes…</div>
+      ) : homeError ? (
+        <RetryState
+          title="Couldn't load recipes"
+          message="Please check your connection and try again."
+          onRetry={retryHomeData}
+        />
+      ) : <>
         <div className="mb-8">
           <div className="px-4 mb-4"><h2 className="font-semibold text-[20px]" style={{ color: '#1F1F1F' }}>Featured</h2></div>
           <div className="relative select-none" style={{ height: 260 }}>
