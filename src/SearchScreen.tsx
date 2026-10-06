@@ -84,13 +84,33 @@ export default function SearchScreen({ query, setQuery, onBack, onSelectRecipe }
   }, []);
 
   const filtered = useMemo(() => {
-    const terms = query
-      .trim()
-      .toLowerCase()
-      .split(/\s+/)
-      .filter(Boolean);
+    const normalized = query.trim().toLowerCase();
+    if (!normalized) return recipes;
 
-    if (terms.length === 0) return recipes;
+    const aliases: Record<string, string[]> = {
+      seafood: ['fish', 'shrimp', 'squid', 'milkfish', 'bangus', 'tuna', 'prawn'],
+      dessert: ['sweet'],
+    };
+
+    if (normalized === 'seafood') {
+      return recipes.filter((recipe) => {
+        const searchableText = [
+          recipe.title,
+          ...recipe.ingredientNames,
+          ...recipe.tagNames,
+        ].join(' ').toLowerCase();
+
+        return aliases.seafood.some((term) => searchableText.includes(term));
+      });
+    }
+
+    if (normalized === 'dessert') {
+      return recipes.filter((recipe) =>
+        recipe.tagNames.some((tag) => tag.toLowerCase() === 'sweet')
+      );
+    }
+
+    const terms = normalized.split(/\s+/).filter(Boolean);
 
     return recipes.filter((recipe) => {
       const searchableText = [
