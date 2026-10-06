@@ -22,6 +22,25 @@ type RecipeCommentsProps = {
   onCountChange?: (count: number) => void;
 };
 
+type ReportReason =
+  | 'spam'
+  | 'harassment'
+  | 'hate_or_abusive'
+  | 'sexual_content'
+  | 'personal_information'
+  | 'off_topic'
+  | 'other';
+
+const REPORT_REASONS: { value: ReportReason; label: string }[] = [
+  { value: 'spam', label: 'Spam or scam' },
+  { value: 'harassment', label: 'Harassment or bullying' },
+  { value: 'hate_or_abusive', label: 'Hate or abusive content' },
+  { value: 'sexual_content', label: 'Sexual content' },
+  { value: 'personal_information', label: 'Personal information' },
+  { value: 'off_topic', label: 'Off-topic or inappropriate' },
+  { value: 'other', label: 'Other' },
+];
+
 function timeAgo(value: string) {
   const diff = Date.now() - new Date(value).getTime();
   const minutes = Math.max(0, Math.floor(diff / 60000));
@@ -51,6 +70,12 @@ export default function RecipeComments({ recipeId, onRequireLogin, onCountChange
   const [replyText, setReplyText] = useState('');
   const [shareOpen, setShareOpen] = useState(false);
   const [shareMessage, setShareMessage] = useState('');
+  const [reportComment, setReportComment] = useState<CommentRow | null>(null);
+  const [reportReason, setReportReason] = useState<ReportReason | null>(null);
+  const [reportDetails, setReportDetails] = useState('');
+  const [reporting, setReporting] = useState(false);
+  const [reportSuccess, setReportSuccess] = useState(false);
+  const [reportError, setReportError] = useState('');
 
   async function loadComments() {
     setLoading(true);
@@ -220,6 +245,63 @@ export default function RecipeComments({ recipeId, onRequireLogin, onCountChange
     await loadComments();
   }
 
+  function openReport(comment: CommentRow) {
+    setMenuCommentId(null);
+    if (!userId) {
+      onRequireLogin();
+      return;
+    }
+    setReportComment(comment);
+    setReportReason(null);
+    setReportDetails('');
+    setReportError('');
+    setReportSuccess(false);
+  }
+
+  function closeReport() {
+    if (reporting) return;
+    setReportComment(null);
+    setReportReason(null);
+    setReportDetails('');
+    setReportError('');
+    setReportSuccess(false);
+  }
+
+  async function submitReport() {
+    if (!userId) {
+      closeReport();
+      onRequireLogin();
+      return;
+    }
+    if (!reportComment || !reportReason || reporting) return;
+
+    setReporting(true);
+    setReportError('');
+
+    const { error } = await supabase.rpc('submit_comment_report', {
+      p_comment_id: reportComment.id,
+      p_reason: reportReason,
+      p_details: reportDetails.trim() || null,
+    });
+
+    if (error) {
+      console.error('Failed to report comment:', error);
+      const normalized = error.message.toLowerCase();
+      setReportError(
+        normalized.includes('own comment')
+          ? 'You cannot report your own comment.'
+          : normalized.includes('not available')
+            ? 'This comment is no longer available for reporting.'
+            : 'Could not submit your report. Please try again.',
+      );
+      setReporting(false);
+      return;
+    }
+
+    setReportSuccess(true);
+    setReporting(false);
+  }
+
   const currentProfile = useMemo(() => userId ? profiles.get(userId) : undefined, [profiles, userId]);
   const currentInitial = currentProfile?.username?.charAt(0).toUpperCase() || 'P';
 
@@ -244,19 +326,25 @@ export default function RecipeComments({ recipeId, onRequireLogin, onCountChange
             <span className="text-[7px]" style={{ color: '#A0A0A0' }}>{timeAgo(comment.created_at)}</span>
           </div>
 
-          {ownComment && (
-            <div className="absolute right-0 top-0">
-              <button type="button" onClick={() => setMenuCommentId((current) => current === comment.id ? null : comment.id)} aria-label="Comment options" className="w-6 h-6 flex items-center justify-center" style={{ color: '#777777' }}>
-                <span className="text-[16px] leading-none">•••</span>
-              </button>
-              {menuCommentId === comment.id && (
-                <div className="absolute right-0 top-7 w-24 rounded-[10px] border bg-white shadow-lg z-20 overflow-hidden" style={{ borderColor: '#EAEAEA' }}>
-                  <button type="button" onClick={() => startEdit(comment)} className="w-full px-3 py-2 text-left text-[12px]" style={{ color: '#1F1F1F' }}>Edit</button>
-                  <button type="button" onClick={() => deleteComment(comment.id)} className="w-full px-3 py-2 text-left text-[12px] border-t" style={{ color: '#C53D2E', borderColor: '#EEEEEE' }}>Delete</button>
-                </div>
-              )}
-            </div>
-          )}
+          <div className="absolute right-0 top-0">
+            <button type="button" onClick={() => setMenuCommentId((current) => current === comment.id ? null : comment.id)} aria-label="Comment options" className="w-6 h-6 flex items-center justify-center" style={{ color: '#777777' }}>
+              <span className="text-[16px] leading-none">•••</span>
+            </button>
+            {menuCommentId === comment.id && (
+              <div className="absolute right-0 top-7 w-28 rounded-[10px] border bg-white shadow-lg z-20 overflow-hidden" style={{ borderColor: '#EAEAEA' }}>
+                {ownComment ? (
+                  <>
+                    <button type="button" onClick={() => startEdit(comment)} className="w-full px-3 py-2 text-left text-[12px]" style={{ color: '#1F1F1F' }}>Edit</button>
+                    <button type="button" onClick={() => deleteComment(comment.id)} className="w-full px-3 py-2 text-left text-[12px] border-t" style={{ color: '#C53D2E', borderColor: '#EEEEEE' }}>Delete</button>
+                  </>
+                ) : (
+                  <button type="button" onClick={() => openReport(comment)} className="w-full px-3 py-2 text-left text-[12px]" style={{ color: '#C53D2E' }}>
+                    Report
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
 
           {editingCommentId === comment.id ? (
             <div className="mt-1.5">
@@ -302,6 +390,105 @@ export default function RecipeComments({ recipeId, onRequireLogin, onCountChange
 
   return (
     <>
+      {reportComment && (
+        <div
+          className="fixed inset-0 z-[110] flex items-end justify-center sm:items-center"
+          style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
+          onClick={closeReport}
+        >
+          <div
+            className="w-full max-w-md px-5 pt-5 pb-7 shadow-xl"
+            style={{ borderTopLeftRadius: 24, borderTopRightRadius: 24, backgroundColor: '#FFFFFF' }}
+            onClick={(event) => event.stopPropagation()}
+          >
+            {reportSuccess ? (
+              <div className="py-5 text-center">
+                <div className="w-12 h-12 rounded-full mx-auto flex items-center justify-center" style={{ backgroundColor: '#FFF0E6', color: '#F26B21' }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                </div>
+                <h3 className="font-semibold text-[18px] mt-4" style={{ color: '#1F1F1F' }}>Report submitted</h3>
+                <p className="text-[14px] leading-5 mt-2" style={{ color: '#6F6F6F' }}>
+                  Thanks for letting us know. The Pickle team will review this comment.
+                </p>
+                <button
+                  type="button"
+                  onClick={closeReport}
+                  className="w-full h-11 rounded-[12px] mt-5 text-[14px] font-semibold text-white"
+                  style={{ backgroundColor: '#F26B21' }}
+                >
+                  Done
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="font-semibold text-[18px]" style={{ color: '#1F1F1F' }}>Report comment</h3>
+                    <p className="text-[12px] mt-1" style={{ color: '#8A8A8A' }}>Tell us why this comment should be reviewed.</p>
+                  </div>
+                  <button type="button" onClick={closeReport} aria-label="Close report" className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#F5F5F5', color: '#555555' }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                      <path d="M18 6L6 18M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+                <div className="rounded-[12px] px-3.5 py-3 mb-4" style={{ backgroundColor: '#F9F9F9' }}>
+                  <p className="text-[12px] leading-5 line-clamp-3" style={{ color: '#6F6F6F' }}>{reportComment.content}</p>
+                </div>
+
+                <div className="rounded-[14px] border overflow-hidden" style={{ borderColor: '#EAEAEA' }}>
+                  {REPORT_REASONS.map((reason, index) => {
+                    const selected = reportReason === reason.value;
+                    return (
+                      <button
+                        key={reason.value}
+                        type="button"
+                        onClick={() => setReportReason(reason.value)}
+                        className="w-full min-h-[48px] px-4 flex items-center gap-3 text-left"
+                        style={{ borderBottom: index < REPORT_REASONS.length - 1 ? '1px solid #EAEAEA' : undefined, backgroundColor: '#FFFFFF' }}
+                      >
+                        <span className="flex-1 text-[14px]" style={{ color: '#1F1F1F' }}>{reason.label}</span>
+                        <span
+                          className="w-5 h-5 rounded-full border flex items-center justify-center"
+                          style={{ borderColor: selected ? '#F26B21' : '#CFCFCF' }}
+                        >
+                          {selected && <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#F26B21' }} />}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <textarea
+                  rows={3}
+                  maxLength={500}
+                  value={reportDetails}
+                  onChange={(event) => setReportDetails(event.target.value)}
+                  placeholder="Add details (optional)"
+                  className="w-full resize-none rounded-[12px] border px-3.5 py-3 mt-4 text-[13px] outline-none"
+                  style={{ borderColor: '#E6E6E6', backgroundColor: '#FAFAFA', color: '#1F1F1F' }}
+                />
+
+                {reportError && <p className="text-[12px] leading-5 mt-2" style={{ color: '#C53D2E' }}>{reportError}</p>}
+
+                <button
+                  type="button"
+                  onClick={submitReport}
+                  disabled={!reportReason || reporting}
+                  className="w-full h-11 rounded-[12px] mt-4 text-[14px] font-semibold text-white disabled:opacity-50"
+                  style={{ backgroundColor: '#F26B21' }}
+                >
+                  {reporting ? 'Submitting…' : 'Submit report'}
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       {shareOpen && (
         <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center" style={{ backgroundColor: 'rgba(0,0,0,0.35)' }} onClick={closeShareMenu}>
           <div className="w-full max-w-md bg-white px-6 pt-6 pb-7 shadow-xl" style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28 }} onClick={(event) => event.stopPropagation()}>
