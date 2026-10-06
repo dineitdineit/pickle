@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { supabase } from './lib/supabase';
 import { addRecentSearch } from './recentSearches';
 
@@ -39,6 +39,7 @@ export default function SearchScreen({ query, setQuery, onBack, onSelectRecipe }
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [recipes, setRecipes] = useState<SearchRecipe[]>([]);
   const [loading, setLoading] = useState(true);
+  const lastLoggedSearchRef = useRef('');
 
   useEffect(() => {
     async function loadRecipes() {
@@ -126,6 +127,29 @@ export default function SearchScreen({ query, setQuery, onBack, onSelectRecipe }
       return terms.every((term) => searchableText.includes(term));
     });
   }, [query, recipes]);
+
+  useEffect(() => {
+    const cleanQuery = query.trim();
+    const normalized = cleanQuery.toLowerCase().replace(/\s+/g, ' ');
+    if (loading || !normalized) return;
+
+    const eventKey = `${normalized}|${filtered.length}`;
+    if (lastLoggedSearchRef.current === eventKey) return;
+
+    const timer = window.setTimeout(async () => {
+      lastLoggedSearchRef.current = eventKey;
+      const { error } = await supabase.rpc('log_search_event', {
+        p_query: cleanQuery,
+        p_result_count: filtered.length,
+      });
+      if (error) {
+        console.error('Failed to log search analytics:', error);
+        lastLoggedSearchRef.current = '';
+      }
+    }, 700);
+
+    return () => window.clearTimeout(timer);
+  }, [query, filtered.length, loading]);
 
   const visible = filtered.slice(0, visibleCount);
   const remaining = Math.max(0, filtered.length - visibleCount);
