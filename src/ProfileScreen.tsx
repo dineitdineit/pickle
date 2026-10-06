@@ -1,4 +1,5 @@
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import RetryState from './RetryState';
 import { supabase } from './lib/supabase';
 
 type ProfileScreenProps = {
@@ -90,6 +91,8 @@ function recipeImageUrl(path: string | null) {
 export default function ProfileScreen({ userId, email, onOpenSaved, onOpenLiked, onBack }: ProfileScreenProps) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [profileError, setProfileError] = useState('');
+  const [profileRetryKey, setProfileRetryKey] = useState(0);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [avatarMessage, setAvatarMessage] = useState('');
   const [showMyComments, setShowMyComments] = useState(false);
@@ -126,6 +129,7 @@ export default function ProfileScreen({ userId, email, onOpenSaved, onOpenLiked,
 
     async function loadProfile() {
       setLoading(true);
+      setProfileError('');
       const { data, error } = await supabase
         .from('profiles')
         .select('username, display_name, avatar_url')
@@ -133,15 +137,20 @@ export default function ProfileScreen({ userId, email, onOpenSaved, onOpenLiked,
         .single();
 
       if (!ignore) {
-        if (error) console.error('Failed to load profile:', error);
-        else setProfile(data);
+        if (error) {
+          console.error('Failed to load profile:', error);
+          setProfile(null);
+          setProfileError('Could not load your profile.');
+        } else {
+          setProfile(data);
+        }
         setLoading(false);
       }
     }
 
     loadProfile();
     return () => { ignore = true; };
-  }, [userId]);
+  }, [userId, profileRetryKey]);
 
   function saveSettings(nextNotifications: boolean, nextTheme: 'Light' | 'Dark') {
     localStorage.setItem(
@@ -318,6 +327,42 @@ export default function ProfileScreen({ userId, email, onOpenSaved, onOpenLiked,
   const displayName = profile?.display_name || profile?.username || 'Pickle User';
   const username = profile?.username ? `@${profile.username}` : email || '';
   const initial = profile?.username?.trim().charAt(0).toUpperCase() || 'P';
+
+  if (loading) {
+    return (
+      <div className="pb-28">
+        <div className="relative px-4 pt-6 text-center">
+          <button type="button" onClick={onBack} aria-label="Back" className="absolute left-4 top-5 w-9 h-9 flex items-center justify-center" style={{ color: '#1F1F1F' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+          <h1 className="font-bold text-[24px]" style={{ color: '#1F1F1F' }}>Profile</h1>
+        </div>
+        <div className="px-4 py-20 text-center text-[14px]" style={{ color: '#6F6F6F' }}>Loading profile…</div>
+      </div>
+    );
+  }
+
+  if (profileError) {
+    return (
+      <div className="pb-28">
+        <div className="relative px-4 pt-6 text-center">
+          <button type="button" onClick={onBack} aria-label="Back" className="absolute left-4 top-5 w-9 h-9 flex items-center justify-center" style={{ color: '#1F1F1F' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+          <h1 className="font-bold text-[24px]" style={{ color: '#1F1F1F' }}>Profile</h1>
+        </div>
+        <RetryState
+          title="Couldn't load your profile"
+          message="Please check your connection and try again."
+          onRetry={() => setProfileRetryKey((current) => current + 1)}
+        />
+      </div>
+    );
+  }
 
   if (supportScreen === 'settings') {
     return (
