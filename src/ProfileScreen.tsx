@@ -41,12 +41,6 @@ const MENU_SECTIONS = [
     ],
   },
   {
-    title: 'Account',
-    items: [
-      { label: 'Settings', icon: 'settings', action: 'settings' },
-    ],
-  },
-  {
     title: 'Support',
     items: [
       { label: 'Contact Us', icon: 'mail', action: 'contact' },
@@ -103,22 +97,13 @@ export default function ProfileScreen({ userId, email, onOpenSaved, onOpenLiked,
   const [myComments, setMyComments] = useState<MyComment[]>([]);
   const [commentRecipes, setCommentRecipes] = useState<Map<string, RecipeSummary>>(new Map());
   const [commentsMessage, setCommentsMessage] = useState('');
-  const [supportScreen, setSupportScreen] = useState<'contact' | 'faq' | 'settings' | 'language' | 'privacy' | 'terms' | null>(null);
+  const [supportScreen, setSupportScreen] = useState<'contact' | 'faq' | 'settings' | 'privacy' | 'terms' | null>(null);
   const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(() => {
     try {
       const stored = localStorage.getItem(`pickle:settings:${userId}`);
       return stored ? JSON.parse(stored).notificationsEnabled ?? true : true;
     } catch {
       return true;
-    }
-  });
-  const [language, setLanguage] = useState<'English' | 'Tagalog'>(() => {
-    try {
-      const stored = localStorage.getItem(`pickle:settings:${userId}`);
-      const value = stored ? JSON.parse(stored).language : null;
-      return value === 'Tagalog' ? 'Tagalog' : 'English';
-    } catch {
-      return 'English';
     }
   });
   const [theme, setTheme] = useState<'Light' | 'Dark'>(() => {
@@ -155,16 +140,11 @@ export default function ProfileScreen({ userId, email, onOpenSaved, onOpenLiked,
     return () => { ignore = true; };
   }, [userId]);
 
-  function saveSettings(
-    nextNotifications: boolean,
-    nextLanguage: 'English' | 'Tagalog',
-    nextTheme: 'Light' | 'Dark',
-  ) {
+  function saveSettings(nextNotifications: boolean, nextTheme: 'Light' | 'Dark') {
     localStorage.setItem(
       `pickle:settings:${userId}`,
       JSON.stringify({
         notificationsEnabled: nextNotifications,
-        language: nextLanguage,
         theme: nextTheme,
       }),
     );
@@ -173,17 +153,12 @@ export default function ProfileScreen({ userId, email, onOpenSaved, onOpenLiked,
   function toggleNotifications() {
     const next = !notificationsEnabled;
     setNotificationsEnabled(next);
-    saveSettings(next, language, theme);
-  }
-
-  function chooseLanguage(nextLanguage: 'English' | 'Tagalog') {
-    setLanguage(nextLanguage);
-    saveSettings(notificationsEnabled, nextLanguage, theme);
+    saveSettings(next, theme);
   }
 
   function chooseTheme(nextTheme: 'Light' | 'Dark') {
     setTheme(nextTheme);
-    saveSettings(notificationsEnabled, language, nextTheme);
+    saveSettings(notificationsEnabled, nextTheme);
     const dark = nextTheme === 'Dark';
     localStorage.setItem('pickle:theme', dark ? 'dark' : 'light');
     document.documentElement.dataset.theme = dark ? 'dark' : 'light';
@@ -319,52 +294,6 @@ export default function ProfileScreen({ userId, email, onOpenSaved, onOpenLiked,
   const username = profile?.username ? `@${profile.username}` : email || '';
   const initial = profile?.username?.trim().charAt(0).toUpperCase() || 'P';
 
-  if (supportScreen === 'language') {
-    return (
-      <div className="pb-28">
-        <div className="relative px-4 pt-6 text-center mb-8">
-          <button type="button" onClick={() => setSupportScreen('settings')} aria-label="Back to profile" className="absolute left-4 top-5 w-9 h-9 flex items-center justify-center" style={{ color: '#1F1F1F' }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
-          </button>
-          <h1 className="font-bold text-[24px]" style={{ color: '#1F1F1F' }}>Language</h1>
-        </div>
-
-        <div className="px-4">
-          <p className="text-[14px] leading-6 mb-5" style={{ color: '#6F6F6F' }}>
-            Choose the language you want to use in Pickle.
-          </p>
-
-          <div className="rounded-[16px] border overflow-hidden" style={{ borderColor: '#EAEAEA', backgroundColor: '#FFFFFF' }}>
-            {(['English', 'Tagalog'] as const).map((option, index) => {
-              const selected = language === option;
-              return (
-                <button
-                  key={option}
-                  type="button"
-                  onClick={() => chooseLanguage(option)}
-                  className="w-full min-h-[60px] px-4 flex items-center gap-3 text-left"
-                  style={{ borderBottom: index === 0 ? '1px solid #EAEAEA' : undefined, backgroundColor: '#FFFFFF' }}
-                >
-                  <span className="flex-1 text-[15px] font-medium" style={{ color: '#1F1F1F' }}>{option}</span>
-                  <span
-                    className="w-5 h-5 rounded-full border flex items-center justify-center"
-                    style={{ borderColor: selected ? '#F26B21' : '#CFCFCF' }}
-                  >
-                    {selected && <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#F26B21' }} />}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-
-          <p className="text-[12px] leading-5 mt-3 px-1" style={{ color: '#A0A0A0' }}>
-            Your preference is saved. Full Tagalog translation will be applied when localization is connected across the app.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   if (supportScreen === 'settings') {
     return (
       <div className="pb-28">
@@ -435,23 +364,7 @@ export default function ProfileScreen({ userId, email, onOpenSaved, onOpenLiked,
             </div>
           </section>
 
-          <section>
-            <p className="text-[13px] font-semibold mb-2 px-1" style={{ color: '#8A8A8A' }}>Language</p>
-            <button
-              type="button"
-              onClick={() => setSupportScreen('language')}
-              className="w-full min-h-[58px] px-4 rounded-[16px] border flex items-center gap-3 text-left"
-              style={{ borderColor: '#EAEAEA', backgroundColor: '#FFFFFF' }}
-            >
-              <span className="flex-1">
-                <span className="block text-[15px] font-medium" style={{ color: '#1F1F1F' }}>Language</span>
-                <span className="block text-[13px] mt-0.5" style={{ color: '#8A8A8A' }}>{language}</span>
-              </span>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B0B0B0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="9 18 15 12 9 6" />
-              </svg>
-            </button>
-          </section>
+
         </div>
       </div>
     );
@@ -772,6 +685,15 @@ export default function ProfileScreen({ userId, email, onOpenSaved, onOpenLiked,
           </svg>
         </button>
         <h1 className="font-bold text-[24px]" style={{ color: '#1F1F1F' }}>Profile</h1>
+        <button
+          type="button"
+          onClick={() => setSupportScreen('settings')}
+          aria-label="Open settings"
+          className="absolute right-4 top-5 w-9 h-9 flex items-center justify-center"
+          style={{ color: '#1F1F1F' }}
+        >
+          <MenuIcon name="settings" />
+        </button>
       </div>
 
       <section className="px-4 pb-8 flex flex-col items-center" style={{ paddingTop: 50 }}>
@@ -801,7 +723,7 @@ export default function ProfileScreen({ userId, email, onOpenSaved, onOpenLiked,
                 <button
                   key={item.label}
                   type="button"
-                  onClick={item.action === 'saved' ? onOpenSaved : item.action === 'liked' ? onOpenLiked : item.action === 'comments' ? openMyComments : item.action === 'settings' ? () => setSupportScreen('settings') : item.action === 'contact' ? () => setSupportScreen('contact') : item.action === 'faq' ? () => setSupportScreen('faq') : item.action === 'privacy' ? () => setSupportScreen('privacy') : item.action === 'terms' ? () => setSupportScreen('terms') : undefined}
+                  onClick={item.action === 'saved' ? onOpenSaved : item.action === 'liked' ? onOpenLiked : item.action === 'comments' ? openMyComments : item.action === 'contact' ? () => setSupportScreen('contact') : item.action === 'faq' ? () => setSupportScreen('faq') : item.action === 'privacy' ? () => setSupportScreen('privacy') : item.action === 'terms' ? () => setSupportScreen('terms') : undefined}
                   className="w-full h-[58px] px-4 flex items-center gap-3 text-left"
                   style={{ borderBottom: index < section.items.length - 1 ? '1px solid #EAEAEA' : undefined, backgroundColor: '#FFFFFF' }}
                 >
