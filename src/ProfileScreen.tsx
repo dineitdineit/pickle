@@ -105,6 +105,16 @@ export default function ProfileScreen({ userId, email, onOpenSaved, onOpenLiked,
       return 'English';
     }
   });
+  const [theme, setTheme] = useState<'Light' | 'Dark'>(() => {
+    try {
+      const stored = localStorage.getItem(`pickle:settings:${userId}`);
+      const value = stored ? JSON.parse(stored).theme : null;
+      if (value === 'Dark' || value === 'Light') return value;
+      return localStorage.getItem('pickle:theme') === 'dark' ? 'Dark' : 'Light';
+    } catch {
+      return 'Light';
+    }
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -129,12 +139,17 @@ export default function ProfileScreen({ userId, email, onOpenSaved, onOpenLiked,
     return () => { ignore = true; };
   }, [userId]);
 
-  function saveSettings(nextNotifications: boolean, nextLanguage: 'English' | 'Tagalog') {
+  function saveSettings(
+    nextNotifications: boolean,
+    nextLanguage: 'English' | 'Tagalog',
+    nextTheme: 'Light' | 'Dark',
+  ) {
     localStorage.setItem(
       `pickle:settings:${userId}`,
       JSON.stringify({
         notificationsEnabled: nextNotifications,
         language: nextLanguage,
+        theme: nextTheme,
       }),
     );
   }
@@ -142,13 +157,29 @@ export default function ProfileScreen({ userId, email, onOpenSaved, onOpenLiked,
   function toggleNotifications() {
     const next = !notificationsEnabled;
     setNotificationsEnabled(next);
-    saveSettings(next, language);
+    saveSettings(next, language, theme);
   }
 
   function chooseLanguage(nextLanguage: 'English' | 'Tagalog') {
     setLanguage(nextLanguage);
-    saveSettings(notificationsEnabled, nextLanguage);
+    saveSettings(notificationsEnabled, nextLanguage, theme);
   }
+
+  function chooseTheme(nextTheme: 'Light' | 'Dark') {
+    setTheme(nextTheme);
+    saveSettings(notificationsEnabled, language, nextTheme);
+    const dark = nextTheme === 'Dark';
+    localStorage.setItem('pickle:theme', dark ? 'dark' : 'light');
+    document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+    document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+  }
+
+  useEffect(() => {
+    const dark = theme === 'Dark';
+    localStorage.setItem('pickle:theme', dark ? 'dark' : 'light');
+    document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+    document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+  }, [theme]);
 
   async function openMyComments() {
     setShowMyComments(true);
@@ -351,6 +382,40 @@ export default function ProfileScreen({ userId, email, onOpenSaved, onOpenLiked,
                   style={{ left: notificationsEnabled ? 23 : 3 }}
                 />
               </button>
+            </div>
+          </section>
+
+          <section>
+            <p className="text-[13px] font-semibold mb-2 px-1" style={{ color: '#8A8A8A' }}>Appearance</p>
+            <div className="rounded-[16px] border p-1.5 flex gap-1.5" style={{ borderColor: '#EAEAEA', backgroundColor: '#FFFFFF' }}>
+              {(['Light', 'Dark'] as const).map((option) => {
+                const selected = theme === option;
+                return (
+                  <button
+                    key={option}
+                    type="button"
+                    onClick={() => chooseTheme(option)}
+                    aria-pressed={selected}
+                    className="flex-1 min-h-[46px] rounded-[11px] flex items-center justify-center gap-2 text-[14px] font-medium transition-colors"
+                    style={{
+                      backgroundColor: selected ? '#FFF0E6' : 'transparent',
+                      color: selected ? '#F26B21' : '#6F6F6F',
+                    }}
+                  >
+                    {option === 'Light' ? (
+                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="4" />
+                        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+                      </svg>
+                    ) : (
+                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+                      </svg>
+                    )}
+                    {option}
+                  </button>
+                );
+              })}
             </div>
           </section>
 
