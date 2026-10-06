@@ -4,6 +4,11 @@ import App from './App'
 import AuthScreen from './AuthScreen'
 import './index.css'
 
+
+const initialTheme = localStorage.getItem('pickle:theme') === 'dark' ? 'dark' : 'light'
+document.documentElement.dataset.theme = initialTheme
+document.documentElement.style.colorScheme = initialTheme
+
 function Root() {
   const isPasswordRecovery = new URLSearchParams(window.location.search).get('reset') === '1'
 
