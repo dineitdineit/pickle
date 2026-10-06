@@ -53,6 +53,13 @@ const MENU_SECTIONS = [
       { label: 'FAQ', icon: 'help', action: 'faq' },
     ],
   },
+  {
+    title: 'Legal',
+    items: [
+      { label: 'Privacy Policy', icon: 'privacy', action: 'privacy' },
+      { label: 'Terms of Service', icon: 'terms', action: 'terms' },
+    ],
+  },
 ] as const;
 
 function MenuIcon({ name }: { name: string }) {
@@ -68,6 +75,8 @@ function MenuIcon({ name }: { name: string }) {
     </svg>
   );
   if (name === 'mail') return <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2z" /><polyline points="22 6 12 13 2 6" /></svg>;
+  if (name === 'privacy') return <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><path d="M9 12l2 2 4-4" /></svg>;
+  if (name === 'terms') return <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="8" y1="13" x2="16" y2="13" /><line x1="8" y1="17" x2="16" y2="17" /></svg>;
   return <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M9.1 9a3 3 0 115.4 1.8c-.9 1.1-2.5 1.6-2.5 3.2" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>;
 }
 
@@ -94,7 +103,7 @@ export default function ProfileScreen({ userId, email, onOpenSaved, onOpenLiked,
   const [myComments, setMyComments] = useState<MyComment[]>([]);
   const [commentRecipes, setCommentRecipes] = useState<Map<string, RecipeSummary>>(new Map());
   const [commentsMessage, setCommentsMessage] = useState('');
-  const [supportScreen, setSupportScreen] = useState<'contact' | 'faq' | 'settings' | 'language' | null>(null);
+  const [supportScreen, setSupportScreen] = useState<'contact' | 'faq' | 'settings' | 'language' | 'privacy' | 'terms' | null>(null);
   const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(() => {
     try {
       const stored = localStorage.getItem(`pickle:settings:${userId}`);
@@ -492,6 +501,154 @@ export default function ProfileScreen({ userId, email, onOpenSaved, onOpenLiked,
     );
   }
 
+  if (supportScreen === 'privacy') {
+    const privacySections = [
+      {
+        title: '1. Information we collect',
+        body: 'When you use Pickle, we may collect account information such as your email address, username, display name, and profile photo; content you choose to post such as comments and replies; and activity such as saved recipes, likes, and recipe views. Our service providers may also process technical information needed to operate, secure, and troubleshoot the service.',
+      },
+      {
+        title: '2. How we use information',
+        body: 'We use this information to provide and personalize Pickle, keep you signed in, save your preferences and activity, enable community features, improve recipe discovery, prevent abuse, maintain security, and respond to support requests.',
+      },
+      {
+        title: '3. Service providers',
+        body: 'Pickle uses third-party service providers to operate parts of the service, including hosting, database, authentication, file storage, and related infrastructure. These providers may process information only as needed to provide their services to Pickle.',
+      },
+      {
+        title: '4. Sharing and sale of information',
+        body: 'We do not sell your personal information. We may share information with service providers that help us operate Pickle, when you direct us to share it, or when disclosure is required to comply with law, protect users, or protect the rights and security of Pickle.',
+      },
+      {
+        title: '5. Public information',
+        body: 'Your display name, username, profile photo, comments, replies, and other content you choose to post may be visible to other users. Do not post information you do not want to make public.',
+      },
+      {
+        title: '6. Data retention',
+        body: 'We keep information for as long as needed to provide Pickle, maintain legitimate business and security records, resolve disputes, and meet legal obligations. Some information may remain in backups for a limited period after deletion.',
+      },
+      {
+        title: '7. Your choices',
+        body: 'You can update certain profile information and delete your own comments through the app. You may also contact us through the Contact Us screen to ask questions about your data or request assistance with your account.',
+      },
+      {
+        title: '8. Children',
+        body: 'Pickle is not intended for children under 13. If we learn that we collected personal information from a child in violation of applicable law, we will take appropriate steps to delete it.',
+      },
+      {
+        title: '9. Changes to this policy',
+        body: 'We may update this Privacy Policy as Pickle changes. When we make material changes, we will update the date shown on this page and provide additional notice when appropriate.',
+      },
+      {
+        title: '10. Contact',
+        body: 'For privacy questions or requests, use the Contact Us section in your Pickle profile.',
+      },
+    ];
+
+    return (
+      <div className="pb-28">
+        <div className="relative px-4 pt-6 text-center mb-6">
+          <button type="button" onClick={() => setSupportScreen(null)} aria-label="Back to profile" className="absolute left-4 top-5 w-9 h-9 flex items-center justify-center" style={{ color: '#1F1F1F' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+          </button>
+          <h1 className="font-bold text-[24px]" style={{ color: '#1F1F1F' }}>Privacy Policy</h1>
+        </div>
+
+        <div className="px-4">
+          <p className="text-[12px] mb-5" style={{ color: '#A0A0A0' }}>Last updated: October 6, 2026</p>
+          <p className="text-[14px] leading-6 mb-6" style={{ color: '#6F6F6F' }}>
+            This Privacy Policy explains how Pickle handles information when you use the app and its related services.
+          </p>
+
+          <div className="space-y-6">
+            {privacySections.map((section) => (
+              <section key={section.title}>
+                <h2 className="text-[16px] font-semibold mb-2" style={{ color: '#1F1F1F' }}>{section.title}</h2>
+                <p className="text-[14px] leading-6" style={{ color: '#6F6F6F' }}>{section.body}</p>
+              </section>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (supportScreen === 'terms') {
+    const termsSections = [
+      {
+        title: '1. Using Pickle',
+        body: 'By accessing or using Pickle, you agree to these Terms of Service. If you do not agree, do not use the service. You must use Pickle in compliance with applicable laws and these terms.',
+      },
+      {
+        title: '2. Accounts',
+        body: 'Some features require an account. You are responsible for the accuracy of your account information and for keeping your login credentials secure. You are also responsible for activity that occurs through your account.',
+      },
+      {
+        title: '3. Recipes and nutrition information',
+        body: 'Recipes, cooking times, substitutions, serving sizes, and nutrition values are provided for general informational purposes. Results can vary based on ingredients, equipment, brands, preparation methods, and individual circumstances. Use appropriate food-safety practices and your own judgment when cooking.',
+      },
+      {
+        title: '4. User content',
+        body: 'You retain ownership of content you submit to Pickle, such as comments and profile information. By posting content, you give Pickle a non-exclusive, worldwide, royalty-free license to host, display, reproduce, and distribute that content as needed to operate and improve the service. You must have the right to post any content you submit.',
+      },
+      {
+        title: '5. Acceptable use',
+        body: 'Do not use Pickle to harass others, post illegal or harmful content, impersonate others, infringe intellectual-property rights, distribute malware, interfere with the service, scrape the service in an abusive manner, or attempt to access accounts or systems without authorization.',
+      },
+      {
+        title: '6. Pickle content and intellectual property',
+        body: 'The Pickle name, branding, app design, software, and original content are protected by applicable intellectual-property laws. These terms do not transfer ownership of Pickle or its content to you.',
+      },
+      {
+        title: '7. Suspension and termination',
+        body: 'We may restrict or suspend access when reasonably necessary to protect Pickle, our users, or third parties, or when these terms are violated. You may stop using Pickle at any time.',
+      },
+      {
+        title: '8. Service availability',
+        body: 'We work to keep Pickle available and reliable, but we do not guarantee uninterrupted or error-free operation. Features may change, be added, or be removed as the service develops.',
+      },
+      {
+        title: '9. Disclaimer and limitation',
+        body: 'To the extent permitted by applicable law, Pickle is provided on an “as is” and “as available” basis. Pickle is not responsible for losses caused by reliance on recipe or nutrition information, service interruptions, or user-submitted content except where liability cannot legally be excluded.',
+      },
+      {
+        title: '10. Changes to these terms',
+        body: 'We may update these Terms of Service as Pickle changes. Continued use of the service after updated terms take effect means you accept the revised terms, where permitted by law.',
+      },
+      {
+        title: '11. Contact',
+        body: 'If you have questions about these terms, use the Contact Us section in your Pickle profile.',
+      },
+    ];
+
+    return (
+      <div className="pb-28">
+        <div className="relative px-4 pt-6 text-center mb-6">
+          <button type="button" onClick={() => setSupportScreen(null)} aria-label="Back to profile" className="absolute left-4 top-5 w-9 h-9 flex items-center justify-center" style={{ color: '#1F1F1F' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+          </button>
+          <h1 className="font-bold text-[24px]" style={{ color: '#1F1F1F' }}>Terms of Service</h1>
+        </div>
+
+        <div className="px-4">
+          <p className="text-[12px] mb-5" style={{ color: '#A0A0A0' }}>Last updated: October 6, 2026</p>
+          <p className="text-[14px] leading-6 mb-6" style={{ color: '#6F6F6F' }}>
+            These Terms of Service govern your access to and use of Pickle.
+          </p>
+
+          <div className="space-y-6">
+            {termsSections.map((section) => (
+              <section key={section.title}>
+                <h2 className="text-[16px] font-semibold mb-2" style={{ color: '#1F1F1F' }}>{section.title}</h2>
+                <p className="text-[14px] leading-6" style={{ color: '#6F6F6F' }}>{section.body}</p>
+              </section>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (supportScreen === 'faq') {
     const faqs = [
       {
@@ -644,7 +801,7 @@ export default function ProfileScreen({ userId, email, onOpenSaved, onOpenLiked,
                 <button
                   key={item.label}
                   type="button"
-                  onClick={item.action === 'saved' ? onOpenSaved : item.action === 'liked' ? onOpenLiked : item.action === 'comments' ? openMyComments : item.action === 'settings' ? () => setSupportScreen('settings') : item.action === 'contact' ? () => setSupportScreen('contact') : item.action === 'faq' ? () => setSupportScreen('faq') : undefined}
+                  onClick={item.action === 'saved' ? onOpenSaved : item.action === 'liked' ? onOpenLiked : item.action === 'comments' ? openMyComments : item.action === 'settings' ? () => setSupportScreen('settings') : item.action === 'contact' ? () => setSupportScreen('contact') : item.action === 'faq' ? () => setSupportScreen('faq') : item.action === 'privacy' ? () => setSupportScreen('privacy') : item.action === 'terms' ? () => setSupportScreen('terms') : undefined}
                   className="w-full h-[58px] px-4 flex items-center gap-3 text-left"
                   style={{ borderBottom: index < section.items.length - 1 ? '1px solid #EAEAEA' : undefined, backgroundColor: '#FFFFFF' }}
                 >
