@@ -59,7 +59,14 @@ function MenuIcon({ name }: { name: string }) {
   if (name === 'bookmark') return <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" /></svg>;
   if (name === 'comment') return <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a4 4 0 01-4 4H8l-5 3V7a4 4 0 014-4h10a4 4 0 014 4z" /></svg>;
   if (name === 'heart') return <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z" /></svg>;
-  if (name === 'settings') return <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M12 2v3" /><path d="M12 19v3" /><path d="M4.93 4.93l2.12 2.12" /><path d="M16.95 16.95l2.12 2.12" /><path d="M2 12h3" /><path d="M19 12h3" /><path d="M4.93 19.07l2.12-2.12" /><path d="M16.95 7.05l2.12-2.12" /></svg>;
+  if (name === 'settings') return (
+    <svg width="19" height="19" viewBox="0 0 512 512" fill="currentColor" aria-hidden="true">
+      <path
+        fillRule="evenodd"
+        d="M 225 0 L 205 14 L 193 63 L 160 77 L 107 50 L 54 95 L 49 121 L 76 162 L 61 197 L 4 217 L 0 286 L 14 306 L 63 318 L 77 351 L 52 387 L 51 408 L 95 457 L 124 461 L 162 435 L 196 450 L 216 507 L 285 511 L 305 497 L 316 449 L 351 435 L 387 460 L 406 461 L 456 417 L 461 390 L 435 349 L 450 315 L 507 295 L 511 226 L 497 206 L 449 195 L 435 161 L 459 127 L 461 104 L 417 55 L 390 50 L 349 76 L 314 61 L 294 4 Z M 232 28 L 279 29 L 291 83 L 347 107 L 399 78 L 433 112 L 404 155 L 426 217 L 483 232 L 483 278 L 429 291 L 404 346 L 433 399 L 399 433 L 352 403 L 294 426 L 278 483 L 233 483 L 220 429 L 167 405 L 113 434 L 79 400 L 108 357 L 86 296 L 28 279 L 28 234 L 82 221 L 107 165 L 78 112 L 111 79 L 155 108 L 215 86 Z M 246 145 L 201 159 L 170 185 L 149 225 L 145 263 L 149 286 L 159 310 L 185 341 L 225 362 L 263 366 L 286 362 L 310 352 L 341 326 L 362 286 L 366 246 L 352 201 L 325 169 L 286 149 Z M 246 174 L 279 177 L 307 192 L 326 214 L 337 246 L 334 279 L 319 307 L 297 326 L 282 333 L 264 337 L 232 334 L 204 319 L 184 295 L 174 264 L 177 232 L 192 204 L 214 185 Z"
+      />
+    </svg>
+  );
   if (name === 'mail') return <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2z" /><polyline points="22 6 12 13 2 6" /></svg>;
   return <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M9.1 9a3 3 0 115.4 1.8c-.9 1.1-2.5 1.6-2.5 3.2" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>;
 }
