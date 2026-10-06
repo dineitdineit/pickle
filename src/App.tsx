@@ -123,7 +123,7 @@ export default function App() {
     if (selectedRecipeId) url.searchParams.set('recipe', selectedRecipeId);
     else url.searchParams.delete('recipe');
     window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
-  }, [selectedRecipeId, homeRetryKey]);
+  }, [selectedRecipeId]);
 
   useEffect(() => {
     let mounted = true;
@@ -217,7 +217,7 @@ export default function App() {
       setLoadingRecipes(false);
     }
     loadHomeData();
-  }, [selectedRecipeId]);
+  }, [selectedRecipeId, homeRetryKey]);
 
   const sortedRecipes = useMemo(() => [...recipes].sort((a, b) => a.title.localeCompare(b.title, 'en', { sensitivity: 'base' })), [recipes]);
   const featuredRecipes = useMemo(() => {
