@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import RetryState from './RetryState';
 import { supabase } from './lib/supabase';
 
 type SavedRecipe = {
@@ -28,6 +29,8 @@ export default function SavedScreen({ recipes, onSelectRecipe, onBack }: SavedSc
   const [loading, setLoading] = useState(true);
   const [loggedIn, setLoggedIn] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [retryKey, setRetryKey] = useState(0);
 
   useEffect(() => {
     let ignore = false;
@@ -35,13 +38,24 @@ export default function SavedScreen({ recipes, onSelectRecipe, onBack }: SavedSc
     async function loadSavedRecipes() {
       setLoading(true);
       setErrorMessage('');
+      setLoadFailed(false);
 
       const { data: userData, error: userError } = await supabase.auth.getUser();
       const user = userData.user;
 
       if (ignore) return;
 
-      if (userError || !user) {
+      if (userError) {
+        console.error('Failed to check saved recipe account:', userError);
+        setLoggedIn(false);
+        setSavedIds([]);
+        setErrorMessage('Could not load your saved recipes.');
+        setLoadFailed(true);
+        setLoading(false);
+        return;
+      }
+
+      if (!user) {
         setLoggedIn(false);
         setSavedIds([]);
         setLoading(false);
@@ -61,6 +75,7 @@ export default function SavedScreen({ recipes, onSelectRecipe, onBack }: SavedSc
       if (error) {
         console.error('Failed to load saved recipes:', error);
         setErrorMessage('Could not load your saved recipes.');
+        setLoadFailed(true);
         setSavedIds([]);
       } else {
         setSavedIds((data ?? []).map((row) => row.recipe_id));
@@ -71,7 +86,7 @@ export default function SavedScreen({ recipes, onSelectRecipe, onBack }: SavedSc
 
     loadSavedRecipes();
     return () => { ignore = true; };
-  }, []);
+  }, [retryKey]);
 
   const recipeMap = useMemo(() => new Map(recipes.map((recipe) => [recipe.id, recipe])), [recipes]);
   const visibleRecipes = useMemo(
@@ -118,6 +133,12 @@ export default function SavedScreen({ recipes, onSelectRecipe, onBack }: SavedSc
 
       {loading ? (
         <div className="px-4 py-16 text-center text-[14px]" style={{ color: '#6F6F6F' }}>Loading saved recipes…</div>
+      ) : loadFailed ? (
+        <RetryState
+          title="Couldn't load saved recipes"
+          message={errorMessage || 'Please check your connection and try again.'}
+          onRetry={() => setRetryKey((current) => current + 1)}
+        />
       ) : !loggedIn ? (
         <div className="flex flex-col items-center justify-center px-6 py-20 text-center">
           <div className="w-12 h-12 rounded-full flex items-center justify-center mb-4" style={{ backgroundColor: '#FFF0E6', color: '#F26B21' }}>
