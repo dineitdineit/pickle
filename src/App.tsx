@@ -289,7 +289,7 @@ export default function App() {
   }
 
   if (activeNav === 2) {
-    return <div className="bg-white min-h-screen max-w-md mx-auto relative"><SavedScreen recipes={sortedRecipes} onSelectRecipe={setSelectedRecipeId} onBack={() => setActiveNav(0)} />{NavBar}</div>;
+    return <div className="bg-white min-h-screen max-w-md mx-auto relative"><SavedScreen recipes={sortedRecipes} recipesLoading={loadingRecipes} recipeDataError={homeError} onRetryRecipeData={retryHomeData} onSelectRecipe={setSelectedRecipeId} onBack={() => setActiveNav(0)} />{NavBar}</div>;
   }
 
   if (activeNav === 4) {
