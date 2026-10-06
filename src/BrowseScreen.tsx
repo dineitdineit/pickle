@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import RetryState from './RetryState';
 import { addRecentSearch, clearRecentSearches, getRecentSearches, removeRecentSearch } from './recentSearches';
 
 const BROWSE_CATEGORIES = [
@@ -23,9 +24,11 @@ interface BrowseScreenProps {
   searchValue: string;
   setSearchValue: (v: string) => void;
   onSearch: () => void;
+  dataError?: string;
+  onRetry?: () => void;
 }
 
-export default function BrowseScreen({ searchValue, setSearchValue, onSearch }: BrowseScreenProps) {
+export default function BrowseScreen({ searchValue, setSearchValue, onSearch, dataError = '', onRetry }: BrowseScreenProps) {
   const [recentSearches, setRecentSearches] = useState<string[]>(() => getRecentSearches());
 
   function removeRecent(item: string) {
@@ -82,6 +85,17 @@ export default function BrowseScreen({ searchValue, setSearchValue, onSearch }: 
           )}
         </div>
       </div>
+
+      {dataError && onRetry && (
+        <div className="mb-5">
+          <RetryState
+            compact
+            title="Couldn't connect to recipes"
+            message="Browse categories are still available, but recipe data could not be refreshed."
+            onRetry={onRetry}
+          />
+        </div>
+      )}
 
       {/* Recently Searched */}
       <div className="px-4 mb-8">
