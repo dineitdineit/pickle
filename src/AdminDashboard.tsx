@@ -155,7 +155,7 @@ export default function AdminDashboard() {
       return;
     }
 
-    if (data?.role !== 'admin') {
+    if (data?.role !== 'admin' && data?.role !== 'official') {
       setAccess('denied');
       return;
     }
