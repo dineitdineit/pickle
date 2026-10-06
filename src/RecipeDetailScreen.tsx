@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import RetryState from './RetryState';
 import { supabase } from './lib/supabase';
 import RecipeComments from './RecipeComments';
 
@@ -93,6 +94,7 @@ export default function RecipeDetailScreen({ recipeId, onBack, onSelectRecipe, o
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
+  const [retryKey, setRetryKey] = useState(0);
   const [activeTab, setActiveTab] = useState<'Ingredients' | 'Steps' | 'Nutrition'>('Ingredients');
   const [userId, setUserId] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState(false);
@@ -138,8 +140,13 @@ export default function RecipeDetailScreen({ recipeId, onBack, onSelectRecipe, o
           .limit(8),
       ]);
 
-      if (recipeResult.error) {
-        console.error(recipeResult.error);
+      if (recipeResult.error || ingredientResult.error || stepResult.error) {
+        if (recipeResult.error) console.error('Failed to load recipe:', recipeResult.error);
+        if (ingredientResult.error) console.error('Failed to load ingredients:', ingredientResult.error);
+        if (stepResult.error) console.error('Failed to load recipe steps:', stepResult.error);
+        setRecipe(null);
+        setIngredients([]);
+        setSteps([]);
         setErrorMessage('Could not load this recipe.');
         setLoading(false);
         return;
@@ -173,7 +180,7 @@ export default function RecipeDetailScreen({ recipeId, onBack, onSelectRecipe, o
     }
 
     loadRecipe();
-  }, [recipeId]);
+  }, [recipeId, retryKey]);
 
   useEffect(() => {
     let ignore = false;
@@ -305,9 +312,15 @@ export default function RecipeDetailScreen({ recipeId, onBack, onSelectRecipe, o
 
   if (!recipe || errorMessage) {
     return (
-      <div className="min-h-screen bg-white max-w-md mx-auto px-4 pt-6">
-        <button onClick={onBack} className="mb-8 text-[15px] font-medium" style={{ color: '#F26B21' }}>← Back</button>
-        <p className="text-[16px]" style={{ color: '#1F1F1F' }}>{errorMessage || 'Recipe not found.'}</p>
+      <div className="min-h-screen bg-white max-w-md mx-auto pt-6">
+        <div className="px-4">
+          <button onClick={onBack} className="mb-2 text-[15px] font-medium" style={{ color: '#F26B21' }}>← Back</button>
+        </div>
+        <RetryState
+          title={errorMessage ? "Couldn't load this recipe" : 'Recipe not found'}
+          message={errorMessage ? 'Please check your connection and try again.' : 'This recipe may no longer be available.'}
+          onRetry={() => setRetryKey((current) => current + 1)}
+        />
       </div>
     );
   }
