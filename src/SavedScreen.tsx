@@ -12,6 +12,9 @@ type SavedRecipe = {
 
 interface SavedScreenProps {
   recipes: SavedRecipe[];
+  recipesLoading?: boolean;
+  recipeDataError?: string;
+  onRetryRecipeData?: () => void;
   onSelectRecipe: (id: string) => void;
   onBack: () => void;
 }
@@ -24,7 +27,14 @@ function formatTime(totalMinutes: number | null) {
   return `${hours}h ${minutes}m`;
 }
 
-export default function SavedScreen({ recipes, onSelectRecipe, onBack }: SavedScreenProps) {
+export default function SavedScreen({
+  recipes,
+  recipesLoading = false,
+  recipeDataError = '',
+  onRetryRecipeData,
+  onSelectRecipe,
+  onBack,
+}: SavedScreenProps) {
   const [savedIds, setSavedIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [loggedIn, setLoggedIn] = useState(false);
@@ -131,13 +141,19 @@ export default function SavedScreen({ recipes, onSelectRecipe, onBack }: SavedSc
         <h1 className="font-bold text-[24px]" style={{ color: '#1F1F1F' }}>Saved Recipes</h1>
       </div>
 
-      {loading ? (
+      {loading || (loggedIn && savedIds.length > 0 && recipesLoading) ? (
         <div className="px-4 py-16 text-center text-[14px]" style={{ color: '#6F6F6F' }}>Loading saved recipes…</div>
       ) : loadFailed ? (
         <RetryState
           title="Couldn't load saved recipes"
           message={errorMessage || 'Please check your connection and try again.'}
           onRetry={() => setRetryKey((current) => current + 1)}
+        />
+      ) : loggedIn && savedIds.length > 0 && recipeDataError && onRetryRecipeData ? (
+        <RetryState
+          title="Couldn't load recipe details"
+          message="Your saved recipes are safe. Please try loading them again."
+          onRetry={onRetryRecipeData}
         />
       ) : !loggedIn ? (
         <div className="flex flex-col items-center justify-center px-6 py-20 text-center">
