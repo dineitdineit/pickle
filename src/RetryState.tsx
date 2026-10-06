@@ -32,8 +32,8 @@ export default function RetryState({
             strokeLinejoin="round"
             aria-hidden="true"
           >
-            <path d="M20 11a8.1 8.1 0 10.9 4" />
-            <polyline points="20 4 20 11 13 11" />
+            <path d="M21 12a9 9 0 1 1-3.2-6.9" />
+            <polyline points="21 3 21 9 15 9" />
           </svg>
         </div>
 
