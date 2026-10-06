@@ -11,6 +11,8 @@ type SearchRecipe = {
   total_time_minutes: number;
   cover_image: string | null;
   image: string;
+  ingredientNames: string[];
+  tagNames: string[];
 };
 
 interface SearchScreenProps {
@@ -43,7 +45,15 @@ export default function SearchScreen({ query, setQuery, onBack, onSelectRecipe }
       setLoading(true);
       const { data, error } = await supabase
         .from('recipes')
-        .select('id, title, difficulty, total_time_minutes, cover_image')
+        .select(`
+          id,
+          title,
+          difficulty,
+          total_time_minutes,
+          cover_image,
+          recipe_ingredients(ingredients(name)),
+          recipe_tags(tags(name))
+        `)
         .not('cover_image', 'is', null)
         .order('title', { ascending: true });
 
@@ -53,9 +63,19 @@ export default function SearchScreen({ query, setQuery, onBack, onSelectRecipe }
         return;
       }
 
-      setRecipes((data ?? []).map((recipe) => ({
-        ...recipe,
+      setRecipes((data ?? []).map((recipe: any) => ({
+        id: recipe.id,
+        title: recipe.title,
+        difficulty: recipe.difficulty,
+        total_time_minutes: recipe.total_time_minutes,
+        cover_image: recipe.cover_image,
         image: publicImageUrl(recipe.cover_image),
+        ingredientNames: (recipe.recipe_ingredients ?? [])
+          .map((row: any) => row.ingredients?.name)
+          .filter((name: unknown): name is string => typeof name === 'string'),
+        tagNames: (recipe.recipe_tags ?? [])
+          .map((row: any) => row.tags?.name)
+          .filter((name: unknown): name is string => typeof name === 'string'),
       })));
       setLoading(false);
     }
@@ -64,14 +84,27 @@ export default function SearchScreen({ query, setQuery, onBack, onSelectRecipe }
   }, []);
 
   const filtered = useMemo(() => {
-    const normalized = query.trim().toLowerCase();
-    if (!normalized) return recipes;
+    const terms = query
+      .trim()
+      .toLowerCase()
+      .split(/\s+/)
+      .filter(Boolean);
 
-    return recipes.filter((recipe) =>
-      recipe.title.toLowerCase().includes(normalized) ||
-      recipe.difficulty.toLowerCase().includes(normalized) ||
-      'filipino'.includes(normalized)
-    );
+    if (terms.length === 0) return recipes;
+
+    return recipes.filter((recipe) => {
+      const searchableText = [
+        recipe.title,
+        recipe.difficulty,
+        'Filipino',
+        ...recipe.ingredientNames,
+        ...recipe.tagNames,
+      ]
+        .join(' ')
+        .toLowerCase();
+
+      return terms.every((term) => searchableText.includes(term));
+    });
   }, [query, recipes]);
 
   const visible = filtered.slice(0, visibleCount);
