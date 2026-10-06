@@ -51,6 +51,17 @@ export default function AuthScreen({ onBack, recoveryMode = false, onRecoveryCom
   const [message, setMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [recoveryReady, setRecoveryReady] = useState(!recoveryMode);
+  const [confirmationSent, setConfirmationSent] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = window.setInterval(() => {
+      setResendCooldown((current) => Math.max(0, current - 1));
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [resendCooldown]);
 
   useEffect(() => {
     if (!recoveryMode) return;
@@ -155,9 +166,45 @@ export default function AuthScreen({ onBack, recoveryMode = false, onRecoveryCom
       },
     });
 
-    if (error) setErrorMessage(error.message);
-    else if (!data.session) setMessage('Account created. Check your email to confirm your account, then sign in.');
+    if (error) {
+      setErrorMessage(error.message);
+    } else if (!data.session) {
+      setConfirmationSent(true);
+      setResendCooldown(60);
+      setMessage('Account created. Check your email to confirm your account, then sign in.');
+    }
     setLoading(false);
+  }
+
+  async function handleResendConfirmation() {
+    const cleanEmail = email.trim();
+    if (!cleanEmail || resendLoading || resendCooldown > 0) return;
+
+    setResendLoading(true);
+    setMessage('');
+    setErrorMessage('');
+
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email: cleanEmail,
+      options: {
+        emailRedirectTo: `${window.location.origin}/`,
+      },
+    });
+
+    if (error) {
+      const rateLimited = error.message.toLowerCase().includes('rate limit');
+      setErrorMessage(
+        rateLimited
+          ? 'Too many confirmation emails were requested. Please wait a while before trying again.'
+          : error.message,
+      );
+    } else {
+      setMessage('Confirmation email sent again. Check your inbox and spam folder.');
+      setResendCooldown(60);
+    }
+
+    setResendLoading(false);
   }
 
   async function handleSocialAuth(provider: SocialProvider) {
@@ -182,6 +229,8 @@ export default function AuthScreen({ onBack, recoveryMode = false, onRecoveryCom
     setConfirmPassword('');
     setMessage('');
     setErrorMessage('');
+    setConfirmationSent(false);
+    setResendCooldown(0);
   }
 
   const socialButtons = (
@@ -272,8 +321,24 @@ export default function AuthScreen({ onBack, recoveryMode = false, onRecoveryCom
             <div><label className="block text-[13px] font-semibold mb-2" style={{ color: '#444444' }}>Password</label><input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]" style={{ borderColor: '#E5E5E5', backgroundColor: '#FAFAFA', color: '#1F1F1F' }} placeholder="At least 6 characters" autoComplete="new-password" /></div>
             {errorMessage && <p className="text-[13px] leading-5" style={{ color: '#C53D2E' }}>{errorMessage}</p>}
             {message && <p className="text-[13px] leading-5" style={{ color: '#5F6F52' }}>{message}</p>}
-            <button type="submit" disabled={loading || Boolean(socialLoading)} className="w-full h-12 rounded-[8px] text-white text-[15px] font-semibold disabled:opacity-60" style={{ backgroundColor: '#F26B21' }}>{loading ? 'Please wait…' : 'Create account'}</button>
-            {socialButtons}
+            {confirmationSent && (
+              <div className="rounded-[12px] px-4 py-3 text-center" style={{ backgroundColor: '#FFF8F3' }}>
+                <p className="text-[12px]" style={{ color: '#6F6F6F' }}>
+                  Didn't get your email?{' '}
+                  <button
+                    type="button"
+                    onClick={handleResendConfirmation}
+                    disabled={resendLoading || resendCooldown > 0}
+                    className="font-semibold disabled:opacity-50"
+                    style={{ color: '#F26B21' }}
+                  >
+                    {resendLoading ? 'Sending…' : resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend'}
+                  </button>
+                </p>
+              </div>
+            )}
+            <button type="submit" disabled={loading || Boolean(socialLoading) || confirmationSent} className="w-full h-12 rounded-[8px] text-white text-[15px] font-semibold disabled:opacity-60" style={{ backgroundColor: '#F26B21' }}>{loading ? 'Please wait…' : confirmationSent ? 'Check your email' : 'Create account'}</button>
+            {!confirmationSent && socialButtons}
             <div className="text-center"><button type="button" onClick={() => changeMode('signin')} className="text-[12px] font-normal" style={{ color: '#A0A0A0' }}>Already have an account? Log in</button></div>
           </form>
         </div>
