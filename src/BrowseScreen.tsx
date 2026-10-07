@@ -52,7 +52,7 @@ export default function BrowseScreen({ searchValue, setSearchValue, onSearch, da
   }
 
   return (
-    <div className="pb-24">
+    <div className="browse-screen pb-24">
       {/* Title */}
       <div className="px-4 pt-6 pb-2 flex items-center justify-center">
         <h1 className="font-bold text-[24px]" style={{ color: '#1F1F1F' }}>Browse</h1>
@@ -139,7 +139,7 @@ export default function BrowseScreen({ searchValue, setSearchValue, onSearch, da
       </div>
 
       {/* Browse categories */}
-      <div className="px-4 space-y-8 mb-8">
+      <div className="browse-category-grid px-4 space-y-8 mb-8">
         {BROWSE_CATEGORIES.map((section) => (
           <section key={section.title}>
             <div className="mb-3">

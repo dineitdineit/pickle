@@ -164,7 +164,7 @@ export default function SearchScreen({ query, setQuery, onBack, onSelectRecipe }
   }
 
   return (
-    <div className="pb-24">
+    <div className="search-screen pb-24">
       <div className="flex items-center gap-3 px-4 pt-5 pb-4">
         <button
           onClick={onBack}
@@ -208,7 +208,7 @@ export default function SearchScreen({ query, setQuery, onBack, onSelectRecipe }
       </div>
 
       {!loading && visible.length > 0 ? (
-        <div className="px-4 flex flex-col">
+        <div className="web-result-grid px-4 flex flex-col">
           {visible.map((recipe, i) => (
             <button
               key={recipe.id}
