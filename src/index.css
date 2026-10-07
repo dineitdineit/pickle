@@ -206,3 +206,22 @@ div.mb-8 > div.px-4.mb-4 + div.relative.select-none {
 main.max-w-7xl div[class*="xl:grid-cols-[1.4fr_1fr]"] + section {
   display: none !important;
 }
+
+/* Recipe detail hero: make the back control match the share button. */
+div.relative.h-\[300px\] > button[aria-label="Back"] {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  background: #FFFFFF !important;
+  border: 0 !important;
+  border-radius: 9999px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14) !important;
+  color: #1F1F1F !important;
+}
+
+div.relative.h-\[300px\] > button[aria-label="Back"] svg {
+  width: 19px !important;
+  height: 19px !important;
+  stroke: #1F1F1F !important;
+}
