@@ -314,7 +314,7 @@ export default function RecipeDetailScreen({ recipeId, onBack, onSelectRecipe, o
     return (
       <div className="min-h-screen bg-white max-w-md mx-auto pt-6">
         <div className="px-4">
-          <button onClick={onBack} className="mb-2 text-[15px] font-medium" style={{ color: '#F26B21' }}>← Back</button>
+          <button onClick={onBack} aria-label="Back" className="mb-2 text-[15px] font-medium" style={{ color: '#F26B21' }}>← Back</button>
         </div>
         <RetryState
           title={errorMessage ? "Couldn't load this recipe" : 'Recipe not found'}

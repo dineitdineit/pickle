@@ -3,6 +3,10 @@
 .web-header, .web-footer, .desktop-home, .web-skip-link { display: none; }
 
 @media (min-width: 1024px) {
+  /* Desktop navigation replaces the mobile back controls on every screen. */
+  .pickle-web button[aria-label="Back"],
+  .pickle-web button[aria-label^="Back to "],
+  .pickle-web .mobile-back-row { display: none; }
   .pickle-web {
     --web-ink: #1f1f1f;
     --web-muted: #6f6f6f;
