@@ -195,3 +195,9 @@ html[data-theme="dark"] svg[stroke="#CFCFCF"] {
 html[data-theme="dark"] .active\:bg-gray-50:active {
   background-color: #242424 !important;
 }
+
+/* Home Featured: align the carousel card edges with the Featured heading. */
+div.mb-8 > div.px-4.mb-4 + div.relative.select-none {
+  margin-left: 16px;
+  margin-right: 16px;
+}
