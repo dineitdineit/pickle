@@ -713,7 +713,7 @@ export default function RecipeDetailScreen({
               className="recipe-recommendations"
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(2, 200px)",
+                gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
                 justifyContent: "space-between",
                 columnGap: 16,
                 rowGap: 28,
@@ -728,11 +728,11 @@ export default function RecipeDetailScreen({
                     window.scrollTo({ top: 0, behavior: "smooth" })
                   }}
                   className="text-left"
-                  style={{ width: 200 }}
+                  style={{ width: "100%", minWidth: 0 }}
                 >
                   <div
                     className="overflow-hidden bg-gray-100 mb-2.5"
-                    style={{ width: 200, height: 200, borderRadius: 16 }}
+                    style={{ width: "100%", aspectRatio: "1", borderRadius: 16 }}
                   >
                     <img
                       src={recipeImageUrl(item.cover_image)}
