@@ -36,9 +36,8 @@
   .web-navigation button[aria-current="page"] { color: var(--web-orange); }
   .web-navigation button[aria-current="page"]::after { content: ''; position: absolute; height: 3px; background: var(--web-orange); bottom: 0; left: 0; right: 0; }
   .web-header-search { display: flex; gap: 10px; align-items: center; background: var(--web-surface); border: 1px solid var(--web-line); border-radius: 12px; height: 44px; padding: 0 12px; margin-left: auto; flex: 1; max-width: 360px; min-width: 180px; color: var(--web-muted); }
-  .web-header-search > svg { flex-shrink: 0; }
   .web-header-search input { width: 100%; min-width: 0; outline: none; font-size: 14px; color: var(--web-ink); background: transparent; }
-  .web-header-search button { font-size: 14px; font-weight: 600; color: var(--web-orange); }
+  .web-header-search button { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 28px; height: 28px; color: var(--web-muted); }
   .web-account { display: flex; gap: 8px; align-items: center; font-size: 14px; font-weight: 600; white-space: nowrap; flex-shrink: 0; }
   .web-account[aria-current="page"] { color: var(--web-orange); }
   .desktop-screen { max-width: 1320px; margin: auto; padding: 36px 40px 64px; min-height: calc(100vh - 200px); outline: none; }

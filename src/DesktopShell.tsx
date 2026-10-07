@@ -33,9 +33,8 @@ export default function DesktopShell({ children, activeNav, searching, accountLa
             ))}
           </nav>
           <form className="web-header-search" role="search" onSubmit={submit}>
-            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m16 16 5 5" /></svg>
+            <button type="submit" aria-label="Submit recipe search"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m16 16 5 5" /></svg></button>
             <input aria-label="Search recipes" placeholder="Find a recipe or ingredient" value={query} onChange={(event) => onQueryChange(event.target.value)} />
-            <button type="submit" aria-label="Submit recipe search">Search</button>
           </form>
           <button type="button" className="web-account" onClick={() => onNavigate(4)} aria-current={accountView ? 'page' : undefined}>
             <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4 22v-3a8 8 0 0 1 16 0v3" /></svg>
