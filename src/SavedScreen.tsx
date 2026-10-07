@@ -166,7 +166,7 @@ export default function SavedScreen({
           <p className="text-[14px] leading-5" style={{ color: '#6F6F6F' }}>Your saved recipes are linked to your Pickle account.</p>
         </div>
       ) : visibleRecipes.length > 0 ? (
-        <div className="px-4 flex flex-col">
+        <div className="web-saved-grid px-4 flex flex-col">
           {errorMessage && <p className="text-[12px] mb-2" style={{ color: '#C53D2E' }}>{errorMessage}</p>}
           {visibleRecipes.map((recipe, index) => (
             <div

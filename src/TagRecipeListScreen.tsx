@@ -59,7 +59,7 @@ export default function TagRecipeListScreen({
       </div>
 
       {visible.length > 0 ? (
-        <div className="px-4 flex flex-col">
+        <div className="web-result-grid px-4 flex flex-col">
           {visible.map((recipe, i) => (
             <button
               key={recipe.id}

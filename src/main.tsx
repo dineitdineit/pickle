@@ -4,6 +4,7 @@ import App from './App'
 import AuthScreen from './AuthScreen'
 import AdminDashboard from './AdminDashboard'
 import './index.css'
+import './desktop.css'
 
 
 const isAdminPath = window.location.pathname === '/admin' || window.location.pathname.startsWith('/admin/')

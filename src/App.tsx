@@ -8,6 +8,8 @@ import AuthScreen from './AuthScreen';
 import RecipeDetailScreen from './RecipeDetailScreen';
 import RetryState from './RetryState';
 import TagRecipeListScreen from './TagRecipeListScreen';
+import DesktopShell from './DesktopShell';
+import DesktopHome from './DesktopHome';
 import { supabase } from './lib/supabase';
 import { addRecentSearch } from './recentSearches';
 
@@ -268,6 +270,26 @@ export default function App() {
     </nav>
   );
 
+  function navigate(index: number) {
+    setSelectedRecipeId(null);
+    setSelectedTagRecipeSection(null);
+    setShowSearch(false);
+    setShowLikedRecipes(false);
+    setActiveNav(index);
+    window.scrollTo({ top: 0 });
+  }
+
+  function desktopSearch(keyword = searchValue) {
+    setSearchValue(keyword);
+    addRecentSearch(keyword);
+    setSelectedRecipeId(null);
+    setSelectedTagRecipeSection(null);
+    setShowLikedRecipes(false);
+    setShowSearch(true);
+    window.scrollTo({ top: 0 });
+  }
+
+  function renderScreen() {
   if (selectedRecipeId) {
     return <RecipeDetailScreen recipeId={selectedRecipeId} onBack={() => setSelectedRecipeId(null)} onSelectRecipe={setSelectedRecipeId} onBrowse={() => { setSelectedRecipeId(null); setSelectedTagRecipeSection(null); setShowSearch(false); setShowLikedRecipes(false); setActiveNav(1); window.scrollTo({ top: 0, behavior: 'smooth' }); }} onRequireLogin={() => { setSelectedRecipeId(null); setSelectedTagRecipeSection(null); setShowSearch(false); setShowLikedRecipes(false); setActiveNav(4); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />;
   }
@@ -314,7 +336,9 @@ export default function App() {
   }
 
   return (
-    <div className="bg-white min-h-screen max-w-md mx-auto relative pb-24">
+    <>
+    <DesktopHome featured={featuredRecipes} trending={trendingPreview} quick={under30Recipes} party={partyRecipes} loading={loadingRecipes} error={homeError} onRetry={retryHomeData} onSelect={(id) => { setSelectedRecipeId(id); window.scrollTo({ top: 0 }); }} onCollection={(title) => { setSelectedTagRecipeSection(title); window.scrollTo({ top: 0 }); }} onKeyword={desktopSearch} />
+    <div className="mobile-home bg-white min-h-screen max-w-md mx-auto relative pb-24">
       <div className="flex items-center justify-between px-4 pt-6 pb-2">
         <div className="flex items-center gap-2"><img src="/assets/logo.png" alt="Pickle logo" className="w-9 h-9 rounded-xl object-cover" /><span className="font-bold text-[17px]" style={{ color: '#1F1F1F' }}>Pickle</span></div>
         <button type="button" onClick={() => setActiveNav(4)} aria-label="Open profile" className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center font-semibold text-[14px]" style={{ backgroundColor: '#FFF0E6', color: '#F26B21' }}>
@@ -367,5 +391,13 @@ export default function App() {
       </>}
       {NavBar}
     </div>
+    </>
+  );
+  }
+
+  return (
+    <DesktopShell activeNav={activeNav} searching={showSearch || Boolean(selectedRecipeId) || Boolean(selectedTagRecipeSection)} accountLabel={authUser ? 'My account' : 'Log in'} accountView={activeNav === 4 && !selectedRecipeId && !showSearch && !selectedTagRecipeSection && !showLikedRecipes} query={searchValue} onQueryChange={setSearchValue} onSearch={() => desktopSearch()} onNavigate={navigate}>
+      {renderScreen()}
+    </DesktopShell>
   );
 }

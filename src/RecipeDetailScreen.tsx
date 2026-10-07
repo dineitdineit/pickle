@@ -326,8 +326,8 @@ export default function RecipeDetailScreen({ recipeId, onBack, onSelectRecipe, o
   }
 
   return (
-    <div className="min-h-screen bg-white max-w-md mx-auto pb-10">
-      <div className="relative h-[300px] bg-gray-100">
+    <div className="recipe-detail min-h-screen bg-white max-w-md mx-auto pb-10">
+      <div className="recipe-detail-hero relative h-[300px] bg-gray-100">
         <img src={imageUrl(recipe.cover_image)} alt={recipe.title} className="w-full h-full object-cover" />
         <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.28), transparent 38%, rgba(0,0,0,0.18))' }} />
         <button onClick={onBack} aria-label="Back" className="w-10 h-10 rounded-full bg-white/90 flex items-center justify-center" style={{ position: 'absolute', top: 20, left: 16, zIndex: 20 }}>
@@ -338,7 +338,8 @@ export default function RecipeDetailScreen({ recipeId, onBack, onSelectRecipe, o
         </button>
       </div>
 
-      <div className="px-4 pt-5">
+      <div className="recipe-detail-body px-4 pt-5">
+        <div className="recipe-detail-intro">
         <div className="flex justify-between gap-4" style={{ alignItems: 'flex-end' }}>
           <div className="min-w-0">
             {recipe.short_description && <p className="text-[13px] leading-5 mb-1.5" style={{ color: '#6F6F6F' }}>{recipe.short_description}</p>}
@@ -391,13 +392,14 @@ export default function RecipeDetailScreen({ recipeId, onBack, onSelectRecipe, o
         </div>
 
         {recipe.description && <section className="mt-8"><h2 className="font-semibold text-[20px] mb-3" style={{ color: '#1F1F1F' }}>About</h2><p className="text-[15px] leading-6" style={{ color: '#6F6F6F' }}>{recipe.description}</p></section>}
+        </div>
 
-        <div className="mt-8 p-2.5 flex gap-1" style={{ backgroundColor: '#F5F5F5', borderRadius: 24 }}>
+        <div className="recipe-detail-tabs mt-8 p-2.5 flex gap-1" style={{ backgroundColor: '#F5F5F5', borderRadius: 24 }}>
           {(['Ingredients', 'Steps', 'Nutrition'] as const).map((tab) => <button key={tab} type="button" onClick={() => setActiveTab(tab)} className="flex-1 h-10 rounded-[16px] text-[14px] font-semibold transition-colors" style={activeTab === tab ? { backgroundColor: '#FFFFFF', color: '#F26B21', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' } : { color: '#6F6F6F' }}>{tab}</button>)}
         </div>
 
         {activeTab === 'Ingredients' && (
-          <section className="mt-6">
+          <section className="recipe-ingredients mt-6">
             <h2 className="font-semibold text-[20px] mb-4" style={{ color: '#1F1F1F' }}>Ingredients</h2>
             {recipe.ingredients_image && <div className="rounded-[16px] overflow-hidden mb-5 bg-gray-100"><img src={imageUrl(recipe.ingredients_image)} alt={`${recipe.title} ingredients`} className="w-full aspect-[4/3] object-cover" /></div>}
             <div className="space-y-6">
@@ -415,7 +417,7 @@ export default function RecipeDetailScreen({ recipeId, onBack, onSelectRecipe, o
         {recommendations.length > 0 && (
           <section className="pt-6 border-t" style={{ borderColor: '#EEEEEE', marginTop: 50 }}>
             <h2 className="font-semibold text-[20px] mb-5" style={{ color: '#1F1F1F' }}>More recipes</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 200px)', justifyContent: 'space-between', columnGap: 16, rowGap: 28 }}>
+            <div className="recipe-recommendations" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 200px)', justifyContent: 'space-between', columnGap: 16, rowGap: 28 }}>
               {recommendations.map((item) => (
                 <button key={item.id} type="button" onClick={() => { onSelectRecipe(item.id); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="text-left" style={{ width: 200 }}>
                   <div className="overflow-hidden bg-gray-100 mb-2.5" style={{ width: 200, height: 200, borderRadius: 16 }}>

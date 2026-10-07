@@ -113,7 +113,7 @@ export default function LikedScreen({ recipes, onSelectRecipe, onBack }: LikedSc
       {loading ? (
         <div className="px-4 py-16 text-center text-[14px]" style={{ color: '#6F6F6F' }}>Loading liked recipes…</div>
       ) : visibleRecipes.length > 0 ? (
-        <div className="px-4 flex flex-col">
+        <div className="web-saved-grid px-4 flex flex-col">
           {errorMessage && <p className="text-[12px] mb-2" style={{ color: '#C53D2E' }}>{errorMessage}</p>}
           {visibleRecipes.map((recipe, index) => (
             <div
