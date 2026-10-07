@@ -73,14 +73,12 @@
   .web-collection { margin-top: 44px; }
   .web-section-heading { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin-bottom: 22px; }
   .web-section-heading h2 { font-size: 26px; font-weight: 700; letter-spacing: -.6px; }
-  .web-section-heading p { font-size: 14px; margin-top: 5px; color: var(--web-muted); }
-  .web-section-heading button { border-bottom: 1px solid var(--web-orange); color: var(--web-orange); font-size: 14px; font-weight: 600; padding: 4px 0; }
+  .web-section-heading button { color: var(--web-orange); font-size: 14px; font-weight: 600; padding: 4px 0; }
   .web-recipe-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 24px; }
   .web-recipe-card { min-width: 0; text-align: left; }
   .web-card-image { position: relative; aspect-ratio: 4 / 3; overflow: hidden; border-radius: 16px; background: var(--web-surface); }
   .web-card-image img { height: 100%; width: 100%; object-fit: cover; transition: transform 250ms; }
   .web-recipe-card:hover img { transform: scale(1.04); }
-  .web-card-image > span { position: absolute; bottom: 12px; right: 12px; background: #fff; color: #1f1f1f; border-radius: 7px; padding: 6px 10px; font-size: 12px; font-weight: 600; }
   .web-card-copy { padding-top: 14px; }
   .web-card-meta { font-size: 13px; color: var(--web-muted); margin-bottom: 5px; }
   .web-card-meta span { margin: 0 6px; }

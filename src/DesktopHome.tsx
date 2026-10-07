@@ -21,21 +21,22 @@ type Props = {
   onKeyword: (keyword: string) => void;
 };
 
-function time(minutes: number | null) {
+function time(minutes: number | null, compact = false) {
   if (minutes === null) return '—';
-  return minutes < 60 ? `${minutes} min` : `${Math.floor(minutes / 60)} hr${minutes % 60 ? ` ${minutes % 60} min` : ''}`;
+  const unit = compact ? 'min' : ' min';
+  return minutes < 60 ? `${minutes}${unit}` : `${Math.floor(minutes / 60)}${compact ? 'h' : ' hr'}${minutes % 60 ? ` ${minutes % 60}${unit}` : ''}`;
 }
 
-function RecipeCollection({ title, subtitle, recipes, onSelect, onMore }: { title: string; subtitle: string; recipes: Recipe[]; onSelect: Props['onSelect']; onMore: () => void }) {
+function RecipeCollection({ title, recipes, onSelect, onMore }: { title: string; recipes: Recipe[]; onSelect: Props['onSelect']; onMore: () => void }) {
   if (recipes.length === 0) return null;
   return (
     <section className="web-collection">
-      <div className="web-section-heading"><div><h2>{title}</h2><p>{subtitle}</p></div><button type="button" onClick={onMore}>View all</button></div>
+      <div className="web-section-heading"><h2>{title}</h2><button type="button" onClick={onMore}>View all</button></div>
       <div className="web-recipe-grid">
         {recipes.slice(0, 4).map((recipe) => (
           <button type="button" key={recipe.id} className="web-recipe-card" onClick={() => onSelect(recipe.id)}>
-            <div className="web-card-image"><img src={recipe.image} alt={recipe.title} loading="lazy" /><span>{time(recipe.total_time_minutes)}</span></div>
-            <div className="web-card-copy"><p className="web-card-meta">Filipino <span>·</span> {recipe.difficulty || 'Recipe'}</p><h3>{recipe.title}</h3></div>
+            <div className="web-card-image"><img src={recipe.image} alt={recipe.title} loading="lazy" /></div>
+            <div className="web-card-copy"><p className="web-card-meta">Filipino <span>·</span> {recipe.difficulty || 'Recipe'} <span>·</span> {time(recipe.total_time_minutes, true)}</p><h3>{recipe.title}</h3></div>
           </button>
         ))}
       </div>
@@ -60,9 +61,9 @@ export default function DesktopHome({ featured, trending, quick, party, loading,
             <button type="button" className="web-browse-all" onClick={() => onKeyword('')}>Explore all recipes</button>
           </div>
         </section>
-        <RecipeCollection title="Trending Recipes" subtitle="Popular in the Pickle kitchen" recipes={trending} onSelect={onSelect} onMore={() => onCollection('Trending Recipes')} />
-        <RecipeCollection title="Under 30min" subtitle="Good food, even on busy days" recipes={quick} onSelect={onSelect} onMore={() => onCollection('Under 30min')} />
-        <RecipeCollection title="Party Packs" subtitle="Bring everyone to the table" recipes={party} onSelect={onSelect} onMore={() => onCollection('Party Packs')} />
+        <RecipeCollection title="Trending Recipes" recipes={trending} onSelect={onSelect} onMore={() => onCollection('Trending Recipes')} />
+        <RecipeCollection title="Under 30min" recipes={quick} onSelect={onSelect} onMore={() => onCollection('Under 30min')} />
+        <RecipeCollection title="Party Packs" recipes={party} onSelect={onSelect} onMore={() => onCollection('Party Packs')} />
       </>}
     </div>
   );
