@@ -8,3 +8,21 @@ if (!supabaseUrl || !supabasePublishableKey) {
 }
 
 export const supabase = createClient(supabaseUrl, supabasePublishableKey)
+
+// In the browser, having no active session is a normal signed-out state, not a
+// network/data-loading failure. Supabase getUser() reports that case as an
+// AuthSessionMissingError, so normalize only that specific case to user: null.
+const originalGetUser = supabase.auth.getUser.bind(supabase.auth)
+
+supabase.auth.getUser = async (jwt?: string) => {
+  const result = await originalGetUser(jwt)
+
+  if (result.error?.name === 'AuthSessionMissingError') {
+    return {
+      data: { user: null },
+      error: null,
+    }
+  }
+
+  return result
+}
