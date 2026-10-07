@@ -1,3 +1,4 @@
+import { carouselIndex } from "./lib/carousel"
 import RecipeStrip from "./RecipeStrip"
 import { formatTime } from "./lib/format"
 import { recipeImageUrl } from "./lib/recipe"
@@ -125,6 +126,7 @@ export default function App() {
   const [authRetryKey, setAuthRetryKey] = useState(0)
   const [homeAvatarUrl, setHomeAvatarUrl] = useState<string | null>(null)
   const carouselScrollRef = useRef<HTMLDivElement>(null)
+  const featuredIndexRef = useRef(0)
   const GAP = 16
 
   useEffect(() => {
@@ -338,13 +340,20 @@ export default function App() {
   function handleCarouselScroll() {
     const el = carouselScrollRef.current
     if (!el || el.clientWidth === 0) return
-    const index = Math.round(el.scrollLeft / (el.clientWidth + GAP))
-    setFeaturedIndex(Math.max(0, Math.min(index, featuredRecipes.length - 1)))
+    const index = carouselIndex(
+      el.scrollLeft,
+      el.clientWidth,
+      featuredRecipes.length,
+      GAP,
+    )
+    featuredIndexRef.current = index
+    setFeaturedIndex(index)
   }
   function scrollToCard(index: number) {
     const el = carouselScrollRef.current
     if (!el) return
     el.scrollTo({ left: index * (el.clientWidth + GAP), behavior: "smooth" })
+    featuredIndexRef.current = index
     setFeaturedIndex(index)
   }
 
@@ -354,9 +363,12 @@ export default function App() {
   const featuredDidDrag = useRef(false)
   function handlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
     const el = carouselScrollRef.current
-    if (!el) return
-    isDragging.current = true
+    if (!el || e.button !== 0) return
     featuredDidDrag.current = false
+    // Touch uses native scrolling and momentum; do not fight the browser.
+    if (e.pointerType !== "mouse") return
+    el.style.scrollSnapType = "none"
+    isDragging.current = true
     dragStartX.current = e.clientX
     dragStartScrollLeft.current = el.scrollLeft
   }
@@ -364,25 +376,23 @@ export default function App() {
     const el = carouselScrollRef.current
     if (!el || !isDragging.current || dragStartX.current === null) return
     const deltaX = e.clientX - dragStartX.current
-    if (Math.abs(deltaX) > 5) featuredDidDrag.current = true
+    if (Math.abs(deltaX) > 5) {
+      featuredDidDrag.current = true
+      if (!el.hasPointerCapture(e.pointerId)) el.setPointerCapture(e.pointerId)
+    }
     if (featuredDidDrag.current)
       el.scrollLeft = dragStartScrollLeft.current - deltaX
   }
   function finishPointerDrag(e: React.PointerEvent<HTMLDivElement>) {
     const el = carouselScrollRef.current
-    if (!el || dragStartX.current === null) return
-    const deltaX = e.clientX - dragStartX.current
+    if (!el || !isDragging.current) return
     isDragging.current = false
     dragStartX.current = null
-    if (Math.abs(deltaX) < 40) {
-      scrollToCard(featuredIndex)
-      return
-    }
-    const nextIndex =
-      deltaX < 0
-        ? Math.min(featuredIndex + 1, featuredRecipes.length - 1)
-        : Math.max(featuredIndex - 1, 0)
-    scrollToCard(nextIndex)
+    if (el.hasPointerCapture(e.pointerId)) el.releasePointerCapture(e.pointerId)
+    el.style.scrollSnapType = "x mandatory"
+    scrollToCard(
+      carouselIndex(el.scrollLeft, el.clientWidth, featuredRecipes.length, GAP),
+    )
     window.setTimeout(() => {
       featuredDidDrag.current = false
     }, 0)
@@ -393,10 +403,11 @@ export default function App() {
       return
     const el = carouselScrollRef.current
     if (!el) return
-    requestAnimationFrame(() => {
-      el.scrollLeft = featuredIndex * (el.clientWidth + GAP)
+    const frame = requestAnimationFrame(() => {
+      el.scrollLeft = featuredIndexRef.current * (el.clientWidth + GAP)
     })
-  }, [activeNav, showSearch, selectedRecipeId, loadingRecipes, featuredIndex])
+    return () => cancelAnimationFrame(frame)
+  }, [activeNav, showSearch, selectedRecipeId, loadingRecipes])
 
   const NavBar = (
     <nav
@@ -695,7 +706,8 @@ export default function App() {
                     style={{
                       scrollSnapType: "x mandatory",
                       WebkitOverflowScrolling: "touch",
-                      touchAction: "pan-y",
+                      touchAction: "pan-x pan-y pinch-zoom",
+                      overscrollBehaviorX: "contain",
                     }}
                   >
                     <div
@@ -765,6 +777,8 @@ export default function App() {
                       <button
                         key={i}
                         onClick={() => scrollToCard(i)}
+                        aria-label={`Show featured recipe ${i + 1}`}
+                        aria-pressed={i === featuredIndex}
                         className="rounded-full transition-all duration-300 pointer-events-auto"
                         style={{
                           width: i === featuredIndex ? 20 : 6,

@@ -184,3 +184,67 @@ test("clipboard denial or missing support offers a manual link", async () => {
     "manual",
   )
 })
+
+const { carouselIndex } = loadHelper("carousel")
+test("carousel follows scroll position without skipping or exceeding its bounds", () => {
+  assert.equal(carouselIndex(0, 360, 5), 0)
+  assert.equal(carouselIndex(150, 360, 5), 0)
+  assert.equal(carouselIndex(200, 360, 5), 1)
+  assert.equal(carouselIndex(376, 360, 5), 1)
+  assert.equal(carouselIndex(752, 360, 5), 2)
+  assert.equal(carouselIndex(-40, 360, 5), 0)
+  assert.equal(carouselIndex(2000, 360, 5), 4)
+  assert.equal(carouselIndex(200, 0, 5), 0)
+  assert.equal(carouselIndex(200, 360, 0), 0)
+})
+
+test("recipe strips leave finger scrolling to the browser while retaining mouse dragging", () => {
+  const source = readFileSync(
+    new URL("../src/RecipeStrip.tsx", import.meta.url),
+    "utf8",
+  )
+  const { outputText } = ts.transpileModule(source, {
+    compilerOptions: {
+      module: ts.ModuleKind.CommonJS,
+      target: ts.ScriptTarget.ES2020,
+      jsx: ts.JsxEmit.ReactJSX,
+    },
+  })
+  const module = { exports: {} }
+  const react = require("react")
+  const mockReact = { ...react, useRef: (value) => ({ current: value }) }
+  new Function("require", "module", "exports", outputText)(
+    (name) =>
+      name === "react"
+        ? mockReact
+        : name === "./lib/format"
+          ? { formatTime }
+          : require(name),
+    module,
+    module.exports,
+  )
+  const strip = module.exports.default({
+    title: "Recipes",
+    recipes: [],
+    onSelectRecipe: () => {},
+    onSeeMore: () => {},
+  })
+  const track = strip.props.children[1]
+  const captures = new Set()
+  const element = {
+    scrollLeft: 100,
+    hasPointerCapture: (id) => captures.has(id),
+    setPointerCapture: (id) => captures.add(id),
+  }
+  track.props.ref.current = element
+  const touch = { pointerType: "touch", button: 0, pointerId: 1, clientX: 200 }
+  track.props.onPointerDown(touch)
+  track.props.onPointerMove({ ...touch, clientX: 100 })
+  assert.equal(element.scrollLeft, 100)
+  assert.equal(track.props.style.touchAction, "pan-x pan-y pinch-zoom")
+  const mouse = { ...touch, pointerType: "mouse" }
+  track.props.onPointerDown(mouse)
+  track.props.onPointerMove({ ...mouse, clientX: 120 })
+  assert.equal(element.scrollLeft, 180)
+  assert.equal(captures.has(1), true)
+})

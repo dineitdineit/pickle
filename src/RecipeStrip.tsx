@@ -30,9 +30,10 @@ export default function RecipeStrip({
 
   function handlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
     const el = scrollRef.current
-    if (!el) return
-    dragging.current = true
+    if (!el || e.button !== 0) return
     didDrag.current = false
+    if (e.pointerType !== "mouse") return
+    dragging.current = true
     startX.current = e.clientX
     startScrollLeft.current = el.scrollLeft
   }
@@ -41,11 +42,16 @@ export default function RecipeStrip({
     const el = scrollRef.current
     if (!el || !dragging.current || startX.current === null) return
     const deltaX = e.clientX - startX.current
-    if (Math.abs(deltaX) > 5) didDrag.current = true
+    if (Math.abs(deltaX) > 5) {
+      didDrag.current = true
+      if (!el.hasPointerCapture(e.pointerId)) el.setPointerCapture(e.pointerId)
+    }
     el.scrollLeft = startScrollLeft.current - deltaX
   }
 
-  function finishDrag() {
+  function finishDrag(e: React.PointerEvent<HTMLDivElement>) {
+    if (e.currentTarget.hasPointerCapture(e.pointerId))
+      e.currentTarget.releasePointerCapture(e.pointerId)
     dragging.current = false
     startX.current = null
     window.setTimeout(() => {
@@ -78,7 +84,11 @@ export default function RecipeStrip({
         onPointerUp={finishDrag}
         onPointerCancel={finishDrag}
         className="flex items-start gap-3 px-4 overflow-x-auto scrollbar-hide pb-1 cursor-grab active:cursor-grabbing"
-        style={{ touchAction: "pan-y", WebkitOverflowScrolling: "touch" }}
+        style={{
+          touchAction: "pan-x pan-y pinch-zoom",
+          WebkitOverflowScrolling: "touch",
+          overscrollBehaviorX: "contain",
+        }}
       >
         {recipes.map((recipe) => (
           <button
