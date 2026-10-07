@@ -1,3 +1,4 @@
+import { shareRecipe, recipeShareUrl } from "./lib/share"
 import type { IngredientRow, StepRow, Nutrition } from "./recipeTypes"
 import {
   IngredientsSection,
@@ -6,7 +7,7 @@ import {
 } from "./RecipeSections"
 import { formatTime } from "./lib/format"
 import { recipeImageUrl, firstRelation } from "./lib/recipe"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import RetryState from "./RetryState"
 import { supabase } from "./lib/supabase"
 import { getCurrentUser } from "./lib/auth"
@@ -65,6 +66,10 @@ export default function RecipeDetailScreen({
   const [isLiked, setIsLiked] = useState(false)
   const [liking, setLiking] = useState(false)
   const [likeMessage, setLikeMessage] = useState("")
+  const shareRequest = useRef(0)
+  const [sharing, setSharing] = useState(false)
+  const [shareMessage, setShareMessage] = useState("")
+  const [showShareLink, setShowShareLink] = useState(false)
   const [commentCount, setCommentCount] = useState(0)
 
   useEffect(() => {
@@ -314,6 +319,32 @@ export default function RecipeDetailScreen({
     setLiking(false)
   }
 
+  useEffect(() => {
+    shareRequest.current += 1
+    setShareMessage("")
+    setShowShareLink(false)
+    setSharing(false)
+    return () => {
+      shareRequest.current += 1
+    }
+  }, [recipeId])
+
+  async function handleShare() {
+    if (!recipe || sharing) return
+    const request = ++shareRequest.current
+    setSharing(true)
+    setShareMessage("")
+    setShowShareLink(false)
+    const result = await shareRecipe(recipe)
+    if (request !== shareRequest.current) return
+    if (result === "copied") setShareMessage("Recipe link copied!")
+    if (result === "manual") {
+      setShareMessage("Copy this link to share the recipe.")
+      setShowShareLink(true)
+    }
+    setSharing(false)
+  }
+
   const groupedIngredients = useMemo(() => {
     const groups = new Map<string, IngredientRow[]>()
     ingredients.forEach((item) => {
@@ -496,6 +527,9 @@ export default function RecipeDetailScreen({
               <button
                 type="button"
                 aria-label="Share recipe"
+                onClick={handleShare}
+                disabled={sharing}
+                aria-busy={sharing}
                 className="w-10 h-10 rounded-full border flex items-center justify-center"
                 style={{ borderColor: "#EAEAEA", backgroundColor: "#FFFFFF" }}
               >
@@ -518,6 +552,26 @@ export default function RecipeDetailScreen({
               </button>
             </div>
           </div>
+          {shareMessage && (
+            <div className="mt-2 text-right">
+              <p
+                role="status"
+                className="text-[12px]"
+                style={{ color: "#6F6F6F" }}
+              >
+                {shareMessage}
+              </p>
+              {showShareLink && (
+                <input
+                  aria-label="Recipe share link"
+                  readOnly
+                  value={recipeShareUrl(recipe.id)}
+                  onFocus={(event) => event.currentTarget.select()}
+                  className="mt-2 w-full border rounded-lg p-2 text-[13px]"
+                />
+              )}
+            </div>
+          )}
           {(saveMessage || likeMessage) && (
             <p
               className="text-[12px] mt-2 text-right"

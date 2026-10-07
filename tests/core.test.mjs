@@ -100,3 +100,87 @@ test("auth normalizes only a missing session and leaves the SDK unchanged", asyn
   }
   assert.equal(await getCurrentUser(), response)
 })
+
+const { shareRecipe, recipeShareUrl } = loadHelper("share")
+const shareTarget = { id: "recipe-1", title: "Chicken Adobo" }
+
+test("sharing uses a clean production recipe URL", async () => {
+  assert.equal(
+    recipeShareUrl("recipe-1"),
+    "https://getpickleapp.com/?recipe=recipe-1",
+  )
+  let payload
+  assert.equal(
+    await shareRecipe(shareTarget, {
+      share: async (data) => {
+        payload = data
+      },
+    }),
+    "shared",
+  )
+  assert.deepEqual(payload, {
+    title: "Chicken Adobo | Pickle",
+    url: recipeShareUrl("recipe-1"),
+  })
+})
+
+test("unsupported native sharing copies the recipe URL", async () => {
+  let copied
+  assert.equal(
+    await shareRecipe(shareTarget, {
+      clipboard: {
+        writeText: async (url) => {
+          copied = url
+        },
+      },
+    }),
+    "copied",
+  )
+  assert.equal(copied, recipeShareUrl("recipe-1"))
+})
+
+test("cancelling native share does not copy anything", async () => {
+  let copied = false
+  const error = new Error("Cancelled")
+  error.name = "AbortError"
+  assert.equal(
+    await shareRecipe(shareTarget, {
+      share: async () => {
+        throw error
+      },
+      clipboard: {
+        writeText: async () => {
+          copied = true
+        },
+      },
+    }),
+    "cancelled",
+  )
+  assert.equal(copied, false)
+})
+
+test("native share failure falls back to copying", async () => {
+  assert.equal(
+    await shareRecipe(shareTarget, {
+      share: async () => {
+        throw new Error("Unavailable")
+      },
+      clipboard: { writeText: async () => {} },
+    }),
+    "copied",
+  )
+})
+
+test("clipboard denial or missing support offers a manual link", async () => {
+  assert.equal(await shareRecipe(shareTarget, {}), "manual")
+  assert.equal(
+    await shareRecipe(shareTarget, {
+      clipboard: {
+        writeText: async () => {
+          throw new Error("Denied")
+        },
+      },
+    }),
+    "manual",
+  )
+})
