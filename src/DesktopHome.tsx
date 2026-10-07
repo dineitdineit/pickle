@@ -48,9 +48,6 @@ export default function DesktopHome({ featured, trending, quick, party, loading,
   return (
     <div className="desktop-home">
       <div className="web-home-heading"><div><h1>What are we cooking today?</h1><p>Find your next recipe.</p></div></div>
-      <nav className="web-quick-links" aria-label="Browse by ingredient or occasion">
-        {['Chicken', 'Pork', 'Beef', 'Seafood', 'Dessert', 'Quick', 'Party'].map((keyword) => <button type="button" key={keyword} onClick={() => onKeyword(keyword)}>{keyword}</button>)}
-      </nav>
       {loading ? <div className="web-loading" role="status">Loading recipes…</div> : error ? <RetryState title="Couldn't load recipes" message="Please check your connection and try again." onRetry={onRetry} /> : !lead ? <div className="web-loading">No recipes available yet.</div> : <>
         <section className="web-featured" aria-label="Featured recipes">
           <button type="button" className="web-featured-lead" onClick={() => onSelect(lead.id)}>

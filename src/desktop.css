@@ -50,9 +50,6 @@
   .web-home-heading h1 { font-size: clamp(30px, 3vw, 42px); font-weight: 700; letter-spacing: -1.5px; line-height: 1.2; margin: 12px 0; }
   .web-home-heading > div > p:last-child { font-size: 16px; color: var(--web-muted); }
   .web-heading-mark { font-size: 14px; line-height: 1.5; font-weight: 600; text-align: right; color: var(--web-muted); border-right: 3px solid var(--web-orange); padding-right: 16px; }
-  .web-quick-links { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 32px; }
-  .web-quick-links button { padding: 10px 22px; border: 1px solid var(--web-line); border-radius: 999px; font-size: 14px; font-weight: 500; transition: background 150ms, border-color 150ms; }
-  .web-quick-links button:hover { border-color: var(--web-orange); background: var(--web-surface); }
   .web-loading { padding: 80px 24px; text-align: center; color: var(--web-muted); }
   .web-featured { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr); gap: 28px; margin-bottom: 52px; }
   .web-featured-lead { position: relative; min-height: 420px; border-radius: 22px; overflow: hidden; text-align: left; background: #242424; }
