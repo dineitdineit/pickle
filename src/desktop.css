@@ -2,6 +2,8 @@
    isolated here so the two surfaces can evolve independently. */
 .web-header, .web-footer, .desktop-home, .web-skip-link { display: none; }
 
+.recipe-content-section.is-inactive { display: none; }
+
 @media (min-width: 1024px) {
   /* Desktop navigation replaces the mobile back controls on every screen. */
   .pickle-web button[aria-label="Back"],
@@ -123,9 +125,10 @@
   .recipe-detail-intro > .grid { margin-top: 24px; }
   .recipe-detail-intro .text-\[12px\] { font-size: 14px; }
   .recipe-detail-intro > section p { font-size: 16px; line-height: 1.8; }
-  .recipe-detail-tabs { margin-top: 8px; }
+  .recipe-detail-tabs { display: none; }
+  .recipe-detail .recipe-content-section { display: block; }
   .recipe-detail-body > section { margin-top: 0; }
-  .recipe-ingredients { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 20px 32px; }
+  .recipe-detail .recipe-ingredients { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 20px 32px; }
   .recipe-ingredients h2 { grid-column: 1/-1; margin-bottom: 0; }
   .recipe-ingredients > .space-y-6:only-of-type { grid-column: 1/-1; }
   .recipe-detail-body > section > .space-y-7 > article { display: grid; grid-template-columns: minmax(0,300px) minmax(0,1fr); gap: 24px; }
