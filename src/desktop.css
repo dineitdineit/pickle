@@ -4,7 +4,21 @@
 
 .recipe-content-section.is-inactive { display: none; }
 
+.recipe-share-button {
+  position: absolute;
+  top: 20px;
+  right: 16px;
+  z-index: 20;
+  border-color: transparent;
+  background-color: rgba(255, 255, 255, 0.9);
+}
+
 @media (min-width: 1024px) {
+  .recipe-share-button {
+    position: static;
+    border-color: #eaeaea;
+    background-color: #fff;
+  }
   /* Desktop navigation replaces the mobile back controls on every screen. */
   .pickle-web button[aria-label="Back"],
   .pickle-web button[aria-label^="Back to "],

@@ -395,7 +395,7 @@ export default function RecipeDetailScreen({
   }
 
   return (
-    <div className="recipe-detail min-h-screen bg-white max-w-md mx-auto pb-10">
+    <div className="recipe-detail relative min-h-screen bg-white max-w-md mx-auto pb-10">
       <div className="recipe-detail-hero relative h-[300px] bg-gray-100">
         <img
           src={recipeImageUrl(recipe.cover_image)}
@@ -530,8 +530,7 @@ export default function RecipeDetailScreen({
                 onClick={handleShare}
                 disabled={sharing}
                 aria-busy={sharing}
-                className="w-10 h-10 rounded-full border flex items-center justify-center"
-                style={{ borderColor: "#EAEAEA", backgroundColor: "#FFFFFF" }}
+                className="recipe-share-button w-10 h-10 rounded-full border flex items-center justify-center disabled:opacity-60"
               >
                 <svg
                   width="19"
