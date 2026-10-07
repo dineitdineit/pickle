@@ -16,7 +16,6 @@ interface SavedScreenProps {
   recipeDataError?: string;
   onRetryRecipeData?: () => void;
   onSelectRecipe: (id: string) => void;
-  onBack: () => void;
 }
 
 function formatTime(totalMinutes: number | null) {
@@ -33,7 +32,6 @@ export default function SavedScreen({
   recipeDataError = '',
   onRetryRecipeData,
   onSelectRecipe,
-  onBack,
 }: SavedScreenProps) {
   const [savedIds, setSavedIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -127,17 +125,6 @@ export default function SavedScreen({
   return (
     <div className="pb-24">
       <div className="relative px-4 pt-6 text-center" style={{ marginBottom: 40 }}>
-        <button
-          type="button"
-          onClick={onBack}
-          aria-label="Back"
-          className="absolute left-4 top-5 w-9 h-9 flex items-center justify-center rounded-full"
-          style={{ backgroundColor: '#F9F9F9', border: '1.5px solid #EAEAEA' }}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1F1F1F" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
-        </button>
         <h1 className="font-bold text-[24px]" style={{ color: '#1F1F1F' }}>Saved Recipes</h1>
       </div>
 
