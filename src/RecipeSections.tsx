@@ -38,7 +38,7 @@ export function IngredientsSection({
         Ingredients
       </h2>
       {ingredientsImage && (
-        <div className="rounded-[16px] overflow-hidden mb-5 bg-gray-100">
+        <div className="recipe-ingredients-image rounded-[16px] overflow-hidden mb-5 bg-gray-100">
           <img
             src={recipeImageUrl(ingredientsImage)}
             alt={`${recipeTitle} ingredients`}
