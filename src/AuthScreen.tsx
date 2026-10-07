@@ -1,156 +1,208 @@
-import PickleLogo from './PickleLogo';
-import { FormEvent, useEffect, useState } from 'react';
-import { supabase } from './lib/supabase';
+import PickleLogo from "./PickleLogo"
+import { FormEvent, useEffect, useState } from "react"
+import { supabase } from "./lib/supabase"
 
-type Mode = 'signin' | 'signup' | 'forgot' | 'update';
-type SocialProvider = 'google' | 'apple';
+type Mode = "signin" | "signup" | "forgot" | "update"
+type SocialProvider = "google" | "apple"
 
-const APP_URL = 'https://getpickleapp.com';
+const APP_URL = "https://getpickleapp.com"
 
 type AuthScreenProps = {
-  onBack: () => void;
-  recoveryMode?: boolean;
-  onRecoveryComplete?: () => void;
-};
+  onBack: () => void
+  recoveryMode?: boolean
+  onRecoveryComplete?: () => void
+}
 
 function GoogleIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-      <path fill="#4285F4" d="M21.6 12.23c0-.71-.06-1.4-.18-2.07H12v3.92h5.38a4.6 4.6 0 0 1-2 3.02v2.51h3.23c1.89-1.74 2.99-4.3 2.99-7.38Z" />
-      <path fill="#34A853" d="M12 22c2.7 0 4.96-.9 6.61-2.39l-3.23-2.51c-.9.6-2.04.96-3.38.96-2.6 0-4.8-1.76-5.59-4.13H3.08v2.59A9.99 9.99 0 0 0 12 22Z" />
-      <path fill="#FBBC05" d="M6.41 13.93A6.02 6.02 0 0 1 6.1 12c0-.67.11-1.32.31-1.93V7.48H3.08A10 10 0 0 0 2 12c0 1.61.39 3.13 1.08 4.52l3.33-2.59Z" />
-      <path fill="#EA4335" d="M12 5.94c1.47 0 2.79.5 3.83 1.49l2.87-2.87A9.62 9.62 0 0 0 12 2a9.99 9.99 0 0 0-8.92 5.48l3.33 2.59C7.2 7.7 9.4 5.94 12 5.94Z" />
+      <path
+        fill="#4285F4"
+        d="M21.6 12.23c0-.71-.06-1.4-.18-2.07H12v3.92h5.38a4.6 4.6 0 0 1-2 3.02v2.51h3.23c1.89-1.74 2.99-4.3 2.99-7.38Z"
+      />
+      <path
+        fill="#34A853"
+        d="M12 22c2.7 0 4.96-.9 6.61-2.39l-3.23-2.51c-.9.6-2.04.96-3.38.96-2.6 0-4.8-1.76-5.59-4.13H3.08v2.59A9.99 9.99 0 0 0 12 22Z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M6.41 13.93A6.02 6.02 0 0 1 6.1 12c0-.67.11-1.32.31-1.93V7.48H3.08A10 10 0 0 0 2 12c0 1.61.39 3.13 1.08 4.52l3.33-2.59Z"
+      />
+      <path
+        fill="#EA4335"
+        d="M12 5.94c1.47 0 2.79.5 3.83 1.49l2.87-2.87A9.62 9.62 0 0 0 12 2a9.99 9.99 0 0 0-8.92 5.48l3.33 2.59C7.2 7.7 9.4 5.94 12 5.94Z"
+      />
     </svg>
-  );
+  )
 }
 
 function AppleIcon() {
   return (
-    <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <svg
+      width="19"
+      height="19"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden="true"
+    >
       <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.79 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.53 4.1v-.01ZM12.03 7.25C11.88 5.02 13.69 3.18 15.77 3c.29 2.58-2.34 4.5-3.74 4.25Z" />
     </svg>
-  );
+  )
 }
 
 function BackButton({ onClick }: { onClick: () => void }) {
   return (
-    <button type="button" onClick={onClick} aria-label="Back to log in" className="w-9 h-9 flex items-center justify-center mb-8" style={{ color: '#1F1F1F' }}>
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label="Back to log in"
+      className="w-9 h-9 flex items-center justify-center mb-8"
+      style={{ color: "#1F1F1F" }}
+    >
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
         <polyline points="15 18 9 12 15 6" />
       </svg>
     </button>
-  );
+  )
 }
 
-export default function AuthScreen({ onBack, recoveryMode = false, onRecoveryComplete }: AuthScreenProps) {
-  const [mode, setMode] = useState<Mode>(recoveryMode ? 'update' : 'signin');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [username, setUsername] = useState('');
-  const [displayName, setDisplayName] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [socialLoading, setSocialLoading] = useState<SocialProvider | null>(null);
-  const [message, setMessage] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-  const [recoveryReady, setRecoveryReady] = useState(!recoveryMode);
-  const [confirmationSent, setConfirmationSent] = useState(false);
-  const [resendLoading, setResendLoading] = useState(false);
-  const [resendCooldown, setResendCooldown] = useState(0);
+export default function AuthScreen({
+  onBack,
+  recoveryMode = false,
+  onRecoveryComplete,
+}: AuthScreenProps) {
+  const [mode, setMode] = useState<Mode>(recoveryMode ? "update" : "signin")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [username, setUsername] = useState("")
+  const [displayName, setDisplayName] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [socialLoading, setSocialLoading] = useState<SocialProvider | null>(
+    null,
+  )
+  const [message, setMessage] = useState("")
+  const [errorMessage, setErrorMessage] = useState("")
+  const [recoveryReady, setRecoveryReady] = useState(!recoveryMode)
+  const [confirmationSent, setConfirmationSent] = useState(false)
+  const [resendLoading, setResendLoading] = useState(false)
+  const [resendCooldown, setResendCooldown] = useState(0)
 
   useEffect(() => {
-    if (resendCooldown <= 0) return;
+    if (resendCooldown <= 0) return
     const timer = window.setInterval(() => {
-      setResendCooldown((current) => Math.max(0, current - 1));
-    }, 1000);
-    return () => window.clearInterval(timer);
-  }, [resendCooldown]);
+      setResendCooldown((current) => Math.max(0, current - 1))
+    }, 1000)
+    return () => window.clearInterval(timer)
+  }, [resendCooldown])
 
   useEffect(() => {
-    if (!recoveryMode) return;
-    setMode('update');
+    if (!recoveryMode) return
+    setMode("update")
 
-    let mounted = true;
+    let mounted = true
     supabase.auth.getSession().then(({ data }) => {
-      if (mounted && data.session) setRecoveryReady(true);
-    });
+      if (mounted && data.session) setRecoveryReady(true)
+    })
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if ((event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') && session) {
-        setRecoveryReady(true);
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if ((event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") && session) {
+        setRecoveryReady(true)
       }
-    });
+    })
 
     return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
-  }, [recoveryMode]);
+      mounted = false
+      subscription.unsubscribe()
+    }
+  }, [recoveryMode])
 
   async function handleSubmit(event: FormEvent) {
-    event.preventDefault();
-    setLoading(true);
-    setMessage('');
-    setErrorMessage('');
+    event.preventDefault()
+    setLoading(true)
+    setMessage("")
+    setErrorMessage("")
 
-    if (mode === 'signin') {
-      const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
-      if (error) setErrorMessage(error.message);
-      setLoading(false);
-      return;
+    if (mode === "signin") {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      })
+      if (error) setErrorMessage(error.message)
+      setLoading(false)
+      return
     }
 
-    if (mode === 'forgot') {
+    if (mode === "forgot") {
       if (!email.trim()) {
-        setErrorMessage('Please enter your email address.');
-        setLoading(false);
-        return;
+        setErrorMessage("Please enter your email address.")
+        setLoading(false)
+        return
       }
 
-      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-        redirectTo: `${APP_URL}/?reset=1`,
-      });
+      const { error } = await supabase.auth.resetPasswordForEmail(
+        email.trim(),
+        {
+          redirectTo: `${APP_URL}/?reset=1`,
+        },
+      )
 
-      if (error) setErrorMessage(error.message);
-      else setMessage('Password reset email sent. Check your inbox and open the reset link.');
-      setLoading(false);
-      return;
+      if (error) setErrorMessage(error.message)
+      else
+        setMessage(
+          "Password reset email sent. Check your inbox and open the reset link.",
+        )
+      setLoading(false)
+      return
     }
 
-    if (mode === 'update') {
+    if (mode === "update") {
       if (!recoveryReady) {
-        setErrorMessage('This reset link is still being verified. Please wait a moment and try again.');
-        setLoading(false);
-        return;
+        setErrorMessage(
+          "This reset link is still being verified. Please wait a moment and try again.",
+        )
+        setLoading(false)
+        return
       }
       if (password.length < 6) {
-        setErrorMessage('Password must be at least 6 characters.');
-        setLoading(false);
-        return;
+        setErrorMessage("Password must be at least 6 characters.")
+        setLoading(false)
+        return
       }
       if (password !== confirmPassword) {
-        setErrorMessage('Passwords do not match.');
-        setLoading(false);
-        return;
+        setErrorMessage("Passwords do not match.")
+        setLoading(false)
+        return
       }
 
-      const { error } = await supabase.auth.updateUser({ password });
+      const { error } = await supabase.auth.updateUser({ password })
       if (error) {
-        setErrorMessage(error.message);
+        setErrorMessage(error.message)
       } else {
-        setMessage('Password updated successfully.');
-        window.setTimeout(() => onRecoveryComplete?.(), 700);
+        setMessage("Password updated successfully.")
+        window.setTimeout(() => onRecoveryComplete?.(), 700)
       }
-      setLoading(false);
-      return;
+      setLoading(false)
+      return
     }
 
-    const cleanUsername = username.trim();
-    const cleanDisplayName = displayName.trim();
+    const cleanUsername = username.trim()
+    const cleanDisplayName = displayName.trim()
     if (!cleanUsername || !cleanDisplayName) {
-      setErrorMessage('Please enter a username and display name.');
-      setLoading(false);
-      return;
+      setErrorMessage("Please enter a username and display name.")
+      setLoading(false)
+      return
     }
 
     const { data, error } = await supabase.auth.signUp({
@@ -163,212 +215,556 @@ export default function AuthScreen({ onBack, recoveryMode = false, onRecoveryCom
           display_name: cleanDisplayName,
         },
       },
-    });
+    })
 
     if (error) {
-      setErrorMessage(error.message);
+      setErrorMessage(error.message)
     } else if (!data.session) {
-      setConfirmationSent(true);
-      setResendCooldown(60);
-      setMessage('Account created. Check your email to confirm your account, then sign in.');
+      setConfirmationSent(true)
+      setResendCooldown(60)
+      setMessage(
+        "Account created. Check your email to confirm your account, then sign in.",
+      )
     }
-    setLoading(false);
+    setLoading(false)
   }
 
   async function handleResendConfirmation() {
-    const cleanEmail = email.trim();
-    if (!cleanEmail || resendLoading || resendCooldown > 0) return;
+    const cleanEmail = email.trim()
+    if (!cleanEmail || resendLoading || resendCooldown > 0) return
 
-    setResendLoading(true);
-    setMessage('');
-    setErrorMessage('');
+    setResendLoading(true)
+    setMessage("")
+    setErrorMessage("")
 
     const { error } = await supabase.auth.resend({
-      type: 'signup',
+      type: "signup",
       email: cleanEmail,
       options: {
         emailRedirectTo: `${APP_URL}/`,
       },
-    });
+    })
 
     if (error) {
-      const rateLimited = error.message.toLowerCase().includes('rate limit');
+      const rateLimited = error.message.toLowerCase().includes("rate limit")
       setErrorMessage(
         rateLimited
-          ? 'Too many confirmation emails were requested. Please wait a while before trying again.'
+          ? "Too many confirmation emails were requested. Please wait a while before trying again."
           : error.message,
-      );
+      )
     } else {
-      setMessage('Confirmation email sent again. Check your inbox and spam folder.');
-      setResendCooldown(60);
+      setMessage(
+        "Confirmation email sent again. Check your inbox and spam folder.",
+      )
+      setResendCooldown(60)
     }
 
-    setResendLoading(false);
+    setResendLoading(false)
   }
 
   async function handleSocialAuth(provider: SocialProvider) {
-    setSocialLoading(provider);
-    setMessage('');
-    setErrorMessage('');
+    setSocialLoading(provider)
+    setMessage("")
+    setErrorMessage("")
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: { redirectTo: `${APP_URL}/` },
-    });
+    })
 
     if (error) {
-      setErrorMessage(error.message);
-      setSocialLoading(null);
+      setErrorMessage(error.message)
+      setSocialLoading(null)
     }
   }
 
   function changeMode(nextMode: Mode) {
-    setMode(nextMode);
-    setPassword('');
-    setConfirmPassword('');
-    setMessage('');
-    setErrorMessage('');
-    setConfirmationSent(false);
-    setResendCooldown(0);
+    setMode(nextMode)
+    setPassword("")
+    setConfirmPassword("")
+    setMessage("")
+    setErrorMessage("")
+    setConfirmationSent(false)
+    setResendCooldown(0)
   }
 
   const socialButtons = (
     <div className="space-y-3">
       <div className="flex items-center gap-3 py-1">
-        <div className="h-px flex-1" style={{ backgroundColor: '#E8E8E8' }} />
-        <span className="text-[12px]" style={{ color: '#A0A0A0' }}>or continue with</span>
-        <div className="h-px flex-1" style={{ backgroundColor: '#E8E8E8' }} />
+        <div className="h-px flex-1" style={{ backgroundColor: "#E8E8E8" }} />
+        <span className="text-[12px]" style={{ color: "#A0A0A0" }}>
+          or continue with
+        </span>
+        <div className="h-px flex-1" style={{ backgroundColor: "#E8E8E8" }} />
       </div>
-      <button type="button" onClick={() => handleSocialAuth('google')} disabled={Boolean(socialLoading)} className="w-full h-12 rounded-[8px] border flex items-center justify-center gap-3 text-[14px] font-semibold disabled:opacity-60" style={{ borderColor: '#E5E5E5', backgroundColor: '#FFFFFF', color: '#1F1F1F' }}>
-        <GoogleIcon />{socialLoading === 'google' ? 'Connecting…' : 'Continue with Google'}
+      <button
+        type="button"
+        onClick={() => handleSocialAuth("google")}
+        disabled={Boolean(socialLoading)}
+        className="w-full h-12 rounded-[8px] border flex items-center justify-center gap-3 text-[14px] font-semibold disabled:opacity-60"
+        style={{
+          borderColor: "#E5E5E5",
+          backgroundColor: "#FFFFFF",
+          color: "#1F1F1F",
+        }}
+      >
+        <GoogleIcon />
+        {socialLoading === "google" ? "Connecting…" : "Continue with Google"}
       </button>
-      <button type="button" onClick={() => handleSocialAuth('apple')} disabled={Boolean(socialLoading)} className="w-full h-12 rounded-[8px] flex items-center justify-center gap-3 text-[14px] font-semibold disabled:opacity-60" style={{ backgroundColor: '#000000', color: '#FFFFFF' }}>
-        <AppleIcon />{socialLoading === 'apple' ? 'Connecting…' : 'Continue with Apple'}
+      <button
+        type="button"
+        onClick={() => handleSocialAuth("apple")}
+        disabled={Boolean(socialLoading)}
+        className="w-full h-12 rounded-[8px] flex items-center justify-center gap-3 text-[14px] font-semibold disabled:opacity-60"
+        style={{ backgroundColor: "#000000", color: "#FFFFFF" }}
+      >
+        <AppleIcon />
+        {socialLoading === "apple" ? "Connecting…" : "Continue with Apple"}
       </button>
     </div>
-  );
+  )
 
-  if (mode === 'forgot') {
+  if (mode === "forgot") {
     return (
       <div className="pb-28">
         <div className="px-6 pt-[72px]">
-          <BackButton onClick={() => changeMode('signin')} />
-          <div className="flex justify-center mb-6"><PickleLogo size={28} iconSize={88} stacked /></div>
+          <BackButton onClick={() => changeMode("signin")} />
+          <div className="flex justify-center mb-6">
+            <PickleLogo size={28} iconSize={88} stacked />
+          </div>
           <div className="text-center mb-7">
-            <h1 className="font-bold text-[24px]" style={{ color: '#1F1F1F' }}>Reset your password</h1>
-            <p className="text-[14px] mt-2" style={{ color: '#777777' }}>Enter your email and we'll send you a reset link.</p>
+            <h1 className="font-bold text-[24px]" style={{ color: "#1F1F1F" }}>
+              Reset your password
+            </h1>
+            <p className="text-[14px] mt-2" style={{ color: "#777777" }}>
+              Enter your email and we'll send you a reset link.
+            </p>
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-[13px] font-semibold mb-2" style={{ color: '#444444' }}>Email</label>
-              <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]" style={{ borderColor: '#E5E5E5', backgroundColor: '#FAFAFA', color: '#1F1F1F' }} placeholder="you@example.com" autoCapitalize="none" autoComplete="email" />
+              <label
+                className="block text-[13px] font-semibold mb-2"
+                style={{ color: "#444444" }}
+              >
+                Email
+              </label>
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]"
+                style={{
+                  borderColor: "#E5E5E5",
+                  backgroundColor: "#FAFAFA",
+                  color: "#1F1F1F",
+                }}
+                placeholder="you@example.com"
+                autoCapitalize="none"
+                autoComplete="email"
+              />
             </div>
-            {errorMessage && <p className="text-[13px] leading-5" style={{ color: '#C53D2E' }}>{errorMessage}</p>}
-            {message && <p className="text-[13px] leading-5" style={{ color: '#5F6F52' }}>{message}</p>}
-            <button type="submit" disabled={loading} className="w-full h-12 rounded-[8px] text-white text-[15px] font-semibold disabled:opacity-60" style={{ backgroundColor: '#F26B21' }}>
-              {loading ? 'Sending…' : 'Send reset link'}
+            {errorMessage && (
+              <p className="text-[13px] leading-5" style={{ color: "#C53D2E" }}>
+                {errorMessage}
+              </p>
+            )}
+            {message && (
+              <p className="text-[13px] leading-5" style={{ color: "#5F6F52" }}>
+                {message}
+              </p>
+            )}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full h-12 rounded-[8px] text-white text-[15px] font-semibold disabled:opacity-60"
+              style={{ backgroundColor: "#F26B21" }}
+            >
+              {loading ? "Sending…" : "Send reset link"}
             </button>
           </form>
         </div>
       </div>
-    );
+    )
   }
 
-  if (mode === 'update') {
+  if (mode === "update") {
     return (
       <div className="pb-28">
         <div className="px-6 pt-[72px]">
-          <div className="flex justify-center mb-6"><PickleLogo size={28} iconSize={88} stacked /></div>
+          <div className="flex justify-center mb-6">
+            <PickleLogo size={28} iconSize={88} stacked />
+          </div>
           <div className="text-center mb-7">
-            <h1 className="font-bold text-[24px]" style={{ color: '#1F1F1F' }}>Choose a new password</h1>
-            <p className="text-[14px] mt-2" style={{ color: '#777777' }}>{recoveryReady ? 'Enter and confirm your new password.' : 'Verifying your reset link…'}</p>
+            <h1 className="font-bold text-[24px]" style={{ color: "#1F1F1F" }}>
+              Choose a new password
+            </h1>
+            <p className="text-[14px] mt-2" style={{ color: "#777777" }}>
+              {recoveryReady
+                ? "Enter and confirm your new password."
+                : "Verifying your reset link…"}
+            </p>
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-[13px] font-semibold mb-2" style={{ color: '#444444' }}>New password</label>
-              <input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]" style={{ borderColor: '#E5E5E5', backgroundColor: '#FAFAFA', color: '#1F1F1F' }} placeholder="At least 6 characters" autoComplete="new-password" />
+              <label
+                className="block text-[13px] font-semibold mb-2"
+                style={{ color: "#444444" }}
+              >
+                New password
+              </label>
+              <input
+                type="password"
+                required
+                minLength={6}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]"
+                style={{
+                  borderColor: "#E5E5E5",
+                  backgroundColor: "#FAFAFA",
+                  color: "#1F1F1F",
+                }}
+                placeholder="At least 6 characters"
+                autoComplete="new-password"
+              />
             </div>
             <div>
-              <label className="block text-[13px] font-semibold mb-2" style={{ color: '#444444' }}>Confirm new password</label>
-              <input type="password" required minLength={6} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]" style={{ borderColor: '#E5E5E5', backgroundColor: '#FAFAFA', color: '#1F1F1F' }} placeholder="Enter it again" autoComplete="new-password" />
+              <label
+                className="block text-[13px] font-semibold mb-2"
+                style={{ color: "#444444" }}
+              >
+                Confirm new password
+              </label>
+              <input
+                type="password"
+                required
+                minLength={6}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]"
+                style={{
+                  borderColor: "#E5E5E5",
+                  backgroundColor: "#FAFAFA",
+                  color: "#1F1F1F",
+                }}
+                placeholder="Enter it again"
+                autoComplete="new-password"
+              />
             </div>
-            {errorMessage && <p className="text-[13px] leading-5" style={{ color: '#C53D2E' }}>{errorMessage}</p>}
-            {message && <p className="text-[13px] leading-5" style={{ color: '#5F6F52' }}>{message}</p>}
-            <button type="submit" disabled={loading || !recoveryReady} className="w-full h-12 rounded-[8px] text-white text-[15px] font-semibold disabled:opacity-50" style={{ backgroundColor: '#F26B21' }}>
-              {loading ? 'Updating…' : 'Update password'}
+            {errorMessage && (
+              <p className="text-[13px] leading-5" style={{ color: "#C53D2E" }}>
+                {errorMessage}
+              </p>
+            )}
+            {message && (
+              <p className="text-[13px] leading-5" style={{ color: "#5F6F52" }}>
+                {message}
+              </p>
+            )}
+            <button
+              type="submit"
+              disabled={loading || !recoveryReady}
+              className="w-full h-12 rounded-[8px] text-white text-[15px] font-semibold disabled:opacity-50"
+              style={{ backgroundColor: "#F26B21" }}
+            >
+              {loading ? "Updating…" : "Update password"}
             </button>
           </form>
         </div>
       </div>
-    );
+    )
   }
 
-  if (mode === 'signup') {
+  if (mode === "signup") {
     return (
       <div className="pb-28">
         <div className="px-6 pt-[72px]">
-          <BackButton onClick={() => changeMode('signin')} />
-          <div className="flex justify-center mb-6"><PickleLogo size={28} iconSize={88} stacked /></div>
+          <BackButton onClick={() => changeMode("signin")} />
+          <div className="flex justify-center mb-6">
+            <PickleLogo size={28} iconSize={88} stacked />
+          </div>
           <div className="text-center mb-7">
-            <h1 className="font-bold text-[24px]" style={{ color: '#1F1F1F' }}>Create your account</h1>
-            <p className="text-[14px] mt-2" style={{ color: '#777777' }}>Save recipes and build your own Pickle profile.</p>
+            <h1 className="font-bold text-[24px]" style={{ color: "#1F1F1F" }}>
+              Create your account
+            </h1>
+            <p className="text-[14px] mt-2" style={{ color: "#777777" }}>
+              Save recipes and build your own Pickle profile.
+            </p>
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div><label className="block text-[13px] font-semibold mb-2" style={{ color: '#444444' }}>Display name</label><input value={displayName} onChange={(e) => setDisplayName(e.target.value)} className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]" style={{ borderColor: '#E5E5E5', backgroundColor: '#FAFAFA', color: '#1F1F1F' }} placeholder="Your name" autoComplete="name" /></div>
-            <div><label className="block text-[13px] font-semibold mb-2" style={{ color: '#444444' }}>Username</label><input value={username} onChange={(e) => setUsername(e.target.value.replace(/\s/g, ''))} className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]" style={{ borderColor: '#E5E5E5', backgroundColor: '#FAFAFA', color: '#1F1F1F' }} placeholder="picklefan" autoCapitalize="none" autoComplete="username" /></div>
-            <div><label className="block text-[13px] font-semibold mb-2" style={{ color: '#444444' }}>Email</label><input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]" style={{ borderColor: '#E5E5E5', backgroundColor: '#FAFAFA', color: '#1F1F1F' }} placeholder="you@example.com" autoCapitalize="none" autoComplete="email" /></div>
-            <div><label className="block text-[13px] font-semibold mb-2" style={{ color: '#444444' }}>Password</label><input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]" style={{ borderColor: '#E5E5E5', backgroundColor: '#FAFAFA', color: '#1F1F1F' }} placeholder="At least 6 characters" autoComplete="new-password" /></div>
-            {errorMessage && <p className="text-[13px] leading-5" style={{ color: '#C53D2E' }}>{errorMessage}</p>}
-            {message && <p className="text-[13px] leading-5" style={{ color: '#5F6F52' }}>{message}</p>}
+            <div>
+              <label
+                className="block text-[13px] font-semibold mb-2"
+                style={{ color: "#444444" }}
+              >
+                Display name
+              </label>
+              <input
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]"
+                style={{
+                  borderColor: "#E5E5E5",
+                  backgroundColor: "#FAFAFA",
+                  color: "#1F1F1F",
+                }}
+                placeholder="Your name"
+                autoComplete="name"
+              />
+            </div>
+            <div>
+              <label
+                className="block text-[13px] font-semibold mb-2"
+                style={{ color: "#444444" }}
+              >
+                Username
+              </label>
+              <input
+                value={username}
+                onChange={(e) => setUsername(e.target.value.replace(/\s/g, ""))}
+                className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]"
+                style={{
+                  borderColor: "#E5E5E5",
+                  backgroundColor: "#FAFAFA",
+                  color: "#1F1F1F",
+                }}
+                placeholder="picklefan"
+                autoCapitalize="none"
+                autoComplete="username"
+              />
+            </div>
+            <div>
+              <label
+                className="block text-[13px] font-semibold mb-2"
+                style={{ color: "#444444" }}
+              >
+                Email
+              </label>
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]"
+                style={{
+                  borderColor: "#E5E5E5",
+                  backgroundColor: "#FAFAFA",
+                  color: "#1F1F1F",
+                }}
+                placeholder="you@example.com"
+                autoCapitalize="none"
+                autoComplete="email"
+              />
+            </div>
+            <div>
+              <label
+                className="block text-[13px] font-semibold mb-2"
+                style={{ color: "#444444" }}
+              >
+                Password
+              </label>
+              <input
+                type="password"
+                required
+                minLength={6}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]"
+                style={{
+                  borderColor: "#E5E5E5",
+                  backgroundColor: "#FAFAFA",
+                  color: "#1F1F1F",
+                }}
+                placeholder="At least 6 characters"
+                autoComplete="new-password"
+              />
+            </div>
+            {errorMessage && (
+              <p className="text-[13px] leading-5" style={{ color: "#C53D2E" }}>
+                {errorMessage}
+              </p>
+            )}
+            {message && (
+              <p className="text-[13px] leading-5" style={{ color: "#5F6F52" }}>
+                {message}
+              </p>
+            )}
             {confirmationSent && (
-              <div className="rounded-[12px] px-4 py-3 text-center" style={{ backgroundColor: '#FFF8F3' }}>
-                <p className="text-[12px]" style={{ color: '#6F6F6F' }}>
-                  Didn't get your email?{' '}
+              <div
+                className="rounded-[12px] px-4 py-3 text-center"
+                style={{ backgroundColor: "#FFF8F3" }}
+              >
+                <p className="text-[12px]" style={{ color: "#6F6F6F" }}>
+                  Didn't get your email?{" "}
                   <button
                     type="button"
                     onClick={handleResendConfirmation}
                     disabled={resendLoading || resendCooldown > 0}
                     className="font-semibold disabled:opacity-50"
-                    style={{ color: '#F26B21' }}
+                    style={{ color: "#F26B21" }}
                   >
-                    {resendLoading ? 'Sending…' : resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend'}
+                    {resendLoading
+                      ? "Sending…"
+                      : resendCooldown > 0
+                        ? `Resend in ${resendCooldown}s`
+                        : "Resend"}
                   </button>
                 </p>
               </div>
             )}
-            <button type="submit" disabled={loading || Boolean(socialLoading) || confirmationSent} className="w-full h-12 rounded-[8px] text-white text-[15px] font-semibold disabled:opacity-60" style={{ backgroundColor: '#F26B21' }}>{loading ? 'Please wait…' : confirmationSent ? 'Check your email' : 'Create account'}</button>
+            <button
+              type="submit"
+              disabled={loading || Boolean(socialLoading) || confirmationSent}
+              className="w-full h-12 rounded-[8px] text-white text-[15px] font-semibold disabled:opacity-60"
+              style={{ backgroundColor: "#F26B21" }}
+            >
+              {loading
+                ? "Please wait…"
+                : confirmationSent
+                  ? "Check your email"
+                  : "Create account"}
+            </button>
             {!confirmationSent && socialButtons}
-            <div className="text-center"><button type="button" onClick={() => changeMode('signin')} className="text-[12px] font-normal" style={{ color: '#A0A0A0' }}>Already have an account? Log in</button></div>
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={() => changeMode("signin")}
+                className="text-[12px] font-normal"
+                style={{ color: "#A0A0A0" }}
+              >
+                Already have an account? Log in
+              </button>
+            </div>
           </form>
         </div>
       </div>
-    );
+    )
   }
 
   return (
     <div className="pb-28">
       <div className="mobile-back-row px-4 pt-5">
-        <button type="button" onClick={onBack} aria-label="Back" className="w-9 h-9 flex items-center justify-center" style={{ color: '#1F1F1F' }}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+        <button
+          type="button"
+          onClick={onBack}
+          aria-label="Back"
+          className="w-9 h-9 flex items-center justify-center"
+          style={{ color: "#1F1F1F" }}
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
         </button>
       </div>
       <div className="px-6 pt-[25px]">
-        <div className="flex justify-center mb-6"><PickleLogo size={28} iconSize={88} stacked /></div>
-        <div className="text-center mb-7"><h1 className="font-bold text-[24px]" style={{ color: '#1F1F1F' }}>Welcome back</h1><p className="text-[14px] mt-2" style={{ color: '#777777' }}>Sign in to keep your Pickle activity with you.</p></div>
+        <div className="flex justify-center mb-6">
+          <PickleLogo size={28} iconSize={88} stacked />
+        </div>
+        <div className="text-center mb-7">
+          <h1 className="font-bold text-[24px]" style={{ color: "#1F1F1F" }}>
+            Welcome back
+          </h1>
+          <p className="text-[14px] mt-2" style={{ color: "#777777" }}>
+            Sign in to keep your Pickle activity with you.
+          </p>
+        </div>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div><label className="block text-[13px] font-semibold mb-2" style={{ color: '#444444' }}>Email</label><input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]" style={{ borderColor: '#E5E5E5', backgroundColor: '#FAFAFA', color: '#1F1F1F' }} placeholder="you@example.com" autoCapitalize="none" autoComplete="email" /></div>
-          <div><label className="block text-[13px] font-semibold mb-2" style={{ color: '#444444' }}>Password</label><input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]" style={{ borderColor: '#E5E5E5', backgroundColor: '#FAFAFA', color: '#1F1F1F' }} placeholder="At least 6 characters" autoComplete="current-password" /></div>
-          {errorMessage && <p className="text-[13px] leading-5" style={{ color: '#C53D2E' }}>{errorMessage}</p>}
-          {message && <p className="text-[13px] leading-5" style={{ color: '#5F6F52' }}>{message}</p>}
-          <button type="submit" disabled={loading || Boolean(socialLoading)} className="w-full h-12 rounded-[8px] text-white text-[15px] font-semibold disabled:opacity-60" style={{ backgroundColor: '#F26B21' }}>{loading ? 'Please wait…' : 'Log in'}</button>
+          <div>
+            <label
+              className="block text-[13px] font-semibold mb-2"
+              style={{ color: "#444444" }}
+            >
+              Email
+            </label>
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]"
+              style={{
+                borderColor: "#E5E5E5",
+                backgroundColor: "#FAFAFA",
+                color: "#1F1F1F",
+              }}
+              placeholder="you@example.com"
+              autoCapitalize="none"
+              autoComplete="email"
+            />
+          </div>
+          <div>
+            <label
+              className="block text-[13px] font-semibold mb-2"
+              style={{ color: "#444444" }}
+            >
+              Password
+            </label>
+            <input
+              type="password"
+              required
+              minLength={6}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]"
+              style={{
+                borderColor: "#E5E5E5",
+                backgroundColor: "#FAFAFA",
+                color: "#1F1F1F",
+              }}
+              placeholder="At least 6 characters"
+              autoComplete="current-password"
+            />
+          </div>
+          {errorMessage && (
+            <p className="text-[13px] leading-5" style={{ color: "#C53D2E" }}>
+              {errorMessage}
+            </p>
+          )}
+          {message && (
+            <p className="text-[13px] leading-5" style={{ color: "#5F6F52" }}>
+              {message}
+            </p>
+          )}
+          <button
+            type="submit"
+            disabled={loading || Boolean(socialLoading)}
+            className="w-full h-12 rounded-[8px] text-white text-[15px] font-semibold disabled:opacity-60"
+            style={{ backgroundColor: "#F26B21" }}
+          >
+            {loading ? "Please wait…" : "Log in"}
+          </button>
           {socialButtons}
           <div className="flex items-center justify-center gap-3 text-[12px]">
-            <button type="button" onClick={() => changeMode('signup')} className="font-normal" style={{ color: '#A0A0A0' }}>Sign up</button>
-            <span style={{ color: '#D0D0D0' }}>·</span>
-            <button type="button" onClick={() => changeMode('forgot')} className="font-normal" style={{ color: '#A0A0A0' }}>Forgot password?</button>
+            <button
+              type="button"
+              onClick={() => changeMode("signup")}
+              className="font-normal"
+              style={{ color: "#A0A0A0" }}
+            >
+              Sign up
+            </button>
+            <span style={{ color: "#D0D0D0" }}>·</span>
+            <button
+              type="button"
+              onClick={() => changeMode("forgot")}
+              className="font-normal"
+              style={{ color: "#A0A0A0" }}
+            >
+              Forgot password?
+            </button>
           </div>
         </form>
       </div>
     </div>
-  );
+  )
 }

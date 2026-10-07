@@ -1,70 +1,177 @@
-import RetryState from './RetryState';
+import { formatTime } from "./lib/format"
+import RetryState from "./RetryState"
 
 type Recipe = {
-  id: string;
-  title: string;
-  difficulty: string;
-  total_time_minutes: number;
-  image: string;
-};
-
-type Props = {
-  featured: Recipe[];
-  trending: Recipe[];
-  quick: Recipe[];
-  party: Recipe[];
-  loading: boolean;
-  error: string;
-  onRetry: () => void;
-  onSelect: (id: string) => void;
-  onCollection: (title: string) => void;
-  onKeyword: (keyword: string) => void;
-};
-
-function time(minutes: number | null, compact = false) {
-  if (minutes === null) return '—';
-  const unit = compact ? 'min' : ' min';
-  return minutes < 60 ? `${minutes}${unit}` : `${Math.floor(minutes / 60)}${compact ? 'h' : ' hr'}${minutes % 60 ? ` ${minutes % 60}${unit}` : ''}`;
+  id: string
+  title: string
+  difficulty: string
+  total_time_minutes: number
+  image: string
 }
 
-function RecipeCollection({ title, recipes, onSelect, onMore }: { title: string; recipes: Recipe[]; onSelect: Props['onSelect']; onMore: () => void }) {
-  if (recipes.length === 0) return null;
+type Props = {
+  featured: Recipe[]
+  trending: Recipe[]
+  quick: Recipe[]
+  party: Recipe[]
+  loading: boolean
+  error: string
+  onRetry: () => void
+  onSelect: (id: string) => void
+  onCollection: (title: string) => void
+  onKeyword: (keyword: string) => void
+}
+
+function RecipeCollection({
+  title,
+  recipes,
+  onSelect,
+  onMore,
+}: {
+  title: string
+  recipes: Recipe[]
+  onSelect: Props["onSelect"]
+  onMore: () => void
+}) {
+  if (recipes.length === 0) return null
   return (
     <section className="web-collection">
-      <div className="web-section-heading"><h2>{title}</h2><button type="button" onClick={onMore}>View all</button></div>
+      <div className="web-section-heading">
+        <h2>{title}</h2>
+        <button type="button" onClick={onMore}>
+          View all
+        </button>
+      </div>
       <div className="web-recipe-grid">
         {recipes.slice(0, 4).map((recipe) => (
-          <button type="button" key={recipe.id} className="web-recipe-card" onClick={() => onSelect(recipe.id)}>
-            <div className="web-card-image"><img src={recipe.image} alt={recipe.title} loading="lazy" /></div>
-            <div className="web-card-copy"><p className="web-card-meta">Filipino <span>·</span> {recipe.difficulty || 'Recipe'} <span>·</span> {time(recipe.total_time_minutes, true)}</p><h3>{recipe.title}</h3></div>
+          <button
+            type="button"
+            key={recipe.id}
+            className="web-recipe-card"
+            onClick={() => onSelect(recipe.id)}
+          >
+            <div className="web-card-image">
+              <img src={recipe.image} alt={recipe.title} loading="lazy" />
+            </div>
+            <div className="web-card-copy">
+              <p className="web-card-meta">
+                Filipino <span>·</span> {recipe.difficulty || "Recipe"}{" "}
+                <span>·</span>{" "}
+                {formatTime(recipe.total_time_minutes, "compact")}
+              </p>
+              <h3>{recipe.title}</h3>
+            </div>
           </button>
         ))}
       </div>
     </section>
-  );
+  )
 }
 
-export default function DesktopHome({ featured, trending, quick, party, loading, error, onRetry, onSelect, onCollection, onKeyword }: Props) {
-  const lead = featured[0];
+export default function DesktopHome({
+  featured,
+  trending,
+  quick,
+  party,
+  loading,
+  error,
+  onRetry,
+  onSelect,
+  onCollection,
+  onKeyword,
+}: Props) {
+  const lead = featured[0]
   return (
     <div className="desktop-home">
-      <div className="web-home-heading"><div><h1>What are we cooking today?</h1><p>Find your next recipe.</p></div></div>
-      {loading ? <div className="web-loading" role="status">Loading recipes…</div> : error ? <RetryState title="Couldn't load recipes" message="Please check your connection and try again." onRetry={onRetry} /> : !lead ? <div className="web-loading">No recipes available yet.</div> : <>
-        <section className="web-featured" aria-label="Featured recipes">
-          <button type="button" className="web-featured-lead" onClick={() => onSelect(lead.id)}>
-            <img src={lead.image} alt={lead.title} fetchPriority="high" />
-            <div className="web-featured-copy"><span className="web-featured-label">Featured recipe</span><h2>{lead.title}</h2><p>{lead.difficulty || 'Filipino'} <span>·</span> {time(lead.total_time_minutes)}</p><span className="web-featured-cta">View recipe</span></div>
-          </button>
-          <div className="web-featured-side">
-            <div className="web-side-heading"><span className="web-eyebrow">A LITTLE INSPIRATION</span><h2>On the menu</h2></div>
-            {featured.slice(1, 3).map((recipe) => <button type="button" className="web-menu-card" key={recipe.id} onClick={() => onSelect(recipe.id)}><img src={recipe.image} alt={recipe.title} /><div><p>{recipe.difficulty || 'Filipino'} · {time(recipe.total_time_minutes)}</p><h3>{recipe.title}</h3><span>View recipe</span></div></button>)}
-            <button type="button" className="web-browse-all" onClick={() => onKeyword('')}>Explore all recipes</button>
-          </div>
-        </section>
-        <RecipeCollection title="Trending Recipes" recipes={trending} onSelect={onSelect} onMore={() => onCollection('Trending Recipes')} />
-        <RecipeCollection title="Under 30min" recipes={quick} onSelect={onSelect} onMore={() => onCollection('Under 30min')} />
-        <RecipeCollection title="Party Packs" recipes={party} onSelect={onSelect} onMore={() => onCollection('Party Packs')} />
-      </>}
+      <div className="web-home-heading">
+        <div>
+          <h1>What are we cooking today?</h1>
+          <p>Find your next recipe.</p>
+        </div>
+      </div>
+      {loading ? (
+        <div className="web-loading" role="status">
+          Loading recipes…
+        </div>
+      ) : error ? (
+        <RetryState
+          title="Couldn't load recipes"
+          message="Please check your connection and try again."
+          onRetry={onRetry}
+        />
+      ) : !lead ? (
+        <div className="web-loading">No recipes available yet.</div>
+      ) : (
+        <>
+          <section className="web-featured" aria-label="Featured recipes">
+            <button
+              type="button"
+              className="web-featured-lead"
+              onClick={() => onSelect(lead.id)}
+            >
+              <img src={lead.image} alt={lead.title} fetchPriority="high" />
+              <div className="web-featured-copy">
+                <span className="web-featured-label">Featured recipe</span>
+                <h2>{lead.title}</h2>
+                <p>
+                  {lead.difficulty || "Filipino"} <span>·</span>{" "}
+                  {formatTime(lead.total_time_minutes, "readable")}
+                </p>
+                <span className="web-featured-cta">View recipe</span>
+              </div>
+            </button>
+            <div className="web-featured-side">
+              <div className="web-side-heading">
+                <span className="web-eyebrow">A LITTLE INSPIRATION</span>
+                <h2>On the menu</h2>
+              </div>
+              {featured.slice(1, 3).map((recipe) => (
+                <button
+                  type="button"
+                  className="web-menu-card"
+                  key={recipe.id}
+                  onClick={() => onSelect(recipe.id)}
+                >
+                  <img src={recipe.image} alt={recipe.title} />
+                  <div>
+                    <p>
+                      {recipe.difficulty || "Filipino"} ·{" "}
+                      {formatTime(recipe.total_time_minutes, "readable")}
+                    </p>
+                    <h3>{recipe.title}</h3>
+                    <span>View recipe</span>
+                  </div>
+                </button>
+              ))}
+              <button
+                type="button"
+                className="web-browse-all"
+                onClick={() => onKeyword("")}
+              >
+                Explore all recipes
+              </button>
+            </div>
+          </section>
+          <RecipeCollection
+            title="Trending Recipes"
+            recipes={trending}
+            onSelect={onSelect}
+            onMore={() => onCollection("Trending Recipes")}
+          />
+          <RecipeCollection
+            title="Under 30min"
+            recipes={quick}
+            onSelect={onSelect}
+            onMore={() => onCollection("Under 30min")}
+          />
+          <RecipeCollection
+            title="Party Packs"
+            recipes={party}
+            onSelect={onSelect}
+            onMore={() => onCollection("Party Packs")}
+          />
+        </>
+      )}
     </div>
-  );
+  )
 }
