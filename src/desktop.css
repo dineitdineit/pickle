@@ -112,7 +112,7 @@
   .web-saved-grid > div > button:first-child p { white-space: normal; }
   .recipe-detail { display: grid; grid-template-columns: minmax(0,1fr); gap: 28px; width: 100%; }
   .desktop-screen > .recipe-detail { max-width: 880px; }
-  .recipe-detail-hero { height: auto; border-radius: 24px; overflow: hidden; }
+  .recipe-detail-hero { width: 100%; max-width: 720px; justify-self: center; height: auto; border-radius: 24px; overflow: hidden; }
   .recipe-detail-hero > img { display: block; width: 100%; height: auto; object-fit: contain; }
   .recipe-detail-hero > .absolute.inset-0 { display: none; }
   .recipe-detail-body { display: contents; }
