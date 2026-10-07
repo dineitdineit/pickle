@@ -4,6 +4,8 @@ import { supabase } from './lib/supabase';
 type Mode = 'signin' | 'signup' | 'forgot' | 'update';
 type SocialProvider = 'google' | 'apple';
 
+const APP_URL = 'https://getpickleapp.com';
+
 type AuthScreenProps = {
   onBack: () => void;
   recoveryMode?: boolean;
@@ -104,13 +106,8 @@ export default function AuthScreen({ onBack, recoveryMode = false, onRecoveryCom
         return;
       }
 
-      const redirectUrl = new URL(window.location.href);
-      redirectUrl.search = '';
-      redirectUrl.hash = '';
-      redirectUrl.searchParams.set('reset', '1');
-
       const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-        redirectTo: redirectUrl.toString(),
+        redirectTo: `${APP_URL}/?reset=1`,
       });
 
       if (error) setErrorMessage(error.message);
@@ -159,6 +156,7 @@ export default function AuthScreen({ onBack, recoveryMode = false, onRecoveryCom
       email: email.trim(),
       password,
       options: {
+        emailRedirectTo: `${APP_URL}/`,
         data: {
           username: cleanUsername,
           display_name: cleanDisplayName,
@@ -188,7 +186,7 @@ export default function AuthScreen({ onBack, recoveryMode = false, onRecoveryCom
       type: 'signup',
       email: cleanEmail,
       options: {
-        emailRedirectTo: `${window.location.origin}/`,
+        emailRedirectTo: `${APP_URL}/`,
       },
     });
 
@@ -214,7 +212,7 @@ export default function AuthScreen({ onBack, recoveryMode = false, onRecoveryCom
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
-      options: { redirectTo: `${window.location.origin}/` },
+      options: { redirectTo: `${APP_URL}/` },
     });
 
     if (error) {
