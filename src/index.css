@@ -201,3 +201,8 @@ div.mb-8 > div.px-4.mb-4 + div.relative.select-none {
   margin-left: 16px;
   margin-right: 16px;
 }
+
+/* Admin analytics: keep summary metrics focused; raw recent activity stays stored for future use. */
+main.max-w-7xl div[class*="xl:grid-cols-[1.4fr_1fr]"] + section {
+  display: none !important;
+}
