@@ -106,12 +106,6 @@
   .web-result-grid > button > div:nth-child(2) > p { white-space: normal; font-size: 18px; }
   .web-result-grid > button > svg { display: none; }
   .web-result-grid > button:hover img { transform: scale(1.04); transition: transform 250ms; }
-  .web-saved-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 20px; }
-  .web-saved-grid > p { grid-column: 1/-1; }
-  .web-saved-grid > div { border: 1px solid var(--web-line) !important; border-radius: 16px; padding: 16px; align-items: flex-start; }
-  .web-saved-grid > div > button:first-child { flex-direction: column; align-items: stretch; }
-  .web-saved-grid > div > button:first-child > div:first-child { width: 100% !important; height: auto !important; aspect-ratio: 4/3; }
-  .web-saved-grid > div > button:first-child p { white-space: normal; }
   .recipe-detail { display: grid; grid-template-columns: minmax(0,1fr); gap: 28px; width: 100%; }
   .desktop-screen > .recipe-detail { max-width: 880px; }
   .recipe-detail-hero { width: 100%; max-width: 720px; justify-self: center; height: auto; border-radius: 24px; overflow: hidden; }
@@ -156,4 +150,23 @@
 
 @media (prefers-reduced-motion: reduce) {
   .pickle-web *, .pickle-web *::after { scroll-behavior: auto !important; transition: none !important; }
+}
+
+/* Saved cards share the same structure on mobile and desktop. */
+.saved-recipe-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 28px 16px; padding: 0 16px; }
+.saved-recipe-error { grid-column: 1/-1; }
+.saved-recipe-card { position: relative; min-width: 0; text-align: center; }
+.saved-recipe-open { display: block; width: 100%; text-align: inherit; }
+.saved-recipe-photo { aspect-ratio: 1; border-radius: 18px; overflow: hidden; background: #f5f5f5; }
+.saved-recipe-photo img { width: 100%; height: 100%; object-fit: cover; }
+.saved-recipe-title { font-size: 16px; font-weight: 600; line-height: 1.4; color: #1f1f1f; margin: 14px 0 8px; }
+.saved-recipe-tags { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; color: #6f6f6f; font-size: 12px; }
+.saved-recipe-tags span { background: #f5f5f5; border-radius: 999px; padding: 3px 8px; }
+.saved-recipe-toggle { position: absolute; top: 12px; right: 12px; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #fff; color: #6f6f6f; box-shadow: 0 2px 8px #0002; }
+.saved-recipe-toggle[aria-pressed="true"] { color: #f26b21; }
+.saved-recipe-toggle:disabled { opacity: .6; cursor: wait; }
+.saved-recipe-open:focus-visible, .saved-recipe-toggle:focus-visible { outline: 3px solid #f26b21; outline-offset: 3px; }
+@media (min-width:1024px) {
+  .saved-recipe-grid { grid-template-columns: repeat(4,minmax(0,1fr)); gap: 40px 24px; }
+  .saved-recipe-title { font-size: 18px; }
 }
