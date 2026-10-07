@@ -31,7 +31,6 @@
   .web-header-inner { max-width: 1320px; margin: auto; padding: 0 40px; min-height: 88px; display: flex; gap: 32px; align-items: center; }
   .web-brand { display: flex; gap: 10px; align-items: center; font-size: 28px; font-weight: 700; letter-spacing: -1.3px; flex-shrink: 0; }
   .web-brand img { width: 40px; height: 40px; border-radius: 12px; }
-  .web-brand-dot { color: var(--web-orange); }
   .web-navigation { display: flex; align-items: stretch; gap: 24px; align-self: stretch; flex-shrink: 0; }
   .web-navigation button { font-size: 14px; font-weight: 600; color: var(--web-muted); position: relative; }
   .web-navigation button[aria-current="page"] { color: var(--web-orange); }
@@ -91,7 +90,6 @@
   .web-card-meta span { margin: 0 6px; }
   .web-card-copy h3 { font-size: 18px; font-weight: 600; line-height: 1.4; }
   .web-footer { max-width: 1240px; margin: auto; padding: 24px 0 32px; border-top: 1px solid var(--web-line); display: flex; gap: 24px; align-items: center; font-size: 14px; color: var(--web-muted); }
-  .web-footer > span:first-child { color: var(--web-ink); font-size: 21px; font-weight: 700; }
   .web-footer > button { margin-left: auto; }
   /* Existing screen features share their data and actions with the web shell. */
   .desktop-account-screen { max-width: 640px; }

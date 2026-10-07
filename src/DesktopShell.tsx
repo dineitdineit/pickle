@@ -1,3 +1,4 @@
+import PickleLogo from './PickleLogo';
 import type { FormEvent, ReactNode } from 'react';
 
 type DesktopShellProps = {
@@ -24,8 +25,7 @@ export default function DesktopShell({ children, activeNav, searching, accountLa
       <header className="web-header">
         <div className="web-header-inner">
           <button type="button" className="web-brand" onClick={() => onNavigate(0)} aria-label="Pickle home">
-            <img src="/assets/logo.png" alt="" width="40" height="40" />
-            <span>Pickle<span className="web-brand-dot">.</span></span>
+            <PickleLogo iconSize={40} />
           </button>
           <nav className="web-navigation" aria-label="Main navigation">
             {[[0, 'Home'], [1, 'Browse'], [2, 'Saved recipes']].map(([index, label]) => (
@@ -44,7 +44,7 @@ export default function DesktopShell({ children, activeNav, searching, accountLa
         </div>
       </header>
       <main id="pickle-content" tabIndex={-1} className={`desktop-screen${accountView ? ' desktop-account-screen' : ''}`}>{children}</main>
-      <footer className="web-footer"><span>Pickle</span><span>Recipes worth coming back to.</span><button type="button" onClick={() => onNavigate(1)}>Browse recipes</button></footer>
+      <footer className="web-footer"><PickleLogo size={21} /><span>Recipes worth coming back to.</span><button type="button" onClick={() => onNavigate(1)}>Browse recipes</button></footer>
     </div>
   );
 }

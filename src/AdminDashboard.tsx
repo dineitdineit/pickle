@@ -1,3 +1,4 @@
+import PickleLogo from './PickleLogo';
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { supabase } from './lib/supabase';
 
@@ -347,7 +348,7 @@ export default function AdminDashboard() {
       <div className="min-h-screen bg-[#F6F7F8] flex items-center justify-center px-5">
         <form onSubmit={handleSignIn} className="w-full max-w-sm rounded-2xl bg-white border border-[#E5E7EB] p-6 shadow-sm">
           <div className="mb-6">
-            <p className="text-sm font-semibold text-[#F26B21] mb-1">Pickle</p>
+            <div className="mb-1"><PickleLogo size={24} /></div>
             <h1 className="text-2xl font-bold text-[#1F1F1F]">Admin sign in</h1>
             <p className="text-sm text-[#6F6F6F] mt-2">Use an account with the admin role.</p>
           </div>

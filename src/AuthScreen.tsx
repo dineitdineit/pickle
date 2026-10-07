@@ -1,3 +1,4 @@
+import PickleLogo from './PickleLogo';
 import { FormEvent, useEffect, useState } from 'react';
 import { supabase } from './lib/supabase';
 
@@ -252,7 +253,7 @@ export default function AuthScreen({ onBack, recoveryMode = false, onRecoveryCom
       <div className="pb-28">
         <div className="px-6 pt-[72px]">
           <BackButton onClick={() => changeMode('signin')} />
-          <div className="flex justify-center mb-6"><img src="/assets/logo.png" alt="Pickle" className="w-[88px] h-[88px] rounded-[24px] object-cover" /></div>
+          <div className="flex justify-center mb-6"><PickleLogo size={28} iconSize={88} stacked /></div>
           <div className="text-center mb-7">
             <h1 className="font-bold text-[24px]" style={{ color: '#1F1F1F' }}>Reset your password</h1>
             <p className="text-[14px] mt-2" style={{ color: '#777777' }}>Enter your email and we'll send you a reset link.</p>
@@ -277,7 +278,7 @@ export default function AuthScreen({ onBack, recoveryMode = false, onRecoveryCom
     return (
       <div className="pb-28">
         <div className="px-6 pt-[72px]">
-          <div className="flex justify-center mb-6"><img src="/assets/logo.png" alt="Pickle" className="w-[88px] h-[88px] rounded-[24px] object-cover" /></div>
+          <div className="flex justify-center mb-6"><PickleLogo size={28} iconSize={88} stacked /></div>
           <div className="text-center mb-7">
             <h1 className="font-bold text-[24px]" style={{ color: '#1F1F1F' }}>Choose a new password</h1>
             <p className="text-[14px] mt-2" style={{ color: '#777777' }}>{recoveryReady ? 'Enter and confirm your new password.' : 'Verifying your reset link…'}</p>
@@ -307,7 +308,7 @@ export default function AuthScreen({ onBack, recoveryMode = false, onRecoveryCom
       <div className="pb-28">
         <div className="px-6 pt-[72px]">
           <BackButton onClick={() => changeMode('signin')} />
-          <div className="flex justify-center mb-6"><img src="/assets/logo.png" alt="Pickle" className="w-[88px] h-[88px] rounded-[24px] object-cover" /></div>
+          <div className="flex justify-center mb-6"><PickleLogo size={28} iconSize={88} stacked /></div>
           <div className="text-center mb-7">
             <h1 className="font-bold text-[24px]" style={{ color: '#1F1F1F' }}>Create your account</h1>
             <p className="text-[14px] mt-2" style={{ color: '#777777' }}>Save recipes and build your own Pickle profile.</p>
@@ -352,7 +353,7 @@ export default function AuthScreen({ onBack, recoveryMode = false, onRecoveryCom
         </button>
       </div>
       <div className="px-6 pt-[25px]">
-        <div className="flex justify-center mb-6"><img src="/assets/logo.png" alt="Pickle" className="w-[88px] h-[88px] rounded-[24px] object-cover" /></div>
+        <div className="flex justify-center mb-6"><PickleLogo size={28} iconSize={88} stacked /></div>
         <div className="text-center mb-7"><h1 className="font-bold text-[24px]" style={{ color: '#1F1F1F' }}>Welcome back</h1><p className="text-[14px] mt-2" style={{ color: '#777777' }}>Sign in to keep your Pickle activity with you.</p></div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div><label className="block text-[13px] font-semibold mb-2" style={{ color: '#444444' }}>Email</label><input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]" style={{ borderColor: '#E5E5E5', backgroundColor: '#FAFAFA', color: '#1F1F1F' }} placeholder="you@example.com" autoCapitalize="none" autoComplete="email" /></div>

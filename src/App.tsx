@@ -1,3 +1,4 @@
+import PickleLogo from './PickleLogo';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import BrowseScreen from './BrowseScreen';
 import SearchScreen from './SearchScreen';
@@ -340,7 +341,7 @@ export default function App() {
     <DesktopHome featured={featuredRecipes} trending={trendingPreview} quick={under30Recipes} party={partyRecipes} loading={loadingRecipes} error={homeError} onRetry={retryHomeData} onSelect={(id) => { setSelectedRecipeId(id); window.scrollTo({ top: 0 }); }} onCollection={(title) => { setSelectedTagRecipeSection(title); window.scrollTo({ top: 0 }); }} onKeyword={desktopSearch} />
     <div className="mobile-home bg-white min-h-screen max-w-md mx-auto relative pb-24">
       <div className="flex items-center justify-between px-4 pt-6 pb-2">
-        <div className="flex items-center gap-2"><img src="/assets/logo.png" alt="Pickle logo" className="w-9 h-9 rounded-xl object-cover" /><span className="font-bold text-[17px]" style={{ color: '#1F1F1F' }}>Pickle</span></div>
+        <PickleLogo size={24} iconSize={36} />
         <button type="button" onClick={() => setActiveNav(4)} aria-label="Open profile" className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center font-semibold text-[14px]" style={{ backgroundColor: '#FFF0E6', color: '#F26B21' }}>
           {homeAvatarUrl && /^https?:\/\//.test(homeAvatarUrl) ? (
             <img src={homeAvatarUrl} alt="Profile" className="w-full h-full object-cover" />
