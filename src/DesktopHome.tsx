@@ -47,7 +47,7 @@ export default function DesktopHome({ featured, trending, quick, party, loading,
   const lead = featured[0];
   return (
     <div className="desktop-home">
-      <div className="web-home-heading"><div><p className="web-eyebrow">THE PICKLE KITCHEN</p><h1>What are we cooking today?</h1><p>Find your next favorite Filipino recipe.</p></div><div className="web-heading-mark" aria-hidden="true">Made<br />for home.</div></div>
+      <div className="web-home-heading"><div><h1>What are we cooking today?</h1><p>Find your next recipe.</p></div></div>
       <nav className="web-quick-links" aria-label="Browse by ingredient or occasion">
         {['Chicken', 'Pork', 'Beef', 'Seafood', 'Dessert', 'Quick', 'Party'].map((keyword) => <button type="button" key={keyword} onClick={() => onKeyword(keyword)}>{keyword}</button>)}
       </nav>
