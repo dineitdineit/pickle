@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState, type KeyboardEvent } from "react"
 import { supabase } from "./lib/supabase"
 import { getCurrentUser } from "./lib/auth"
 
@@ -176,6 +176,22 @@ export default function RecipeComments({
       })
     return map
   }, [comments])
+
+  function handleCommentKeyDown(
+    event: KeyboardEvent<HTMLTextAreaElement>,
+    parentCommentId: string | null = null,
+  ) {
+    if (
+      event.key !== "Enter" ||
+      event.shiftKey ||
+      event.nativeEvent.isComposing ||
+      event.nativeEvent.keyCode === 229
+    )
+      return
+
+    event.preventDefault()
+    if (!event.repeat) void postComment(parentCommentId)
+  }
 
   async function postComment(parentCommentId: string | null = null) {
     const cleanText = (parentCommentId ? replyText : text).trim()
@@ -541,6 +557,7 @@ export default function RecipeComments({
                 maxLength={1000}
                 value={replyText}
                 onChange={(event) => setReplyText(event.target.value)}
+                onKeyDown={(event) => handleCommentKeyDown(event, comment.id)}
                 placeholder={`Reply to ${name}...`}
                 className="w-full resize-none rounded-[12px] border px-3 py-2 text-[12px] outline-none"
                 style={{ borderColor: "#E6E6E6", backgroundColor: "#FAFAFA" }}
@@ -788,6 +805,7 @@ export default function RecipeComments({
               maxLength={1000}
               value={text}
               onChange={(event) => setText(event.target.value)}
+              onKeyDown={handleCommentKeyDown}
               onFocus={() => {
                 if (!userId) onRequireLogin()
               }}
