@@ -413,7 +413,18 @@ export default function App() {
     return () => cancelAnimationFrame(frame)
   }, [activeNav, showSearch, selectedRecipeId, loadingRecipes])
 
+  useEffect(() => {
+    if (showMyRecipes && !loadingAuth && !authError && !authUser) {
+      setShowMyRecipes(false)
+      setActiveNav(4)
+    }
+  }, [showMyRecipes, loadingAuth, authError, authUser])
+
   function openRecipeUpload() {
+    if (!loadingAuth && !authError && !authUser) {
+      navigate(4)
+      return
+    }
     setSelectedRecipeId(null)
     setSelectedTagRecipeSection(null)
     setShowSearch(false)
@@ -496,7 +507,7 @@ export default function App() {
     if (showMyRecipes) {
       if (loadingAuth) return <p className="px-4 py-20" role="status">Loading your account…</p>
       if (authError) return <RetryState title="Couldn't load your account" message="Please check your connection and try again." onRetry={() => setAuthRetryKey(value => value + 1)} />
-      if (!authUser) return <div className="bg-white min-h-screen max-w-md mx-auto"><AuthScreen onBack={() => { setShowMyRecipes(false); setActiveNav(0) }} /></div>
+      if (!authUser) return null
       return <MyRecipesScreen key={authUser.id} userId={authUser.id} startNew={startNewRecipe} onShowList={() => { setStartNewRecipe(false); setHomeRetryKey(value => value + 1) }} onBack={() => { setShowMyRecipes(false); setActiveNav(4) }} onSelectRecipe={id => { setShowMyRecipes(false); setSelectedRecipeId(id); window.scrollTo({ top: 0 }) }} />
     }
     if (selectedRecipeId) {

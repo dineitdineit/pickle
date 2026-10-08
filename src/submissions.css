@@ -1,5 +1,6 @@
 .submission-ui { --submission-text:#1f1f1f; --submission-muted:#6f6f6f; --submission-bg:#fff; --submission-surface:#fafafa; --submission-border:#e5e5e5; color:var(--submission-text); font-size:16px; line-height:1.55; }
-.web-upload-recipe { color:#f26b21; border:1px solid #f26b21; border-radius:999px; padding:8px 14px; font-size:14px; font-weight:600; white-space:nowrap; }
+.web-upload-recipe { color:#f26b21; border-radius:50%; width:40px; height:40px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.web-upload-recipe:focus-visible { outline:2px solid #f26b21; outline-offset:3px; }
 .recipe-upload, .my-recipes { width:100%; max-width:880px; margin:auto; padding:24px 16px 100px; }
 .submission-ui h1 { font-size:28px; font-weight:700; }
 .submission-ui h2 { font-size:22px; font-weight:600; margin-bottom:12px; }

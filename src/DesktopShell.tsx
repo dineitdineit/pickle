@@ -86,7 +86,12 @@ export default function DesktopShell({
               onChange={(event) => onQueryChange(event.target.value)}
             />
           </form>
-          <button type="button" className="web-upload-recipe" onClick={onUploadRecipe}>+recipe</button>
+          <button type="button" className="web-upload-recipe" aria-label="Add recipe" title="Add recipe" onClick={onUploadRecipe}>
+            <svg width="30" height="30" viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+              <circle cx="16" cy="16" r="13" />
+              <path d="M16 10v12M10 16h12" />
+            </svg>
+          </button>
           <button
             type="button"
             className="web-account"
