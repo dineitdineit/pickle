@@ -1,0 +1,16 @@
+.recipe-video-badge { position:absolute; top:8px; left:8px; z-index:2; display:grid; place-items:center; width:25px; height:18px; border-radius:4px; background:rgba(255,255,255,.95); color:#777; box-shadow:0 1px 4px #0002; pointer-events:none; }
+.recipe-video-badge svg { width:12px; height:12px; }
+.recipe-video-play { position:absolute; bottom:20px; left:20px; z-index:3; width:50px; height:50px; border-radius:50%; background:#fff; color:#111; display:grid; place-items:center; box-shadow:0 2px 8px #0002; }
+.recipe-video-play:focus-visible { outline:3px solid #f26b21; outline-offset:4px; }
+.recipe-video-screen { position:fixed; inset:0; z-index:1000; height:100dvh; background:#000; color:#fff; display:flex; flex-direction:column; }
+.recipe-video-screen header { display:flex; align-items:center; gap:12px; padding:14px 18px; padding-top:max(14px,env(safe-area-inset-top)); }
+.recipe-video-screen header button { width:40px; height:40px; font-size:26px; color:#fff; }
+.recipe-video-screen h2 { font-size:16px; font-weight:500; }
+.recipe-video-player { flex:1; min-height:0; display:flex; align-items:center; justify-content:center; padding-bottom:env(safe-area-inset-bottom); }
+.recipe-video-player iframe,.recipe-video-player video { width:100%; height:100%; max-width:1200px; border:0; object-fit:contain; }
+.recipe-video-external { text-align:center; padding:24px; }
+.recipe-video-external a { display:inline-block; margin-top:20px; padding:12px 20px; border:1px solid #fff; border-radius:24px; }
+.web-card-image,.saved-recipe-photo,.web-featured-lead { position:relative; }
+.recipe-menu-photo { position:relative; flex-shrink:0; }
+
+.web-menu-card .recipe-video-badge { display:grid; color:#777; margin-top:0; }

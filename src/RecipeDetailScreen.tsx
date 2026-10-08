@@ -1,3 +1,5 @@
+import RecipeVideo, { PlayIcon, VideoBadge } from "./RecipeVideo"
+import { videoSource } from "./lib/video"
 import { shareRecipe, recipeShareUrl } from "./lib/share"
 import type { IngredientRow, StepRow, Nutrition } from "./recipeTypes"
 import {
@@ -31,6 +33,7 @@ type Recipe = {
   difficulty: string | null
   total_time_minutes: number | null
   servings: number | null
+  video_url: string | null
   cover_image: string | null
   ingredients_image: string | null
   finished_image: string | null
@@ -42,6 +45,7 @@ type Recommendation = {
   title: string
   difficulty: string | null
   total_time_minutes: number | null
+  video_url: string | null
   cover_image: string | null
 }
 
@@ -52,6 +56,7 @@ export default function RecipeDetailScreen({
   onBrowse,
   onRequireLogin,
 }: RecipeDetailScreenProps) {
+  const [videoOpen, setVideoOpen] = useState(false)
   const [recipe, setRecipe] = useState<Recipe | null>(null)
   const [ingredients, setIngredients] = useState<IngredientRow[]>([])
   const [steps, setSteps] = useState<StepRow[]>([])
@@ -78,6 +83,7 @@ export default function RecipeDetailScreen({
 
   useEffect(() => {
     let ignore = false
+    setVideoOpen(false)
     async function loadRecipe() {
       setLoading(true)
       setErrorMessage("")
@@ -92,7 +98,7 @@ export default function RecipeDetailScreen({
         supabase
           .from("recipes")
           .select(
-            "id, title, short_description, description, difficulty, total_time_minutes, servings, cover_image, ingredients_image, finished_image, like_count",
+            "id, title, short_description, description, difficulty, total_time_minutes, servings, cover_image, video_url, ingredients_image, finished_image, like_count",
           )
           .eq("id", recipeId)
           .single(),
@@ -117,7 +123,7 @@ export default function RecipeDetailScreen({
           .maybeSingle(),
         supabase
           .from("recipes")
-          .select("id, title, difficulty, total_time_minutes, cover_image")
+          .select("id, title, difficulty, total_time_minutes, cover_image, video_url")
           .neq("id", recipeId)
           .not("cover_image", "is", null)
           .order("created_at", { ascending: false })
@@ -400,6 +406,7 @@ export default function RecipeDetailScreen({
 
   return (
     <div className="recipe-detail relative min-h-screen bg-white max-w-md mx-auto pb-10">
+      {videoOpen && recipe.video_url && <RecipeVideo url={recipe.video_url} title={recipe.title} onClose={() => setVideoOpen(false)} />}
       <div className="recipe-detail-hero relative h-[300px] bg-gray-100">
         <img
           src={recipeImageUrl(recipe.cover_image)}
@@ -413,6 +420,7 @@ export default function RecipeDetailScreen({
               "linear-gradient(to bottom, rgba(0,0,0,0.28), transparent 38%, rgba(0,0,0,0.18))",
           }}
         />
+        {recipe.video_url && videoSource(recipe.video_url) && <button type="button" className="recipe-video-play" aria-label="Play recipe video" onClick={() => setVideoOpen(true)}><PlayIcon /></button>}
         <button
           onClick={onBack}
           aria-label="Back"
@@ -772,11 +780,13 @@ export default function RecipeDetailScreen({
                   <div
                     className="overflow-hidden bg-gray-100 mb-2"
                     style={{
+                      position: "relative",
                       width: "100%",
                       aspectRatio: "1",
                       borderRadius: 16,
                     }}
                   >
+                    <VideoBadge url={item.video_url} />
                     <img
                       src={recipeImageUrl(item.cover_image)}
                       alt={item.title}

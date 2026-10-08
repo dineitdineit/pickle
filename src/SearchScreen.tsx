@@ -1,3 +1,4 @@
+import { VideoBadge } from "./RecipeVideo"
 import { formatTime } from "./lib/format"
 import { recipeImageUrl, firstRelation } from "./lib/recipe"
 import { useEffect, useMemo, useRef, useState } from "react"
@@ -11,6 +12,7 @@ type SearchRecipe = {
   title: string
   difficulty: string
   total_time_minutes: number
+  video_url?: string | null
   cover_image: string | null
   image: string
   ingredientNames: string[]
@@ -47,6 +49,7 @@ export default function SearchScreen({
           difficulty,
           total_time_minutes,
           cover_image,
+          video_url,
           recipe_ingredients(ingredients(name)),
           recipe_tags(tags(name))
         `)
@@ -67,6 +70,7 @@ export default function SearchScreen({
           difficulty: recipe.difficulty,
           total_time_minutes: recipe.total_time_minutes,
           cover_image: recipe.cover_image,
+          video_url: recipe.video_url,
           image: recipeImageUrl(recipe.cover_image),
           ingredientNames: (recipe.recipe_ingredients ?? [])
             .map((row) => firstRelation(row.ingredients)?.name)
@@ -281,9 +285,10 @@ export default function SearchScreen({
             >
               <div
                 className="flex-shrink-0 rounded-[12px] overflow-hidden bg-gray-100"
-                style={{ width: 64, height: 64 }}
+                style={{ width: 64, height: 64, position: "relative" }}
               >
-                <img
+                <VideoBadge url={recipe.video_url} />
+              <img
                   src={recipe.image}
                   alt={recipe.title}
                   className="w-full h-full object-cover"

@@ -163,6 +163,7 @@ export default function RecipeUploadScreen({ userId, submission, tags, onBack, o
         {imageField("Recipe photo",input.cover_image,"cover_image")}
         <div className="wizard-basic-fields">
           <label>Recipe name *<input required maxLength={150} value={input.title} placeholder="Give your recipe a name" onChange={event => update("title",event.target.value)} /></label>
+          <label>Video link <small>optional</small><input type="url" maxLength={2048} value={input.video_url} placeholder="https://…" onChange={event => update("video_url",event.target.value)} /><small>YouTube, Vimeo or a direct video link.</small></label>
           <label>Short description <small>optional</small><input maxLength={300} value={input.short_description} placeholder="A short introduction to your dish" onChange={event => update("short_description",event.target.value)} /></label>
           <label>About this recipe *<textarea required rows={5} maxLength={10000} value={input.description} placeholder="Tell us about your recipe…" onChange={event => update("description",event.target.value)} /></label>
           <label htmlFor="recipe-tag-input">Tags <small>optional</small></label><div className="wizard-tag-input"><input id="recipe-tag-input" list="recipe-tag-suggestions" maxLength={40} value={tagText} placeholder="e.g. Comfort food" onChange={event => setTagText(event.target.value)} onKeyDown={event => { if (event.key === "Enter") { event.preventDefault(); addTag() } }} /><button type="button" className="submission-secondary" onClick={addTag}>Add</button></div>

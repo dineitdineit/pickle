@@ -5,6 +5,7 @@ export default function RecipeSubmissionPreview({ input, tags }: { input: Recipe
   return <article className="submission-preview">
     {input.cover_image && <img className="submission-cover" src={recipeImageUrl(input.cover_image)} alt={input.title || "Recipe photo"} />}
     <h2>{input.title || "Untitled recipe"}</h2>
+    {input.video_url && <p><a href={input.video_url} target="_blank" rel="noopener noreferrer">Watch recipe video ↗</a></p>}
     {input.short_description && <p>{input.short_description}</p>}
     <p className="submission-muted">{input.difficulty || "Difficulty not set"} · {input.total_time_minutes || "—"} min{input.servings ? ` · ${input.servings} servings` : ""}</p>
     {input.tag_ids.length > 0 && <div className="submission-tags">{tags.filter(tag => input.tag_ids.includes(tag.id)).map(tag => <span key={tag.id}>{tag.name}</span>)}</div>}

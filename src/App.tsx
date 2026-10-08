@@ -26,6 +26,7 @@ type RecipeCard = {
   difficulty: string
   total_time_minutes: number
   servings: number | null
+  video_url?: string | null
   cover_image: string | null
   image: string
 }
@@ -224,7 +225,7 @@ export default function App() {
         supabase
           .from("recipes")
           .select(
-            "id, title, difficulty, total_time_minutes, servings, cover_image",
+            "id, title, difficulty, total_time_minutes, servings, cover_image, video_url",
           )
           .order("created_at", { ascending: true }),
         supabase.from("tags").select("id").eq("name", "Party").single(),

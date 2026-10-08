@@ -1,3 +1,4 @@
+import { VideoBadge } from "./RecipeVideo"
 import { formatTime } from "./lib/format"
 import { useEffect, useMemo, useState } from "react"
 import { supabase } from "./lib/supabase"
@@ -8,6 +9,7 @@ type LikedRecipe = {
   title: string
   difficulty: string
   total_time_minutes: number
+  video_url?: string | null
   image: string
 }
 
@@ -162,9 +164,10 @@ export default function LikedScreen({
               >
                 <div
                   className="flex-shrink-0 rounded-[8px] overflow-hidden bg-gray-100"
-                  style={{ width: 64, height: 64 }}
+                  style={{ width: 64, height: 64, position: "relative" }}
                 >
-                  <img
+                  <VideoBadge url={recipe.video_url} />
+              <img
                     src={recipe.image}
                     alt={recipe.title}
                     className="w-full h-full object-cover"

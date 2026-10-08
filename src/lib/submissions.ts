@@ -1,3 +1,4 @@
+import { validVideoUrl } from "./video"
 export type IngredientInput = {
   key: string
   name: string
@@ -25,6 +26,7 @@ export type RecipeInput = {
   difficulty: string
   total_time_minutes: string
   servings: string
+  video_url: string
   cover_image: string
   ingredients_image: string
   finished_image: string
@@ -47,7 +49,7 @@ export type RecipeTag = { id: string; name: string; category: string }
 export const submissionColumns = "id,user_id,payload,status,published_recipe_id,updated_at,submitted_at"
 export const newIngredient = (): IngredientInput => ({ key: crypto.randomUUID(), name: "", group_name: "Ingredients", amount: "", unit: "", metric_amount: "", metric_unit: "", optional: false, substitute: "" })
 export const newStep = (): StepInput => ({ key: crypto.randomUUID(), title: "", instruction: "", step_image: "", step_time_minutes: "", is_final: false })
-export const newRecipeInput = (): RecipeInput => ({ title: "", short_description: "", description: "", difficulty: "", total_time_minutes: "", servings: "", cover_image: "", ingredients_image: "", finished_image: "", ingredients: [newIngredient()], steps: [newStep()], tag_ids: [], tag_names: [], nutrition: null })
+export const newRecipeInput = (): RecipeInput => ({ title: "", short_description: "", description: "", difficulty: "", total_time_minutes: "", servings: "", video_url: "", cover_image: "", ingredients_image: "", finished_image: "", ingredients: [newIngredient()], steps: [newStep()], tag_ids: [], tag_names: [], nutrition: null })
 
 export function restoreRecipeInput(payload: RecipeInput): RecipeInput {
   const result = { ...newRecipeInput(), ...payload }
@@ -55,6 +57,7 @@ export function restoreRecipeInput(payload: RecipeInput): RecipeInput {
   result.ingredients = (payload.ingredients ?? []).map(item => ({ ...newIngredient(), ...item, key: item.key || crypto.randomUUID(), amount: String(item.amount ?? ""), metric_amount: String(item.metric_amount ?? "") }))
   result.steps = (payload.steps ?? []).map(item => ({ ...newStep(), ...item, key: item.key || crypto.randomUUID(), step_time_minutes: String(item.step_time_minutes ?? "") }))
   if (payload.nutrition) result.nutrition = { ...payload.nutrition, calories: String(payload.nutrition.calories ?? ""), protein_g: String(payload.nutrition.protein_g ?? ""), carbs_g: String(payload.nutrition.carbs_g ?? ""), fat_g: String(payload.nutrition.fat_g ?? "") }
+  result.video_url = String(payload.video_url ?? "")
   const groupKeys = new Map<string, string>()
   result.ingredients = result.ingredients.map(item => {
     const key = item.group_key || groupKeys.get(item.group_name) || crypto.randomUUID()
@@ -67,6 +70,7 @@ export function restoreRecipeInput(payload: RecipeInput): RecipeInput {
 export function validateRecipeInput(input: RecipeInput, submit: boolean, page?: 0 | 1 | 2): string[] {
   const errors: string[] = []
   if (page === undefined || page === 0) {
+    if (!validVideoUrl(input.video_url)) errors.push("Enter a valid HTTPS video link (up to 2048 characters).")
     if (submit && !input.cover_image.trim()) errors.push("Recipe photo is required.")
     if (submit && !input.description.trim()) errors.push("Recipe description is required.")
     if (submit && !input.title.trim()) errors.push("Recipe name is required.")
@@ -112,6 +116,7 @@ export function recipeSubmissionPayload(input: RecipeInput) {
   const number = (value: string) => value.trim() ? Number(value) : null
   return {
     ...input,
+    video_url: input.video_url.trim(),
     tag_names: [...new Set(input.tag_names.map(name => name.trim()).filter(Boolean))],
     title: input.title.trim(), short_description: input.short_description.trim(), description: input.description.trim(),
     total_time_minutes: number(input.total_time_minutes), servings: number(input.servings),

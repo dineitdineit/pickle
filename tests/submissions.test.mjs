@@ -5,7 +5,9 @@ import ts from 'typescript'
 const source=readFileSync(new URL('../src/lib/submissions.ts',import.meta.url),'utf8')
 const js=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText
 const module={exports:{}}
-new Function('module','exports',js)(module,module.exports)
+const videoModule={exports:{}}
+new Function('module','exports',ts.transpileModule(readFileSync(new URL('../src/lib/video.ts',import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText)(videoModule,videoModule.exports)
+new Function('require','module','exports',js)(() => videoModule.exports,module,module.exports)
 const {newRecipeInput,recipeSubmissionPayload,restoreRecipeInput,validateRecipeInput,assignStepPhotos,newStep}=module.exports
 function complete(){const i=newRecipeInput();i.title='  Soup  ';i.description='A simple soup.';i.servings='2';i.cover_image='community:user/draft/cover.jpg';i.difficulty='Easy';i.total_time_minutes='20';i.ingredients[0].name='Water';i.ingredients[0].amount='500';i.ingredients[0].unit='ml';i.steps[0].instruction='Boil.';return i}
 test('incomplete recipes save as drafts but cannot publish',()=>{const i=newRecipeInput();assert.deepEqual(validateRecipeInput(i,false),[]);assert.equal(validateRecipeInput(i,true).length,10)})
@@ -59,4 +61,23 @@ test('wizard allows backwards navigation with incomplete fields and forwards aft
   const input = complete(); input.steps[0].instruction = ''
   const next = navigationSetup(input, 1)
   next.goTo(2); assert.equal(next.state.page, 2)
+})
+
+test('video links are optional, persist in drafts and reject unsafe schemes', () => {
+  const input = complete()
+  assert.deepEqual(validateRecipeInput(input, true), [])
+  input.video_url = ' https://youtu.be/abcdefghijk '
+  assert.deepEqual(validateRecipeInput(input, true), [])
+  assert.equal(restoreRecipeInput(recipeSubmissionPayload(input)).video_url, 'https://youtu.be/abcdefghijk')
+  for (const url of ['javascript:alert(1)', 'http://example.com/video.mp4', 'https://user:pass@example.com/video.mp4', 'not a url']) {
+    input.video_url = url; assert.ok(validateRecipeInput(input, true, 0).some(e => e.includes('video')))
+  }
+})
+test('video sources use trusted provider embeds and preserve direct file URLs', () => {
+  const {videoSource} = videoModule.exports
+  for (const url of ['https://youtu.be/abcdefghijk','https://www.youtube.com/watch?v=abcdefghijk','https://www.youtube.com/shorts/abcdefghijk']) assert.equal(videoSource(url).url,'https://www.youtube-nocookie.com/embed/abcdefghijk?autoplay=1&playsinline=1')
+  assert.equal(videoSource('https://vimeo.com/123456').kind, 'embed')
+  assert.equal(videoSource('https://example.com/recipe.mp4?token=abc').kind, 'file')
+  assert.equal(videoSource('https://youtube.com.evil.com/watch?v=abcdefghijk').kind, 'external')
+  assert.equal(videoSource('javascript:alert(1)'), null)
 })

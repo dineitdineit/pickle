@@ -1,7 +1,9 @@
+import { VideoBadge } from "./RecipeVideo"
 import { formatTime } from "./lib/format"
 type Props = {
   recipe: {
     title: string
+    video_url?: string | null
     image: string
     difficulty: string
     total_time_minutes: number | null
@@ -29,7 +31,8 @@ export default function SavedRecipeCard({
         aria-label={`View ${recipe.title}`}
       >
         <div className="saved-recipe-photo">
-          <img src={recipe.image} alt={recipe.title} loading="lazy" />
+          <VideoBadge url={recipe.video_url} />
+              <img src={recipe.image} alt={recipe.title} loading="lazy" />
         </div>
         <h2 className="saved-recipe-title">{recipe.title}</h2>
         <div className="saved-recipe-tags">

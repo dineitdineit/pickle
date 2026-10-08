@@ -9,6 +9,7 @@ type SavedRecipe = {
   title: string
   difficulty: string
   total_time_minutes: number
+  video_url?: string | null
   image: string
 }
 

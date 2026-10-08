@@ -220,7 +220,7 @@ test("recipe strips leave finger scrolling to the browser while retaining mouse 
         ? mockReact
         : name === "./lib/format"
           ? { formatTime }
-          : require(name),
+          : name === "./RecipeVideo" ? { VideoBadge: () => null } : require(name),
     module,
     module.exports,
   )

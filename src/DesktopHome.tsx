@@ -1,3 +1,4 @@
+import { VideoBadge } from "./RecipeVideo"
 import { formatTime } from "./lib/format"
 import RetryState from "./RetryState"
 
@@ -6,6 +7,7 @@ type Recipe = {
   title: string
   difficulty: string
   total_time_minutes: number
+  video_url?: string | null
   image: string
 }
 
@@ -51,6 +53,7 @@ function RecipeCollection({
             onClick={() => onSelect(recipe.id)}
           >
             <div className="web-card-image">
+              <VideoBadge url={recipe.video_url} />
               <img src={recipe.image} alt={recipe.title} loading="lazy" />
             </div>
             <div className="web-card-copy">
@@ -109,7 +112,7 @@ export default function DesktopHome({
               className="web-featured-lead"
               onClick={() => onSelect(lead.id)}
             >
-              <img src={lead.image} alt={lead.title} fetchPriority="high" />
+              <VideoBadge url={lead.video_url} /><img src={lead.image} alt={lead.title} fetchPriority="high" />
               <div className="web-featured-copy">
                 <span className="web-featured-label">Featured recipe</span>
                 <h2>{lead.title}</h2>
@@ -132,7 +135,7 @@ export default function DesktopHome({
                   key={recipe.id}
                   onClick={() => onSelect(recipe.id)}
                 >
-                  <img src={recipe.image} alt={recipe.title} />
+                  <div className="recipe-menu-photo"><VideoBadge url={recipe.video_url} /><img src={recipe.image} alt={recipe.title} /></div>
                   <div>
                     <p>
                       {recipe.difficulty || "Filipino"} ·{" "}

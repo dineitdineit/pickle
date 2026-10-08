@@ -10,11 +10,16 @@ do $$
 declare sid uuid:=current_setting('test.submission_id')::uuid; p jsonb; saved jsonb; published jsonb; rid uuid; version timestamptz; blocked boolean; field text;
 begin
   if auth.uid() is null then raise exception 'Test needs an existing user profile'; end if;
+
   p:='{"title":"Upload integration test","difficulty":"Easy","total_time_minutes":20,"servings":2,"description":"Integration soup recipe","ingredients":[{"name":"Water","group_name":"Ingredients","amount":500,"unit":"ml","optional":false},{"name":"Salt","group_name":"Seasoning","amount":0.5,"unit":"tsp","metric_amount":2,"metric_unit":"g","optional":true,"substitute":"Pepper"}],"steps":[{"instruction":"Boil water","step_time_minutes":5},{"instruction":"Season","is_final":true}],"tag_ids":[],"nutrition":{"calories":0,"protein_g":0,"carbs_g":0,"fat_g":0,"is_estimated":true}}';
+  p:=jsonb_set(p,'{video_url}',to_jsonb('https://youtu.be/abcdefghijk'::text));
   p:=jsonb_set(p,'{cover_image}',to_jsonb(current_setting('test.cover_image')));
   p:=jsonb_set(p,'{finished_image}',to_jsonb(current_setting('test.cover_image')));
   p:=jsonb_set(p,'{tag_names}',jsonb_build_array('test-'||left(sid::text,8),'TEST-'||left(sid::text,8)));
 
+  blocked:=false;
+  begin perform public.save_recipe_submission(sid,jsonb_set(p,'{video_url}','"javascript:alert(1)"'),false,null); exception when others then blocked:=true; end;
+  if not blocked then raise exception 'Unsafe video URL accepted'; end if;
   p:=jsonb_set(p,'{tag_ids}',jsonb_build_array(current_setting('test.tag_id'),current_setting('test.tag_id')));
   saved:=public.save_recipe_submission(sid,jsonb_set(jsonb_set(p-'cover_image'-'description'-'servings','{ingredients,0,amount}','null'::jsonb),'{ingredients,0,unit}','null'::jsonb),false,null);
   version:=(saved->>'updated_at')::timestamptz;
@@ -45,6 +50,7 @@ begin
     if not blocked then raise exception 'Missing ingredient % accepted',field; end if;
   end loop;
   published:=public.save_recipe_submission(sid,p,true,version);rid:=(published->>'recipe_id')::uuid;
+  if (select video_url from public.recipes where id=rid) is distinct from 'https://youtu.be/abcdefghijk' then raise exception 'Published video missing'; end if;
   if published->>'status'<>'published' or rid is null then raise exception 'Publish failed'; end if;
   if not exists(select 1 from public.recipes where id=rid and author_id=auth.uid() and servings=2 and total_time_minutes=20 and finished_image=current_setting('test.cover_image')) then raise exception 'Recipe mapping failed'; end if;
   if (select count(*) from public.recipe_ingredients where recipe_id=rid)<>2 or not exists(select 1 from public.recipe_ingredients where recipe_id=rid and amount=500 and unit='ml' and group_name='Ingredients') then raise exception 'Ingredient mapping failed'; end if;

@@ -1,3 +1,4 @@
+import { VideoBadge } from "./RecipeVideo"
 import { useRef } from "react"
 import { formatTime } from "./lib/format"
 
@@ -7,6 +8,7 @@ type RecipeCard = {
   difficulty: string
   total_time_minutes: number
   servings: number | null
+  video_url?: string | null
   cover_image: string | null
   image: string
 }
@@ -99,7 +101,8 @@ export default function RecipeStrip({
             }}
             className="flex-none w-[148px] text-left self-start"
           >
-            <div className="w-[148px] h-[148px] rounded-[12px] overflow-hidden mb-1.5 bg-gray-100">
+            <div className="relative w-[148px] h-[148px] rounded-[12px] overflow-hidden mb-1.5 bg-gray-100">
+              <VideoBadge url={recipe.video_url} />
               <img
                 src={recipe.image}
                 alt={recipe.title}
