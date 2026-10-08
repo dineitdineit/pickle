@@ -233,7 +233,7 @@ export function NutritionSection({
           </div>
           {nutrition.is_estimated && (
             <p
-              className="mt-3 text-[7px] leading-[10px]"
+              className="mt-3 text-[10px] leading-[14px]"
               style={{ color: "#A0A0A0" }}
             >
               *Nutrition values are estimates and may not be accurate.
