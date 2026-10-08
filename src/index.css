@@ -287,3 +287,14 @@ html[data-theme="dark"] .comment-author-name {
 html[data-theme="dark"] .comment-content {
   color: #FFFFFF !important;
 }
+
+html[data-theme="dark"] .comment-textarea {
+  background-color: #2A2A2A !important;
+  border-color: #444444 !important;
+  color: #FFFFFF !important;
+  color-scheme: dark;
+}
+
+html[data-theme="dark"] .comment-textarea::placeholder {
+  color: #B8B8B8 !important;
+}

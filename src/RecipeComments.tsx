@@ -482,7 +482,7 @@ export default function RecipeComments({
                 maxLength={1000}
                 value={editText}
                 onChange={(event) => setEditText(event.target.value)}
-                className="w-full resize-none rounded-[12px] border px-3 py-2 text-[13px] outline-none"
+                className="comment-textarea w-full resize-none rounded-[12px] border px-3 py-2 text-[13px] outline-none"
                 style={{ borderColor: "#E6E6E6" }}
               />
             </div>
@@ -578,7 +578,7 @@ export default function RecipeComments({
                 onChange={(event) => setReplyText(event.target.value)}
                 onKeyDown={(event) => handleCommentKeyDown(event, comment.id)}
                 placeholder={`Reply to ${name}...`}
-                className="w-full resize-none rounded-[12px] border px-3 py-2 text-[12px] outline-none"
+                className="comment-textarea w-full resize-none rounded-[12px] border px-3 py-2 text-[12px] outline-none"
                 style={{ borderColor: "#E6E6E6", backgroundColor: "#FAFAFA" }}
               />
               <div className="flex justify-end mt-1.5">
@@ -758,7 +758,7 @@ export default function RecipeComments({
                     value={reportDetails}
                     onChange={(event) => setReportDetails(event.target.value)}
                     placeholder="Add details (optional)"
-                    className="w-full resize-none rounded-[12px] border px-3.5 py-3 mt-4 text-[13px] outline-none"
+                    className="comment-textarea w-full resize-none rounded-[12px] border px-3.5 py-3 mt-4 text-[13px] outline-none"
                     style={{
                       borderColor: "#E6E6E6",
                       backgroundColor: "#FAFAFA",
@@ -830,7 +830,7 @@ export default function RecipeComments({
               onFocus={() => {
                 if (!userId) onRequireLogin()
               }}
-              className="w-full resize-none rounded-[16px] border px-4 py-3 text-[14px] leading-5 outline-none"
+              className="comment-textarea w-full resize-none rounded-[16px] border px-4 py-3 text-[14px] leading-5 outline-none"
               style={{
                 borderColor: "#E6E6E6",
                 color: "#1F1F1F",
