@@ -439,25 +439,52 @@ export default function RecipeComments({
             </button>
             {menuCommentId === comment.id && (
               <div
-                className="absolute right-0 top-7 w-28 rounded-[10px] border bg-white shadow-lg z-20 overflow-hidden"
-                style={{ borderColor: "#EAEAEA" }}
+                className="absolute right-0 top-7 w-44 rounded-[12px] shadow-lg z-20 overflow-hidden p-1"
+                style={{ backgroundColor: "#2A2A2A" }}
               >
                 {ownComment ? (
                   <>
                     <button
                       type="button"
                       onClick={() => startEdit(comment)}
-                      className="w-full px-3 py-2 text-left text-[12px]"
-                      style={{ color: "#1F1F1F" }}
+                      className="w-full flex items-center gap-3 px-3 py-3 rounded-[8px] text-left text-[14px] hover:bg-white/10"
+                      style={{ color: "#FFFFFF" }}
                     >
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="m16 3 5 5-12 12-6 1 1-6Z" />
+                        <path d="m14 5 5 5" />
+                      </svg>
                       Edit
                     </button>
                     <button
                       type="button"
                       onClick={() => deleteComment(comment.id)}
-                      className="w-full px-3 py-2 text-left text-[12px] border-t"
-                      style={{ color: "#C53D2E", borderColor: "#EEEEEE" }}
+                      className="w-full flex items-center gap-3 px-3 py-3 rounded-[8px] text-left text-[14px] hover:bg-white/10"
+                      style={{ color: "#FF5C5C" }}
                     >
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7" />
+                      </svg>
                       Delete
                     </button>
                   </>
@@ -465,9 +492,22 @@ export default function RecipeComments({
                   <button
                     type="button"
                     onClick={() => openReport(comment)}
-                    className="w-full px-3 py-2 text-left text-[12px]"
-                    style={{ color: "#C53D2E" }}
+                    className="w-full flex items-center gap-3 px-3 py-3 rounded-[8px] text-left text-[14px] hover:bg-white/10"
+                    style={{ color: "#FFFFFF" }}
                   >
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M4 21V3c5-3 10 3 16 0v12c-6 3-11-3-16 0" />
+                    </svg>
                     Report
                   </button>
                 )}
