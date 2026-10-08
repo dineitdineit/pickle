@@ -465,8 +465,8 @@ export default function RecipeDetailScreen({
                   isLiked
                     ? {
                         borderColor: "#F26B21",
-                        backgroundColor: "#FFF0E6",
-                        color: "#F26B21",
+                        backgroundColor: "#F26B21",
+                        color: "#FFFFFF",
                       }
                     : {
                         borderColor: "#EAEAEA",
