@@ -64,41 +64,47 @@ export function restoreRecipeInput(payload: RecipeInput): RecipeInput {
   return result
 }
 
-export function validateRecipeInput(input: RecipeInput, submit: boolean): string[] {
+export function validateRecipeInput(input: RecipeInput, submit: boolean, page?: 0 | 1 | 2): string[] {
   const errors: string[] = []
-  if (submit && !input.cover_image.trim()) errors.push("Recipe photo is required.")
-  if (submit && !input.description.trim()) errors.push("Recipe description is required.")
-  if (submit && !input.servings.trim()) errors.push("Servings are required.")
-  if (submit && !input.title.trim()) errors.push("Recipe name is required.")
-  if (submit && !["Easy", "Intermediate", "Advanced"].includes(input.difficulty)) errors.push("Choose a difficulty.")
-  if (submit && !input.total_time_minutes.trim()) errors.push("Total cooking time is required.")
+  if (page === undefined || page === 0) {
+    if (submit && !input.cover_image.trim()) errors.push("Recipe photo is required.")
+    if (submit && !input.description.trim()) errors.push("Recipe description is required.")
+    if (submit && !input.title.trim()) errors.push("Recipe name is required.")
+    if (input.tag_names.length > 10 || input.tag_names.some(name => !name.trim() || name.trim().length > 40)) errors.push("Use up to 10 tags, each between 1 and 40 characters.")
+  }
   function number(value: string, label: string, min: number, integer = false, max = 100000) {
     if (!value.trim()) return
     if (!/^[0-9]+(?:\.[0-9]+)?$/.test(value.trim()) || !Number.isFinite(Number(value)) || Number(value) < min || Number(value) > max || (integer && !Number.isInteger(Number(value)))) errors.push(`${label} must be ${integer ? "a whole number" : "a number"} between ${min} and ${max.toLocaleString()}.`)
   }
-  number(input.total_time_minutes, "Total cooking time", 1, true)
-  number(input.servings, "Servings", 1, true)
-  if (input.ingredients.length > 100 || (submit && !input.ingredients.length)) errors.push("Add between 1 and 100 ingredients.")
-  input.ingredients.forEach((item, index) => {
-    if (submit && !item.name.trim()) errors.push(`Ingredient ${index + 1} needs a name.`)
-    if (submit && !item.group_name.trim()) errors.push(`Ingredient ${index + 1} needs a group.`)
-    if (submit && !item.amount.trim()) errors.push(`Ingredient ${index + 1} needs a quantity.`)
-    if (submit && !item.unit.trim()) errors.push(`Ingredient ${index + 1} needs a unit.`)
-    number(item.amount, `Ingredient ${index + 1} quantity`, 0, false, 1000000)
-    number(item.metric_amount, `Ingredient ${index + 1} metric quantity`, 0, false, 1000000)
-  })
-  if (input.steps.length > 30 || (submit && !input.steps.length)) errors.push("Add between 1 and 30 cooking steps.")
-  input.steps.forEach((item, index) => {
-    if (submit && !item.instruction.trim()) errors.push(`Step ${index + 1} needs an instruction.`)
-    number(item.step_time_minutes, `Step ${index + 1} time`, 0, true)
-  })
-  if (input.nutrition) {
-    for (const field of ["calories", "protein_g", "carbs_g", "fat_g"] as const) {
-      if (submit && !input.nutrition[field].trim()) errors.push(`Fill in ${field.replace("_g", "")} or turn off nutrition.`)
-      number(input.nutrition[field], field, 0, true)
-    }
+  if (page === undefined || page === 1) {
+    if (submit && !input.servings.trim()) errors.push("Servings are required.")
+    if (submit && !["Easy", "Intermediate", "Advanced"].includes(input.difficulty)) errors.push("Choose a difficulty.")
+    if (submit && !input.total_time_minutes.trim()) errors.push("Total cooking time is required.")
+    number(input.total_time_minutes, "Total cooking time", 1, true)
+    number(input.servings, "Servings", 1, true)
+    if (input.ingredients.length > 100 || (submit && !input.ingredients.length)) errors.push("Add between 1 and 100 ingredients.")
+    input.ingredients.forEach((item, index) => {
+      if (submit && !item.name.trim()) errors.push(`Ingredient ${index + 1} needs a name.`)
+      if (submit && !item.group_name.trim()) errors.push(`Ingredient ${index + 1} needs a group.`)
+      if (submit && !item.amount.trim()) errors.push(`Ingredient ${index + 1} needs a quantity.`)
+      if (submit && !item.unit.trim()) errors.push(`Ingredient ${index + 1} needs a unit.`)
+      number(item.amount, `Ingredient ${index + 1} quantity`, 0, false, 1000000)
+      number(item.metric_amount, `Ingredient ${index + 1} metric quantity`, 0, false, 1000000)
+    })
+    if (input.nutrition) {
+      for (const field of ["calories", "protein_g", "carbs_g", "fat_g"] as const) {
+        if (submit && !input.nutrition[field].trim()) errors.push(`Fill in ${field.replace("_g", "")} or turn off nutrition.`)
+        number(input.nutrition[field], field, 0, true)
+      }
   }
-  if (input.tag_names.length > 10 || input.tag_names.some(name => !name.trim() || name.trim().length > 40)) errors.push("Use up to 10 tags, each between 1 and 40 characters.")
+  }
+  if (page === undefined || page === 2) {
+    if (input.steps.length > 30 || (submit && !input.steps.length)) errors.push("Add between 1 and 30 cooking steps.")
+    input.steps.forEach((item, index) => {
+      if (submit && !item.instruction.trim()) errors.push(`Step ${index + 1} needs an instruction.`)
+      number(item.step_time_minutes, `Step ${index + 1} time`, 0, true)
+    })
+  }
   return errors
 }
 

@@ -44,7 +44,20 @@ export default function RecipeUploadScreen({ userId, submission, tags, onBack, o
   function update<K extends keyof RecipeInput>(key: K, value: RecipeInput[K]) { setInput(current => ({ ...current, [key]: value })); setMessage("") }
   function updateIngredient(index: number, field: string, value: string | boolean) { setInput(current => ({ ...current, ingredients: current.ingredients.map((item,i) => i === index ? { ...item, [field]: value } : item) })); setMessage("") }
   function updateStep(index: number, field: string, value: string | boolean) { setInput(current => ({ ...current, steps: current.steps.map((item,i) => i === index ? { ...item, [field]: value } : item) })); setMessage("") }
-  function goTo(next: number) { setPage(next); setPreview(false); window.scrollTo({ top: 0 }); requestAnimationFrame(() => pageHeading.current?.focus()) }
+  function goTo(next: number) {
+    if (guard.current || busy || uploading !== null) return
+    if (editable && next > page) {
+      const issues = Array.from({ length: next }, (_, index) => validateRecipeInput(input, true, index as 0 | 1 | 2)).flat()
+      if (tagText.trim()) issues.push("Press Add to include the tag you typed, or clear the tag input.")
+      if (issues.length) {
+        setErrors(issues); setMessage(""); setPreview(false)
+        requestAnimationFrame(() => errorPanel.current?.focus())
+        return
+      }
+    }
+    setErrors([]); setMessage(""); setPage(next); setPreview(false)
+    window.scrollTo({ top: 0 }); requestAnimationFrame(() => pageHeading.current?.focus())
+  }
   function addTag() {
     const name = tagText.trim().replace(/^#+/, "").trim()
     if (!name) return
@@ -140,7 +153,7 @@ export default function RecipeUploadScreen({ userId, submission, tags, onBack, o
     <div className="wizard-title"><div><p className="wizard-eyebrow">SHARE YOUR KITCHEN</p><h1>{editable ? submission ? "Edit recipe" : "Create a recipe" : "Your recipe"}</h1></div><button className="submission-secondary" disabled={busy || uploading !== null} onClick={() => setPreview(value => !value)}>{preview ? "Back to editing" : "Preview"}</button></div>
     <nav className="wizard-progress" aria-label="Recipe creation steps">{pages.map((label,index) => <button key={label} disabled={busy || uploading !== null} aria-current={page === index ? "step" : undefined} onClick={() => goTo(index)}><span>{index + 1}</span>{label}</button>)}</nav>
     <h2 className="wizard-page-heading" ref={pageHeading} tabIndex={-1}>{preview ? "Recipe preview" : pages[page]}</h2>
-    <p className="submission-muted">Fields marked * are required to publish. Save a draft at any time.</p>
+    <p className="submission-muted">Complete the fields marked * before continuing. Save a draft at any time.</p>
     {errors.length > 0 && <div className="submission-errors" role="alert" ref={errorPanel} tabIndex={-1}><strong>필수 항목을 입력하고 내용을 확인해줘.</strong><ul>{errors.map((error,index) => <li key={index}>{error}</li>)}</ul><div className="submission-inline-actions">{pages.map((label,index) => <button key={label} className="submission-text-button" onClick={() => goTo(index)}>{label}</button>)}</div></div>}
     {message && <p role="status" className="submission-notice">{message}</p>}
     {uploading && <p role="status" className="submission-notice">Uploading… {uploading.startsWith("Photo ") ? uploading : ""}</p>}

@@ -27,3 +27,36 @@ test('bulk photos enforce the 30-step limit without changing original steps',()=
 test('legacy ingredients restore into stable groups and drafts preserve group membership',()=>{const i=complete();i.ingredients=[{...i.ingredients[0],group_name:'Main'},{...i.ingredients[0],group_name:'Main'},{...i.ingredients[0],group_name:'Sauce'}];const restored=restoreRecipeInput(i);assert.equal(restored.ingredients[0].group_key,restored.ingredients[1].group_key);assert.notEqual(restored.ingredients[1].group_key,restored.ingredients[2].group_key);const again=restoreRecipeInput(recipeSubmissionPayload(restored));assert.equal(again.ingredients[0].group_key,restored.ingredients[0].group_key)})
 test('custom tags and finished photo persist through draft conversion',()=>{const i=complete();i.tag_names=[' Soup ','Soup'];i.finished_image='community:user/draft/finished.jpg';const p=recipeSubmissionPayload(i);assert.deepEqual(p.tag_names,['Soup']);assert.equal(restoreRecipeInput(p).finished_image,i.finished_image);i.tag_names=['x'.repeat(41)];assert.ok(validateRecipeInput(i,true).some(e=>e.includes('tags')))})
 test('save draft stays on the editor with updated version instead of navigating away',async()=>{const {state,context}=saveSetup({data:{id:'draft',status:'draft',updated_at:'next'},error:null});await saveAction(context)(false);assert.equal(state.Version,'next');assert.equal(state.PublishedId,undefined);assert.equal(state.saved,undefined);assert.ok(state.Message.startsWith('Draft saved'))})
+
+function navigationSetup(input, page) {
+  const state = { page }, ast = ts.createSourceFile('upload.tsx', screen, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX)
+  let fn
+  function visit(n) { if (ts.isFunctionDeclaration(n) && n.name?.text === 'goTo') fn = n.getText(ast); ts.forEachChild(n, visit) }
+  visit(ast)
+  const context = { input, page, editable: true, guard: { current: false }, busy: false, uploading: null, tagText: '', validateRecipeInput, setErrors(v) { state.errors = v }, setMessage() {}, setPreview() {}, setPage(v) { state.page = v }, window: { scrollTo() {} }, requestAnimationFrame(fn) { fn() }, errorPanel: { current: { focus() { state.focused = true } } }, pageHeading: { current: null } }
+  const js = ts.transpileModule(fn, { compilerOptions: { target: ts.ScriptTarget.ES2020 } }).outputText
+  return { state, goTo: new Function(...Object.keys(context), `${js};return goTo`)(...Object.values(context)) }
+}
+test('wizard validates only the relevant page fields', () => {
+  const input = newRecipeInput()
+  input.title = 'Soup'; input.description = 'Boil water'; input.cover_image = 'photo'
+  assert.deepEqual(validateRecipeInput(input, true, 0), [])
+  assert.ok(validateRecipeInput(input, true, 1).length > 0)
+  assert.ok(validateRecipeInput(input, true, 2).length > 0)
+})
+test('wizard blocks forward movement and direct stage jumps when earlier required fields are missing', () => {
+  for (const target of [1, 2]) {
+    const { state, goTo } = navigationSetup(newRecipeInput(), 0)
+    goTo(target); assert.equal(state.page, 0); assert.ok(state.errors.length > 0); assert.equal(state.focused, true)
+  }
+  const input = complete(); input.ingredients[0].unit = ' '
+  const { state, goTo } = navigationSetup(input, 1)
+  goTo(2); assert.equal(state.page, 1); assert.ok(state.errors.some(e => e.includes('unit')))
+})
+test('wizard allows backwards navigation with incomplete fields and forwards after page completion', () => {
+  const back = navigationSetup(newRecipeInput(), 1)
+  back.goTo(0); assert.equal(back.state.page, 0); assert.deepEqual(back.state.errors, [])
+  const input = complete(); input.steps[0].instruction = ''
+  const next = navigationSetup(input, 1)
+  next.goTo(2); assert.equal(next.state.page, 2)
+})
