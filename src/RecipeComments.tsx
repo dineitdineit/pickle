@@ -470,7 +470,70 @@ export default function RecipeComments({
                 className="w-full resize-none rounded-[12px] border px-3 py-2 text-[13px] outline-none"
                 style={{ borderColor: "#E6E6E6" }}
               />
-              <div className="flex justify-end gap-2 mt-1.5">
+            </div>
+          ) : (
+            <p
+              className="text-[14px] leading-5 mt-1 whitespace-pre-wrap break-words"
+              style={{ color: "#555555" }}
+            >
+              {comment.content}
+            </p>
+          )}
+
+          <div className="flex items-center justify-between gap-3 mt-2">
+            <div
+              className="flex items-center gap-3 text-[7px]"
+              style={{ color: "#8A8A8A" }}
+            >
+              <button
+                type="button"
+                onClick={() => toggleCommentLike(comment.id)}
+                className="flex items-center gap-1"
+                style={{ color: liked ? "#F26B21" : "#8A8A8A" }}
+              >
+                <svg
+                  width="11"
+                  height="11"
+                  viewBox="0 0 24 24"
+                  fill={liked ? "currentColor" : "none"}
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z" />
+                </svg>
+                <span>{likeCounts.get(comment.id) ?? 0}</span>
+              </button>
+              {!isReply && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!userId) {
+                      onRequireLogin()
+                      return
+                    }
+                    setReplyingToId((current) =>
+                      current === comment.id ? null : comment.id,
+                    )
+                    setReplyText("")
+                  }}
+                  className="flex items-center gap-1"
+                >
+                  <svg
+                    width="11"
+                    height="11"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M21 15a4 4 0 01-4 4H8l-5 3V7a4 4 0 014-4h10a4 4 0 014 4z" />
+                  </svg>
+                  <span>{replyCount}</span>
+                </button>
+              )}
+            </div>
+            {editingCommentId === comment.id && (
+              <div className="flex items-center gap-2 flex-shrink-0">
                 <button
                   type="button"
                   onClick={() => setEditingCommentId(null)}
@@ -488,65 +551,6 @@ export default function RecipeComments({
                   Save
                 </button>
               </div>
-            </div>
-          ) : (
-            <p
-              className="text-[14px] leading-5 mt-1 whitespace-pre-wrap break-words"
-              style={{ color: "#555555" }}
-            >
-              {comment.content}
-            </p>
-          )}
-
-          <div
-            className="flex items-center gap-3 mt-2 text-[7px]"
-            style={{ color: "#8A8A8A" }}
-          >
-            <button
-              type="button"
-              onClick={() => toggleCommentLike(comment.id)}
-              className="flex items-center gap-1"
-              style={{ color: liked ? "#F26B21" : "#8A8A8A" }}
-            >
-              <svg
-                width="11"
-                height="11"
-                viewBox="0 0 24 24"
-                fill={liked ? "currentColor" : "none"}
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z" />
-              </svg>
-              <span>{likeCounts.get(comment.id) ?? 0}</span>
-            </button>
-            {!isReply && (
-              <button
-                type="button"
-                onClick={() => {
-                  if (!userId) {
-                    onRequireLogin()
-                    return
-                  }
-                  setReplyingToId((current) =>
-                    current === comment.id ? null : comment.id,
-                  )
-                  setReplyText("")
-                }}
-                className="flex items-center gap-1"
-              >
-                <svg
-                  width="11"
-                  height="11"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M21 15a4 4 0 01-4 4H8l-5 3V7a4 4 0 014-4h10a4 4 0 014 4z" />
-                </svg>
-                <span>{replyCount}</span>
-              </button>
             )}
           </div>
 
