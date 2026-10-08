@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type KeyboardEvent } from "react"
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react"
 import { createPortal } from "react-dom"
 import { supabase } from "./lib/supabase"
 import { getCurrentUser } from "./lib/auth"
@@ -66,6 +66,15 @@ export default function RecipeComments({
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState("")
   const [menuCommentId, setMenuCommentId] = useState<string | null>(null)
+  const [deleteCommentId, setDeleteCommentId] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState("")
+  const deleteDialogRef = useRef<HTMLDialogElement>(null)
+
+  useEffect(() => {
+    if (deleteCommentId) deleteDialogRef.current?.showModal()
+  }, [deleteCommentId])
+
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null)
   const [editText, setEditText] = useState("")
   const [replyingToId, setReplyingToId] = useState<string | null>(null)
@@ -302,19 +311,24 @@ export default function RecipeComments({
   }
 
   async function deleteComment(commentId: string) {
-    if (!userId) return
-    const { error } = await supabase
-      .from("recipe_comments")
-      .delete()
-      .eq("id", commentId)
-      .eq("user_id", userId)
-    if (error) {
+    if (!userId || deleting) return
+    setDeleting(true)
+    setDeleteError("")
+    try {
+      const { error } = await supabase
+        .from("recipe_comments")
+        .delete()
+        .eq("id", commentId)
+        .eq("user_id", userId)
+      if (error) throw error
+      await loadComments()
+      setDeleteCommentId(null)
+    } catch (error) {
       console.error("Failed to delete comment:", error)
-      setMessage("Could not delete your comment.")
-      return
+      setDeleteError("Could not delete your comment. Please try again.")
+    } finally {
+      setDeleting(false)
     }
-    setMenuCommentId(null)
-    await loadComments()
   }
 
   function openReport(comment: CommentRow) {
@@ -438,9 +452,7 @@ export default function RecipeComments({
               <span className="text-[18px] leading-none">•••</span>
             </button>
             {menuCommentId === comment.id && (
-              <div
-                className="comment-options-menu absolute right-0 top-7 w-44 rounded-[12px] shadow-lg z-20 overflow-hidden p-1"
-              >
+              <div className="comment-options-menu absolute right-0 top-7 w-44 rounded-[12px] shadow-lg z-20 overflow-hidden p-1">
                 {ownComment ? (
                   <>
                     <button
@@ -466,7 +478,11 @@ export default function RecipeComments({
                     </button>
                     <button
                       type="button"
-                      onClick={() => deleteComment(comment.id)}
+                      onClick={() => {
+                        setMenuCommentId(null)
+                        setDeleteError("")
+                        setDeleteCommentId(comment.id)
+                      }}
                       className="w-full flex items-center gap-3 px-3 py-3 rounded-[8px] text-left text-[16px]"
                       style={{ color: "#FF5C5C" }}
                     >
@@ -638,6 +654,62 @@ export default function RecipeComments({
 
   return (
     <>
+      {deleteCommentId &&
+        createPortal(
+          <dialog
+            ref={deleteDialogRef}
+            className="comment-delete-dialog w-[calc(100%-32px)] max-w-sm rounded-[16px] border-0 p-6 shadow-xl m-auto"
+            style={{ backgroundColor: "#FFFFFF", color: "#1F1F1F" }}
+            aria-labelledby="comment-delete-title"
+            aria-describedby="comment-delete-description"
+            onCancel={(event) => {
+              if (deleting) event.preventDefault()
+              else setDeleteCommentId(null)
+            }}
+          >
+            <h2 id="comment-delete-title" className="font-semibold text-[22px]">
+              Delete comment?
+            </h2>
+            <p
+              id="comment-delete-description"
+              className="mt-2 text-[16px] leading-6"
+              style={{ color: "#6F6F6F" }}
+            >
+              Are you sure you want to delete this comment? This cannot be
+              undone.
+            </p>
+            {deleteError && (
+              <p
+                role="alert"
+                className="mt-3 text-[15px]"
+                style={{ color: "#C53D2E" }}
+              >
+                {deleteError}
+              </p>
+            )}
+            <div className="flex justify-end gap-3 mt-5">
+              <button
+                type="button"
+                autoFocus
+                disabled={deleting}
+                onClick={() => setDeleteCommentId(null)}
+                className="px-4 py-2 rounded-[8px] text-[16px] font-semibold disabled:opacity-60"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={deleting}
+                onClick={() => deleteComment(deleteCommentId)}
+                className="px-4 py-2 rounded-[8px] text-[16px] font-semibold text-white disabled:opacity-60"
+                style={{ backgroundColor: "#C53D2E" }}
+              >
+                {deleting ? "Deleting…" : "Delete"}
+              </button>
+            </div>
+          </dialog>,
+          document.body,
+        )}
       {reportComment &&
         createPortal(
           <div

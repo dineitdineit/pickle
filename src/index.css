@@ -334,3 +334,7 @@ html[data-theme="dark"] .comment-options-menu button:hover {
 
 /* Raise inherited text without scaling spacing or control dimensions. */
 body { font-size: 18px; }
+
+.comment-delete-dialog::backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+}
