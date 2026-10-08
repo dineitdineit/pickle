@@ -183,8 +183,9 @@ export default function RecipeUploadScreen({ userId, submission, tags, onBack, o
       </section>}
     </fieldset></form>}
     <div className="submission-save-bar wizard-actions">
-      <div className="submission-inline-actions">{editable ? <><button type="button" className="submission-text-button" disabled={busy || uploading !== null} onClick={() => setCancelOpen(true)}>Cancel</button><button type="button" className="submission-secondary" disabled={disabled} onClick={() => void save(false)}>{busy ? "Saving…" : "Save draft"}</button></> : <button type="button" className="submission-secondary" onClick={onBack}>My recipes</button>}</div>
-      <div className="submission-inline-actions">{page > 0 && <button type="button" className="submission-secondary" disabled={busy || uploading !== null} onClick={() => goTo(page - 1)}>Previous</button>}{page < 2 ? <button type="button" className="submission-primary" disabled={busy || uploading !== null} onClick={() => goTo(page + 1)}>Next →</button> : editable && <button type="button" className="submission-primary" disabled={disabled} onClick={() => void save(true)}>{busy ? "Publishing…" : "Publish"}</button>}</div>
+      <div className="submission-inline-actions wizard-draft-actions">{editable ? <button type="button" className="submission-secondary" disabled={disabled} onClick={() => void save(false)}>{busy ? "Saving…" : "Save draft"}</button> : <button type="button" className="submission-secondary" onClick={onBack}>My recipes</button>}</div>
+      <div className="submission-inline-actions wizard-navigation">{page > 0 && <button type="button" className="submission-secondary" disabled={busy || uploading !== null} onClick={() => goTo(page - 1)}><span aria-hidden="true">←</span> Previous</button>}{page < 2 ? <button type="button" className="submission-primary" disabled={busy || uploading !== null} onClick={() => goTo(page + 1)}>Next →</button> : editable && <button type="button" className="submission-primary" disabled={disabled} onClick={() => void save(true)}>{busy ? "Publishing…" : "Publish"}</button>}</div>
+      <div className="submission-inline-actions wizard-cancel-actions">{editable && <button type="button" className="submission-text-button" disabled={busy || uploading !== null} onClick={() => setCancelOpen(true)}>Cancel</button>}</div>
     </div>
   </div>
 }
