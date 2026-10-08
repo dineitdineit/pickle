@@ -298,3 +298,18 @@ html[data-theme="dark"] .comment-textarea {
 html[data-theme="dark"] .comment-textarea::placeholder {
   color: #B8B8B8 !important;
 }
+
+@media (max-width: 1023px) {
+  html[data-theme="dark"] .recipe-detail div.relative.h-\[300px\] > button[aria-label="Back"],
+  html[data-theme="dark"] .recipe-detail .recipe-share-button {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    color: #FFFFFF !important;
+  }
+
+  html[data-theme="dark"] .recipe-detail div.relative.h-\[300px\] > button[aria-label="Back"] svg,
+  html[data-theme="dark"] .recipe-detail .recipe-share-button svg {
+    stroke: #FFFFFF !important;
+  }
+}
