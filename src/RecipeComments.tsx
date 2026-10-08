@@ -439,16 +439,14 @@ export default function RecipeComments({
             </button>
             {menuCommentId === comment.id && (
               <div
-                className="absolute right-0 top-7 w-44 rounded-[12px] shadow-lg z-20 overflow-hidden p-1"
-                style={{ backgroundColor: "#2A2A2A" }}
+                className="comment-options-menu absolute right-0 top-7 w-44 rounded-[12px] shadow-lg z-20 overflow-hidden p-1"
               >
                 {ownComment ? (
                   <>
                     <button
                       type="button"
                       onClick={() => startEdit(comment)}
-                      className="w-full flex items-center gap-3 px-3 py-3 rounded-[8px] text-left text-[14px] hover:bg-white/10"
-                      style={{ color: "#FFFFFF" }}
+                      className="w-full flex items-center gap-3 px-3 py-3 rounded-[8px] text-left text-[14px]"
                     >
                       <svg
                         width="20"
@@ -469,7 +467,7 @@ export default function RecipeComments({
                     <button
                       type="button"
                       onClick={() => deleteComment(comment.id)}
-                      className="w-full flex items-center gap-3 px-3 py-3 rounded-[8px] text-left text-[14px] hover:bg-white/10"
+                      className="w-full flex items-center gap-3 px-3 py-3 rounded-[8px] text-left text-[14px]"
                       style={{ color: "#FF5C5C" }}
                     >
                       <svg
@@ -492,8 +490,7 @@ export default function RecipeComments({
                   <button
                     type="button"
                     onClick={() => openReport(comment)}
-                    className="w-full flex items-center gap-3 px-3 py-3 rounded-[8px] text-left text-[14px] hover:bg-white/10"
-                    style={{ color: "#FFFFFF" }}
+                    className="w-full flex items-center gap-3 px-3 py-3 rounded-[8px] text-left text-[14px]"
                   >
                     <svg
                       width="20"
