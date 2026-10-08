@@ -89,6 +89,8 @@ export default function AdminDashboard() {
   const [loadingReports, setLoadingReports] = useState(false)
   const [busyCommentId, setBusyCommentId] = useState<string | null>(null)
   const [pageMessage, setPageMessage] = useState("")
+  const [actionMessage, setActionMessage] = useState("")
+  const [signingOut, setSigningOut] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [signingIn, setSigningIn] = useState(false)
@@ -113,6 +115,7 @@ export default function AdminDashboard() {
   async function loadReports() {
     setLoadingReports(true)
     setPageMessage("")
+    setActionMessage("")
 
     const { data, error } = await supabase
       .from("comment_reports")
@@ -125,7 +128,7 @@ export default function AdminDashboard() {
       console.error("Failed to load moderation reports:", error)
       setPageMessage("Could not load moderation reports.")
       setLoadingReports(false)
-      return
+      return false
     }
 
     const rows = (data ?? []) as ReportRow[]
@@ -185,7 +188,13 @@ export default function AdminDashboard() {
         ]),
       ),
     )
+    if (profileResult.error || recipeResult.error || commentResult.error) {
+      setPageMessage("Some report details could not be loaded. Please refresh.")
+      setLoadingReports(false)
+      return false
+    }
     setLoadingReports(false)
+    return true
   }
 
   async function evaluateAccess(userId?: string) {
@@ -223,21 +232,29 @@ export default function AdminDashboard() {
   }
 
   useEffect(() => {
-    evaluateAccess()
+    void evaluateAccess()
+    let accessTimer: ReturnType<typeof setTimeout> | undefined
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
+      clearTimeout(accessTimer)
       if (!session?.user) {
         setAccess("signed-out")
         setAnalytics(null)
         setReports([])
         return
       }
-      evaluateAccess(session.user.id)
+      const userId = session.user.id
+      accessTimer = setTimeout(() => {
+        void evaluateAccess(userId)
+      }, 0)
     })
 
-    return () => subscription.unsubscribe()
+    return () => {
+      clearTimeout(accessTimer)
+      subscription.unsubscribe()
+    }
   }, [])
 
   const groups = useMemo<ReportGroup[]>(() => {
@@ -304,6 +321,21 @@ export default function AdminDashboard() {
     setSigningIn(false)
   }
 
+  async function handleSignOut() {
+    if (signingOut) return
+    setSigningOut(true)
+    setPageMessage("")
+    try {
+      const { error } = await supabase.auth.signOut()
+      if (error) throw error
+    } catch (error) {
+      console.error("Failed to sign out:", error)
+      setPageMessage("Could not sign out. Please try again.")
+    } finally {
+      setSigningOut(false)
+    }
+  }
+
   async function moderate(
     group: ReportGroup,
     action: "dismiss" | "hide" | "remove",
@@ -320,21 +352,57 @@ export default function AdminDashboard() {
     setBusyCommentId(group.commentId)
     setPageMessage("")
 
-    const { error } = await supabase.rpc("moderate_comment_report", {
-      p_report_id: firstReport.id,
-      p_action: action,
-      p_note: null,
-    })
+    setActionMessage("")
+    try {
+      const { error } = await supabase.rpc("moderate_comment_report", {
+        p_report_id: firstReport.id,
+        p_action: action,
+        p_note: null,
+      })
+      if (error) throw error
 
-    if (error) {
+      const result =
+        action === "dismiss"
+          ? await supabase
+              .from("comment_reports")
+              .select("status")
+              .eq("id", firstReport.id)
+              .maybeSingle()
+          : await supabase
+              .from("recipe_comments")
+              .select("moderation_status")
+              .eq("id", group.commentId)
+              .maybeSingle()
+      if (result.error) throw result.error
+      const expected =
+        action === "dismiss"
+          ? "dismissed"
+          : action === "hide"
+            ? "hidden"
+            : "removed"
+      const actual =
+        result.data &&
+        ("status" in result.data
+          ? result.data.status
+          : result.data.moderation_status)
+      if (actual !== expected)
+        throw new Error("Moderation result did not match the requested action")
+      if (!(await loadReports())) return
+      setActionMessage(
+        action === "dismiss"
+          ? "Report dismissed. The comment remains visible."
+          : action === "hide"
+            ? "Comment hidden from recipe pages."
+            : "Comment removed from recipe pages. The report remains in moderation history.",
+      )
+    } catch (error) {
       console.error("Failed to moderate comment:", error)
-      setPageMessage("Could not apply this moderation action.")
+      setPageMessage(
+        "Could not confirm this moderation action. Refresh and check the comment state before retrying.",
+      )
+    } finally {
       setBusyCommentId(null)
-      return
     }
-
-    await loadReports()
-    setBusyCommentId(null)
   }
 
   if (access === "loading") {
@@ -408,9 +476,15 @@ export default function AdminDashboard() {
           <p className="text-sm text-[#6F6F6F] mt-2">
             This account does not have Pickle admin access.
           </p>
+          {pageMessage && (
+            <p role="alert" className="text-sm text-[#C53D2E] mt-3">
+              {pageMessage}
+            </p>
+          )}
           <button
             type="button"
-            onClick={() => supabase.auth.signOut()}
+            onClick={handleSignOut}
+            disabled={signingOut}
             className="mt-5 h-10 px-4 rounded-lg border border-[#D9DDE3] text-sm font-medium text-[#333333]"
           >
             Sign out
@@ -437,7 +511,8 @@ export default function AdminDashboard() {
             </a>
             <button
               type="button"
-              onClick={() => supabase.auth.signOut()}
+              onClick={handleSignOut}
+              disabled={signingOut}
               className="h-9 px-3 rounded-lg border border-[#D9DDE3] text-sm font-medium"
             >
               Sign out
@@ -494,6 +569,14 @@ export default function AdminDashboard() {
               </button>
             </div>
 
+            {actionMessage && (
+              <p
+                role="status"
+                className="mb-5 rounded-xl bg-[#EDF7EE] px-4 py-3 text-sm text-[#397A46]"
+              >
+                {actionMessage}
+              </p>
+            )}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
               {[
                 ["Open", stats.open],
@@ -580,7 +663,7 @@ export default function AdminDashboard() {
                         new Date(a.created_at).getTime(),
                     )[0]
 
-                    const busy = busyCommentId === group.commentId
+                    const busy = busyCommentId !== null
 
                     return (
                       <article key={group.commentId} className="p-4 lg:p-5">

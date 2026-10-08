@@ -85,6 +85,7 @@ export default function RecipeComments({
         .from("recipe_comments")
         .select("id, user_id, content, created_at, parent_comment_id")
         .eq("recipe_id", recipeId)
+        .eq("moderation_status", "active")
         .order("created_at", { ascending: false }),
     ])
 
@@ -100,7 +101,13 @@ export default function RecipeComments({
       return
     }
 
-    const rows = (commentResult.data ?? []) as CommentRow[]
+    const activeRows = (commentResult.data ?? []) as CommentRow[]
+    const rootIds = new Set(
+      activeRows.filter((row) => !row.parent_comment_id).map((row) => row.id),
+    )
+    const rows = activeRows.filter(
+      (row) => !row.parent_comment_id || rootIds.has(row.parent_comment_id),
+    )
     setComments(rows)
     onCountChange?.(rows.length)
 
@@ -153,7 +160,12 @@ export default function RecipeComments({
   }
 
   useEffect(() => {
-    loadComments()
+    void loadComments()
+    const refreshComments = () => {
+      void loadComments()
+    }
+    window.addEventListener("focus", refreshComments)
+    return () => window.removeEventListener("focus", refreshComments)
   }, [recipeId])
 
   const rootComments = useMemo(
