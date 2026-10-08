@@ -103,9 +103,11 @@ export function IngredientsSection({
 
 export function StepsSection({
   steps,
+  finishedImage,
   active,
 }: {
   steps: StepRow[]
+  finishedImage?: string | null
   active: boolean
 }) {
   return (
@@ -165,6 +167,7 @@ export function StepsSection({
           </article>
         ))}
       </div>
+      {finishedImage && <div className="mt-8"><h3 className="font-semibold text-[19px] mb-3">The finished dish</h3><img src={recipeImageUrl(finishedImage)} alt="Finished dish" className="w-full rounded-[16px]" /></div>}
     </section>
   )
 }

@@ -34,7 +34,7 @@ export default function MyRecipesScreen({ userId, startNew, onBack, onShowList, 
   },[userId,refresh,limit])
   if(loading && !rows.length) return <div className="submission-ui my-recipes"><p role="status">Loading your recipes…</p></div>
   if(error) return <div className="submission-ui my-recipes"><p role="alert">{error}</p><button className="submission-secondary" onClick={() => setRefresh(value => value+1)}>Retry</button><button className="submission-text-button" onClick={onBack}>Back</button></div>
-  if(creating || editing) return <RecipeUploadScreen key={editing?.id ?? "new"} userId={userId} submission={editing} tags={tags} onBack={() => { setCreating(false); setEditing(null); onShowList() }} onSaved={() => { setNotice("Recipe saved."); onShowList(); setCreating(false); setEditing(null); setRefresh(value => value+1) }} />
+  if(creating || editing) return <RecipeUploadScreen key={editing?.id ?? "new"} userId={userId} submission={editing} tags={tags} onBack={() => { setCreating(false); setEditing(null); onShowList(); setRefresh(value => value + 1) }} onSaved={() => { setNotice("업로드 되었습니다."); onShowList(); setCreating(false); setEditing(null); setRefresh(value => value+1) }} />
   return <div className="submission-ui my-recipes">
     <div className="submission-heading"><button onClick={onBack} aria-label="Back to profile">‹</button><h1>My recipes</h1></div>
     <div className="submission-list-heading"><p className="submission-muted">Drafts stay private. Publish a finished recipe to share it with everyone.</p><button className="submission-primary" onClick={() => { setEditing(null); setCreating(true); setNotice("") }}>Upload recipe</button></div>

@@ -33,6 +33,7 @@ type Recipe = {
   servings: number | null
   cover_image: string | null
   ingredients_image: string | null
+  finished_image: string | null
   like_count: number
 }
 
@@ -91,7 +92,7 @@ export default function RecipeDetailScreen({
         supabase
           .from("recipes")
           .select(
-            "id, title, short_description, description, difficulty, total_time_minutes, servings, cover_image, ingredients_image, like_count",
+            "id, title, short_description, description, difficulty, total_time_minutes, servings, cover_image, ingredients_image, finished_image, like_count",
           )
           .eq("id", recipeId)
           .single(),
@@ -717,7 +718,7 @@ export default function RecipeDetailScreen({
           ingredientsImage={recipe.ingredients_image}
           active={activeTab === "Ingredients"}
         />
-        <StepsSection steps={steps} active={activeTab === "Steps"} />
+        <StepsSection steps={steps} finishedImage={recipe.finished_image} active={activeTab === "Steps"} />
         <NutritionSection
           nutrition={nutrition}
           active={activeTab === "Nutrition"}
