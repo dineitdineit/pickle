@@ -9,6 +9,7 @@ type ProfileScreenProps = {
   email?: string
   onOpenSaved: () => void
   onOpenLiked: () => void
+  onOpenMyRecipes: () => void
   onBack: () => void
 }
 
@@ -41,6 +42,7 @@ const MENU_SECTIONS = [
       { label: "Saved Recipes", icon: "bookmark", action: "saved" },
       { label: "My Comments", icon: "comment", action: "comments" },
       { label: "Liked Recipes", icon: "heart", action: "liked" },
+      { label: "My Recipes", icon: "bookmark", action: "recipes" },
     ],
   },
   {
@@ -203,6 +205,7 @@ export default function ProfileScreen({
   email,
   onOpenSaved,
   onOpenLiked,
+  onOpenMyRecipes,
   onBack,
 }: ProfileScreenProps) {
   const [profile, setProfile] = useState<Profile | null>(null)
@@ -1404,7 +1407,9 @@ export default function ProfileScreen({
                   key={item.label}
                   type="button"
                   onClick={
-                    item.action === "saved"
+                    item.action === "recipes"
+                      ? onOpenMyRecipes
+                      : item.action === "saved"
                       ? onOpenSaved
                       : item.action === "liked"
                         ? onOpenLiked

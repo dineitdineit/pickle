@@ -50,7 +50,6 @@ export default function SearchScreen({
           recipe_ingredients(ingredients(name)),
           recipe_tags(tags(name))
         `)
-        .not("cover_image", "is", null)
         .order("title", { ascending: true })
 
       if (ignore) return

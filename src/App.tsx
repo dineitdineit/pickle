@@ -11,6 +11,7 @@ import LikedScreen from "./LikedScreen"
 import ProfileScreen from "./ProfileScreen"
 import AuthScreen from "./AuthScreen"
 import RecipeDetailScreen from "./RecipeDetailScreen"
+import MyRecipesScreen from "./MyRecipesScreen"
 import RetryState from "./RetryState"
 import TagRecipeListScreen from "./TagRecipeListScreen"
 import DesktopShell from "./DesktopShell"
@@ -106,6 +107,8 @@ export default function App() {
   const [searchValue, setSearchValue] = useState("")
   const [showSearch, setShowSearch] = useState(false)
   const [showLikedRecipes, setShowLikedRecipes] = useState(false)
+  const [showMyRecipes, setShowMyRecipes] = useState(() => new URLSearchParams(window.location.search).has("upload"))
+  const [startNewRecipe, setStartNewRecipe] = useState(() => new URLSearchParams(window.location.search).get("upload") === "new")
   const [selectedRecipeId, setSelectedRecipeId] = useState<string | null>(() =>
     new URLSearchParams(window.location.search).get("recipe"),
   )
@@ -133,12 +136,14 @@ export default function App() {
     const url = new URL(window.location.href)
     if (selectedRecipeId) url.searchParams.set("recipe", selectedRecipeId)
     else url.searchParams.delete("recipe")
+    if (showMyRecipes) url.searchParams.set("upload", startNewRecipe ? "new" : "my")
+    else url.searchParams.delete("upload")
     window.history.replaceState(
       window.history.state,
       "",
       `${url.pathname}${url.search}${url.hash}`,
     )
-  }, [selectedRecipeId])
+  }, [selectedRecipeId, showMyRecipes, startNewRecipe])
 
   useEffect(() => {
     let mounted = true
@@ -221,7 +226,6 @@ export default function App() {
           .select(
             "id, title, difficulty, total_time_minutes, servings, cover_image",
           )
-          .not("cover_image", "is", null)
           .order("created_at", { ascending: true }),
         supabase.from("tags").select("id").eq("name", "Party").single(),
         supabase
@@ -418,6 +422,7 @@ export default function App() {
         <button
           key={i}
           onClick={() => {
+            setShowMyRecipes(false)
             setActiveNav(i)
             setShowSearch(false)
             setShowLikedRecipes(false)
@@ -440,6 +445,7 @@ export default function App() {
   )
 
   function navigate(index: number) {
+    setShowMyRecipes(false)
     setSelectedRecipeId(null)
     setSelectedTagRecipeSection(null)
     setShowSearch(false)
@@ -449,6 +455,7 @@ export default function App() {
   }
 
   function desktopSearch(keyword = searchValue) {
+    setShowMyRecipes(false)
     setSearchValue(keyword)
     addRecentSearch(keyword)
     setSelectedRecipeId(null)
@@ -459,6 +466,12 @@ export default function App() {
   }
 
   function renderScreen() {
+    if (showMyRecipes) {
+      if (loadingAuth) return <p className="px-4 py-20" role="status">Loading your account…</p>
+      if (authError) return <RetryState title="Couldn't load your account" message="Please check your connection and try again." onRetry={() => setAuthRetryKey(value => value + 1)} />
+      if (!authUser) return <div className="bg-white min-h-screen max-w-md mx-auto"><AuthScreen onBack={() => { setShowMyRecipes(false); setActiveNav(0) }} /></div>
+      return <MyRecipesScreen key={authUser.id} userId={authUser.id} startNew={startNewRecipe} onShowList={() => { setStartNewRecipe(false); setHomeRetryKey(value => value + 1) }} onBack={() => { setShowMyRecipes(false); setActiveNav(4) }} onSelectRecipe={id => { setShowMyRecipes(false); setSelectedRecipeId(id); window.scrollTo({ top: 0 }) }} />
+    }
     if (selectedRecipeId) {
       return (
         <RecipeDetailScreen
@@ -575,6 +588,7 @@ export default function App() {
               email={authUser.email}
               onOpenSaved={() => setActiveNav(2)}
               onOpenLiked={() => setShowLikedRecipes(true)}
+              onOpenMyRecipes={() => { setStartNewRecipe(false); setShowMyRecipes(true); window.scrollTo({ top: 0 }) }}
               onBack={() => setActiveNav(0)}
             />
           ) : (
@@ -828,6 +842,7 @@ export default function App() {
         showSearch ||
         Boolean(selectedRecipeId) ||
         Boolean(selectedTagRecipeSection)
+        || showMyRecipes
       }
       accountLabel={authUser ? "My account" : "Log in"}
       accountView={
@@ -836,11 +851,13 @@ export default function App() {
         !showSearch &&
         !selectedTagRecipeSection &&
         !showLikedRecipes
+        && !showMyRecipes
       }
       query={searchValue}
       onQueryChange={setSearchValue}
       onSearch={() => desktopSearch()}
       onNavigate={navigate}
+      onUploadRecipe={() => { setSelectedRecipeId(null); setSelectedTagRecipeSection(null); setShowSearch(false); setStartNewRecipe(true); setShowMyRecipes(true); window.scrollTo({ top: 0 }) }}
     >
       {renderScreen()}
     </DesktopShell>

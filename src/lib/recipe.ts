@@ -1,8 +1,9 @@
 import { supabase } from "./supabase"
 
 export function recipeImageUrl(path: string | null) {
-  if (!path) return ""
-  return supabase.storage.from("recipe_images").getPublicUrl(path).data
+  if (!path) return "/recipe-placeholder.svg"
+  const community = path.startsWith("community:")
+  return supabase.storage.from(community ? "community_recipe_images" : "recipe_images").getPublicUrl(community ? path.slice(10) : path).data
     .publicUrl
 }
 

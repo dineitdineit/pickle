@@ -11,6 +11,7 @@ type DesktopShellProps = {
   onQueryChange: (query: string) => void
   onSearch: () => void
   onNavigate: (index: number) => void
+  onUploadRecipe: () => void
 }
 
 export default function DesktopShell({
@@ -23,6 +24,7 @@ export default function DesktopShell({
   onQueryChange,
   onSearch,
   onNavigate,
+  onUploadRecipe,
 }: DesktopShellProps) {
   function submit(event: FormEvent) {
     event.preventDefault()
@@ -104,6 +106,7 @@ export default function DesktopShell({
             </svg>
             {accountLabel}
           </button>
+          <button type="button" className="web-upload-recipe" onClick={onUploadRecipe}>Upload recipe</button>
         </div>
       </header>
       <main

@@ -1,0 +1,68 @@
+.submission-ui { --submission-text:#1f1f1f; --submission-muted:#6f6f6f; --submission-bg:#fff; --submission-surface:#fafafa; --submission-border:#e5e5e5; color:var(--submission-text); font-size:16px; line-height:1.55; }
+.web-upload-recipe { color:#f26b21; border:1px solid #f26b21; border-radius:999px; padding:8px 14px; font-size:14px; font-weight:600; white-space:nowrap; }
+.recipe-upload, .my-recipes { width:100%; max-width:880px; margin:auto; padding:24px 16px 100px; }
+.submission-ui h1 { font-size:28px; font-weight:700; }
+.submission-ui h2 { font-size:22px; font-weight:600; margin-bottom:12px; }
+.submission-ui h3 { font-size:17px; font-weight:600; margin:14px 0 8px; }
+.submission-ui small { font-size:13px; font-weight:400; color:var(--submission-muted); margin-left:4px; }
+.submission-muted { color:var(--submission-muted); font-size:14px; }
+.submission-heading { display:flex; align-items:center; gap:14px; margin-bottom:24px; }
+.submission-heading button { width:40px; height:40px; font-size:30px; }
+.submission-list-heading, .submission-item-heading { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:16px; }
+.submission-form-section { border-top:1px solid var(--submission-border); padding:24px 0; }
+.submission-ui label { display:block; font-size:15px; font-weight:500; margin:12px 0; }
+.submission-ui input:not([type="checkbox"]):not([type="file"]), .submission-ui select, .submission-ui textarea { width:100%; min-width:0; background:var(--submission-bg); color:var(--submission-text); border:1px solid var(--submission-border); border-radius:10px; padding:11px 12px; font-size:16px; line-height:1.5; margin-top:6px; }
+.submission-ui textarea { resize:vertical; }
+.submission-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr)); gap:0 16px; }
+.submission-item { border:1px solid var(--submission-border); padding:16px; border-radius:14px; background:var(--submission-surface); margin-bottom:16px; }
+.submission-item-heading h3 { margin:0; }
+.submission-ui .submission-checkbox { display:flex; align-items:center; gap:8px; font-weight:400; }
+.submission-checkbox input { width:18px; height:18px; accent-color:#f26b21; flex-shrink:0; }
+.submission-tag-options { display:flex; flex-wrap:wrap; gap:4px 20px; }
+.submission-tag-options label { margin:6px 0; }
+.submission-ui button:disabled, .submission-ui fieldset:disabled .submission-photo-button { opacity:.5; cursor:not-allowed; }
+.submission-ui button, .submission-photo-button { min-height:40px; }
+.submission-primary, .submission-secondary, .submission-photo-button { border-radius:999px; padding:10px 18px; font-size:15px; font-weight:600; }
+.submission-primary { background:#f26b21; color:#fff; }
+.submission-secondary, .submission-photo-button { border:1px solid var(--submission-border); background:var(--submission-bg); color:var(--submission-text); }
+.submission-ui .submission-photo-button { display:inline-flex; align-items:center; position:relative; overflow:hidden; cursor:pointer; margin-right:12px; }
+.submission-photo-button input { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; }
+.submission-text-button { font-size:14px; color:#f26b21; padding:8px 0; }
+.submission-inline-actions { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+.submission-inline-actions button[aria-pressed="true"] { color:#f26b21; border-color:#f26b21; }
+.submission-image-field { margin-top:12px; }
+.submission-field-label { display:block; font-size:15px; font-weight:500; margin-bottom:8px; }
+.submission-image-field > img { width:100%; max-width:240px; max-height:180px; object-fit:cover; border-radius:12px; display:block; margin-bottom:10px; }
+.submission-ui details { border-top:1px solid var(--submission-border); padding-top:12px; margin-top:12px; }
+.submission-ui summary { cursor:pointer; font-size:14px; }
+.submission-errors, .submission-notice { border:1px solid var(--submission-border); border-radius:12px; padding:12px 16px; margin:16px 0; font-size:15px; overflow-wrap:anywhere; }
+.submission-errors { color:#c53d2e; }
+.submission-errors ul { padding-left:20px; list-style:disc; margin-top:6px; }
+.submission-notice { background:var(--submission-surface); }
+.submission-save-bar { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:12px; position:sticky; bottom:0; z-index:10; border-top:1px solid var(--submission-border); background:var(--submission-bg); padding:16px 0; }
+.submission-view-toggle { display:flex; gap:8px; margin:16px 0 24px; }
+.submission-view-toggle button { padding:8px 20px; border-radius:999px; border:1px solid var(--submission-border); font-size:15px; }
+.submission-view-toggle button[aria-pressed="true"] { color:#f26b21; border-color:#f26b21; }
+.submission-cover { display:block; width:100%; max-height:480px; object-fit:contain; border-radius:16px; margin-bottom:20px; }
+.submission-step-photo { width:100%; max-width:400px; border-radius:12px; margin:12px 0; }
+.submission-prose { white-space:pre-wrap; overflow-wrap:anywhere; }
+.submission-preview { overflow-wrap:anywhere; }
+.submission-preview h3 { margin-top:28px; }
+.submission-preview-ingredient { padding:12px 0; border-bottom:1px solid var(--submission-border); display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px; }
+.submission-preview-ingredient p { width:100%; }
+.submission-preview-step { padding:16px 0; }
+.submission-preview-step h4 { font-weight:600; }
+.submission-tags { display:flex; flex-wrap:wrap; gap:8px; margin:12px 0; }
+.submission-tags span { border:1px solid var(--submission-border); border-radius:999px; padding:3px 10px; font-size:14px; }
+.submission-own-list { display:grid; gap:16px; margin:24px 0; }
+.submission-own-card { display:flex; align-items:flex-start; gap:16px; border:1px solid var(--submission-border); border-radius:16px; padding:16px; }
+.submission-own-card > img { width:90px; height:90px; object-fit:cover; border-radius:12px; flex-shrink:0; }
+.submission-own-card > div { flex:1; min-width:0; }
+.submission-own-card h2 { font-size:20px; margin:8px 0; overflow-wrap:anywhere; }
+.submission-status { font-size:13px; color:var(--submission-muted); border:1px solid var(--submission-border); border-radius:999px; padding:3px 10px; }
+.status-published { color:#f26b21; }
+.submission-empty { text-align:center; padding:60px 12px; }
+.submission-ui :is(button,input,select,textarea,summary):focus-visible { outline:2px solid #f26b21; outline-offset:3px; }
+html[data-theme="dark"] .submission-ui { --submission-text:#fff; --submission-muted:#b8b8b8; --submission-bg:#181818; --submission-surface:#2a2a2a; --submission-border:#444; }
+@media(max-width:1023px) { .submission-save-bar { bottom:0; } .recipe-upload { padding-bottom:40px; } }
+@media(max-width:420px) { .submission-own-card { flex-direction:column; } .submission-own-card > img { width:100%; height:150px; } }

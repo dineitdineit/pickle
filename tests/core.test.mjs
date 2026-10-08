@@ -55,7 +55,7 @@ test("relations handle object, array, empty and missing joins", () => {
   assert.equal(firstRelation(null), null)
 })
 
-test("recipe image URLs use the recipe_images bucket and allow empty images", () => {
+test("recipe image URLs use the correct buckets and supply a placeholder for optional photos", () => {
   const calls = []
   const { recipeImageUrl } = loadHelper("recipe", {
     "./supabase": {
@@ -71,12 +71,13 @@ test("recipe image URLs use the recipe_images bucket and allow empty images", ()
       },
     },
   })
-  assert.equal(recipeImageUrl(null), "")
+  assert.equal(recipeImageUrl(null), "/recipe-placeholder.svg")
   assert.equal(
     recipeImageUrl("adobo.webp"),
     "https://images.example/adobo.webp",
   )
-  assert.deepEqual(calls, [{ bucket: "recipe_images", path: "adobo.webp" }])
+  assert.equal(recipeImageUrl("community:user/draft/photo.jpg"), "https://images.example/user/draft/photo.jpg")
+  assert.deepEqual(calls, [{ bucket: "recipe_images", path: "adobo.webp" }, { bucket: "community_recipe_images", path: "user/draft/photo.jpg" }])
 })
 
 test("auth normalizes only a missing session and leaves the SDK unchanged", async () => {
