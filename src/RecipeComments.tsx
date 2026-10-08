@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type KeyboardEvent } from "react"
+import { createPortal } from "react-dom"
 import { supabase } from "./lib/supabase"
 import { getCurrentUser } from "./lib/auth"
 
@@ -588,193 +589,195 @@ export default function RecipeComments({
 
   return (
     <>
-      {reportComment && (
-        <div
-          className="fixed inset-0 z-[110] flex items-end justify-center sm:items-center"
-          style={{ backgroundColor: "rgba(0,0,0,0.4)" }}
-          onClick={closeReport}
-        >
+      {reportComment &&
+        createPortal(
           <div
-            className="w-full max-w-md px-5 pt-5 pb-7 shadow-xl"
-            style={{
-              borderTopLeftRadius: 24,
-              borderTopRightRadius: 24,
-              backgroundColor: "#FFFFFF",
-            }}
-            onClick={(event) => event.stopPropagation()}
+            className="fixed inset-0 z-[110] flex items-end justify-center sm:items-center"
+            style={{ backgroundColor: "rgba(0,0,0,0.4)" }}
+            onClick={closeReport}
           >
-            {reportSuccess ? (
-              <div className="py-5 text-center">
-                <div
-                  className="w-12 h-12 rounded-full mx-auto flex items-center justify-center"
-                  style={{ backgroundColor: "#FFF0E6", color: "#F26B21" }}
-                >
-                  <svg
-                    width="22"
-                    height="22"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                </div>
-                <h3
-                  className="font-semibold text-[18px] mt-4"
-                  style={{ color: "#1F1F1F" }}
-                >
-                  Report submitted
-                </h3>
-                <p
-                  className="text-[14px] leading-5 mt-2"
-                  style={{ color: "#6F6F6F" }}
-                >
-                  Thanks for letting us know. The Pickle team will review this
-                  comment.
-                </p>
-                <button
-                  type="button"
-                  onClick={closeReport}
-                  className="w-full h-11 rounded-[12px] mt-5 text-[14px] font-semibold text-white"
-                  style={{ backgroundColor: "#F26B21" }}
-                >
-                  Done
-                </button>
-              </div>
-            ) : (
-              <>
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h3
-                      className="font-semibold text-[18px]"
-                      style={{ color: "#1F1F1F" }}
-                    >
-                      Report comment
-                    </h3>
-                    <p
-                      className="text-[12px] mt-1"
-                      style={{ color: "#8A8A8A" }}
-                    >
-                      Tell us why this comment should be reviewed.
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={closeReport}
-                    aria-label="Close report"
-                    className="w-8 h-8 rounded-full flex items-center justify-center"
-                    style={{ backgroundColor: "#F5F5F5", color: "#555555" }}
+            <div
+              className="w-full max-w-md px-5 pt-5 pb-7 shadow-xl"
+              style={{
+                borderTopLeftRadius: 24,
+                borderTopRightRadius: 24,
+                backgroundColor: "#FFFFFF",
+              }}
+              onClick={(event) => event.stopPropagation()}
+            >
+              {reportSuccess ? (
+                <div className="py-5 text-center">
+                  <div
+                    className="w-12 h-12 rounded-full mx-auto flex items-center justify-center"
+                    style={{ backgroundColor: "#FFF0E6", color: "#F26B21" }}
                   >
                     <svg
-                      width="16"
-                      height="16"
+                      width="22"
+                      height="22"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
-                      strokeWidth="2"
+                      strokeWidth="2.2"
                       strokeLinecap="round"
+                      strokeLinejoin="round"
                     >
-                      <path d="M18 6L6 18M6 6l12 12" />
+                      <polyline points="20 6 9 17 4 12" />
                     </svg>
-                  </button>
-                </div>
-
-                <div
-                  className="rounded-[12px] px-3.5 py-3 mb-4"
-                  style={{ backgroundColor: "#F9F9F9" }}
-                >
+                  </div>
+                  <h3
+                    className="font-semibold text-[18px] mt-4"
+                    style={{ color: "#1F1F1F" }}
+                  >
+                    Report submitted
+                  </h3>
                   <p
-                    className="text-[12px] leading-5 line-clamp-3"
+                    className="text-[14px] leading-5 mt-2"
                     style={{ color: "#6F6F6F" }}
                   >
-                    {reportComment.content}
+                    Thanks for letting us know. The Pickle team will review this
+                    comment.
                   </p>
+                  <button
+                    type="button"
+                    onClick={closeReport}
+                    className="w-full h-11 rounded-[12px] mt-5 text-[14px] font-semibold text-white"
+                    style={{ backgroundColor: "#F26B21" }}
+                  >
+                    Done
+                  </button>
                 </div>
-
-                <div
-                  className="rounded-[14px] border overflow-hidden"
-                  style={{ borderColor: "#EAEAEA" }}
-                >
-                  {REPORT_REASONS.map((reason, index) => {
-                    const selected = reportReason === reason.value
-                    return (
-                      <button
-                        key={reason.value}
-                        type="button"
-                        onClick={() => setReportReason(reason.value)}
-                        className="w-full min-h-[48px] px-4 flex items-center gap-3 text-left"
-                        style={{
-                          borderBottom:
-                            index < REPORT_REASONS.length - 1
-                              ? "1px solid #EAEAEA"
-                              : undefined,
-                          backgroundColor: "#FFFFFF",
-                        }}
+              ) : (
+                <>
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3
+                        className="font-semibold text-[18px]"
+                        style={{ color: "#1F1F1F" }}
                       >
-                        <span
-                          className="flex-1 text-[14px]"
-                          style={{ color: "#1F1F1F" }}
-                        >
-                          {reason.label}
-                        </span>
-                        <span
-                          className="w-5 h-5 rounded-full border flex items-center justify-center"
+                        Report comment
+                      </h3>
+                      <p
+                        className="text-[12px] mt-1"
+                        style={{ color: "#8A8A8A" }}
+                      >
+                        Tell us why this comment should be reviewed.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={closeReport}
+                      aria-label="Close report"
+                      className="w-8 h-8 rounded-full flex items-center justify-center"
+                      style={{ backgroundColor: "#F5F5F5", color: "#555555" }}
+                    >
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      >
+                        <path d="M18 6L6 18M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  <div
+                    className="rounded-[12px] px-3.5 py-3 mb-4"
+                    style={{ backgroundColor: "#F9F9F9" }}
+                  >
+                    <p
+                      className="text-[12px] leading-5 line-clamp-3"
+                      style={{ color: "#6F6F6F" }}
+                    >
+                      {reportComment.content}
+                    </p>
+                  </div>
+
+                  <div
+                    className="rounded-[14px] border overflow-hidden"
+                    style={{ borderColor: "#EAEAEA" }}
+                  >
+                    {REPORT_REASONS.map((reason, index) => {
+                      const selected = reportReason === reason.value
+                      return (
+                        <button
+                          key={reason.value}
+                          type="button"
+                          onClick={() => setReportReason(reason.value)}
+                          className="w-full min-h-[48px] px-4 flex items-center gap-3 text-left"
                           style={{
-                            borderColor: selected ? "#F26B21" : "#CFCFCF",
+                            borderBottom:
+                              index < REPORT_REASONS.length - 1
+                                ? "1px solid #EAEAEA"
+                                : undefined,
+                            backgroundColor: "#FFFFFF",
                           }}
                         >
-                          {selected && (
-                            <span
-                              className="w-2.5 h-2.5 rounded-full"
-                              style={{ backgroundColor: "#F26B21" }}
-                            />
-                          )}
-                        </span>
-                      </button>
-                    )
-                  })}
-                </div>
+                          <span
+                            className="flex-1 text-[14px]"
+                            style={{ color: "#1F1F1F" }}
+                          >
+                            {reason.label}
+                          </span>
+                          <span
+                            className="w-5 h-5 rounded-full border flex items-center justify-center"
+                            style={{
+                              borderColor: selected ? "#F26B21" : "#CFCFCF",
+                            }}
+                          >
+                            {selected && (
+                              <span
+                                className="w-2.5 h-2.5 rounded-full"
+                                style={{ backgroundColor: "#F26B21" }}
+                              />
+                            )}
+                          </span>
+                        </button>
+                      )
+                    })}
+                  </div>
 
-                <textarea
-                  rows={3}
-                  maxLength={500}
-                  value={reportDetails}
-                  onChange={(event) => setReportDetails(event.target.value)}
-                  placeholder="Add details (optional)"
-                  className="w-full resize-none rounded-[12px] border px-3.5 py-3 mt-4 text-[13px] outline-none"
-                  style={{
-                    borderColor: "#E6E6E6",
-                    backgroundColor: "#FAFAFA",
-                    color: "#1F1F1F",
-                  }}
-                />
+                  <textarea
+                    rows={3}
+                    maxLength={500}
+                    value={reportDetails}
+                    onChange={(event) => setReportDetails(event.target.value)}
+                    placeholder="Add details (optional)"
+                    className="w-full resize-none rounded-[12px] border px-3.5 py-3 mt-4 text-[13px] outline-none"
+                    style={{
+                      borderColor: "#E6E6E6",
+                      backgroundColor: "#FAFAFA",
+                      color: "#1F1F1F",
+                    }}
+                  />
 
-                {reportError && (
-                  <p
-                    className="text-[12px] leading-5 mt-2"
-                    style={{ color: "#C53D2E" }}
+                  {reportError && (
+                    <p
+                      className="text-[12px] leading-5 mt-2"
+                      style={{ color: "#C53D2E" }}
+                    >
+                      {reportError}
+                    </p>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={submitReport}
+                    disabled={!reportReason || reporting}
+                    className="w-full h-11 rounded-[12px] mt-4 text-[14px] font-semibold text-white disabled:opacity-50"
+                    style={{ backgroundColor: "#F26B21" }}
                   >
-                    {reportError}
-                  </p>
-                )}
-
-                <button
-                  type="button"
-                  onClick={submitReport}
-                  disabled={!reportReason || reporting}
-                  className="w-full h-11 rounded-[12px] mt-4 text-[14px] font-semibold text-white disabled:opacity-50"
-                  style={{ backgroundColor: "#F26B21" }}
-                >
-                  {reporting ? "Submitting…" : "Submit report"}
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      )}
+                    {reporting ? "Submitting…" : "Submit report"}
+                  </button>
+                </>
+              )}
+            </div>
+          </div>,
+          document.body,
+        )}
 
       <section
         className="border-t"
