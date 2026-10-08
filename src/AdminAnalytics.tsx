@@ -68,8 +68,8 @@ export default function AdminAnalytics({
     <>
       <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 mb-6">
         <div>
-          <h2 className="text-2xl font-bold">App analytics</h2>
-          <p className="text-sm text-[#6F6F6F] mt-1">
+          <h2 className="text-[27px] font-bold">App analytics</h2>
+          <p className="text-[16px] text-[#6F6F6F] mt-1">
             Recipe views, searches, saves, and likes across Pickle.
           </p>
         </div>
@@ -77,20 +77,20 @@ export default function AdminAnalytics({
           type="button"
           onClick={loadAnalytics}
           disabled={loadingAnalytics}
-          className="h-10 px-4 rounded-lg bg-white border border-[#D9DDE3] text-sm font-medium disabled:opacity-50 self-start lg:self-auto"
+          className="h-10 px-4 rounded-lg bg-white border border-[#D9DDE3] text-[16px] font-medium disabled:opacity-50 self-start lg:self-auto"
         >
           {loadingAnalytics ? "Refreshing…" : "Refresh"}
         </button>
       </div>
 
       {analyticsMessage && (
-        <div className="mb-5 rounded-xl border border-[#F0C7C0] bg-[#FFF7F5] px-4 py-3 text-sm text-[#C53D2E]">
+        <div className="mb-5 rounded-xl border border-[#F0C7C0] bg-[#FFF7F5] px-4 py-3 text-[16px] text-[#C53D2E]">
           {analyticsMessage}
         </div>
       )}
 
       {loadingAnalytics && !analytics ? (
-        <div className="rounded-2xl bg-white border border-[#E5E7EB] py-16 text-center text-sm text-[#6F6F6F]">
+        <div className="rounded-2xl bg-white border border-[#E5E7EB] py-16 text-center text-[16px] text-[#6F6F6F]">
           Loading analytics…
         </div>
       ) : analytics ? (
@@ -110,11 +110,11 @@ export default function AdminAnalytics({
                 key={label}
                 className="rounded-xl bg-white border border-[#E5E7EB] p-4"
               >
-                <p className="text-xs font-semibold uppercase tracking-wide text-[#8A8A8A]">
+                <p className="text-[14px] font-semibold uppercase tracking-wide text-[#8A8A8A]">
                   {label}
                 </p>
-                <p className="text-2xl font-bold mt-1">{formatNumber(total)}</p>
-                <p className="text-xs text-[#8A8A8A] mt-1">
+                <p className="text-[27px] font-bold mt-1">{formatNumber(total)}</p>
+                <p className="text-[14px] text-[#8A8A8A] mt-1">
                   {formatNumber(recent)} in last 30 days
                 </p>
               </div>
@@ -125,18 +125,18 @@ export default function AdminAnalytics({
             <section className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden">
               <div className="px-5 py-4 border-b border-[#E5E7EB]">
                 <h3 className="font-semibold">Recipe performance</h3>
-                <p className="text-xs text-[#8A8A8A] mt-1">
+                <p className="text-[14px] text-[#8A8A8A] mt-1">
                   Top recipes with recorded activity.
                 </p>
               </div>
               {analytics.recipe_metrics.length === 0 ? (
-                <div className="py-12 text-center text-sm text-[#8A8A8A]">
+                <div className="py-12 text-center text-[16px] text-[#8A8A8A]">
                   No recipe activity yet.
                 </div>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="w-full min-w-[560px] text-sm">
-                    <thead className="bg-[#FAFAFA] text-[#8A8A8A] text-xs uppercase">
+                  <table className="w-full min-w-[560px] text-[16px]">
+                    <thead className="bg-[#FAFAFA] text-[#8A8A8A] text-[14px] uppercase">
                       <tr>
                         <th className="text-left font-semibold px-5 py-3">
                           Recipe
@@ -185,12 +185,12 @@ export default function AdminAnalytics({
             <section className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden">
               <div className="px-5 py-4 border-b border-[#E5E7EB]">
                 <h3 className="font-semibold">Top searches</h3>
-                <p className="text-xs text-[#8A8A8A] mt-1">
+                <p className="text-[14px] text-[#8A8A8A] mt-1">
                   Most searched keywords and average results.
                 </p>
               </div>
               {analytics.top_searches.length === 0 ? (
-                <div className="py-12 text-center text-sm text-[#8A8A8A]">
+                <div className="py-12 text-center text-[16px] text-[#8A8A8A]">
                   Search tracking will appear here.
                 </div>
               ) : (
@@ -201,15 +201,15 @@ export default function AdminAnalytics({
                       className="px-5 py-3 flex items-center gap-4"
                     >
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium truncate">
+                        <p className="text-[16px] font-medium truncate">
                           {item.query}
                         </p>
-                        <p className="text-xs text-[#8A8A8A] mt-0.5">
+                        <p className="text-[14px] text-[#8A8A8A] mt-0.5">
                           Avg. {Number(item.avg_result_count).toFixed(1)}{" "}
                           results · Last {formatDate(item.last_searched_at)}
                         </p>
                       </div>
-                      <span className="text-sm font-bold">
+                      <span className="text-[16px] font-bold">
                         {formatNumber(Number(item.search_count))}
                       </span>
                     </div>
@@ -222,12 +222,12 @@ export default function AdminAnalytics({
           <section className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden">
             <div className="px-5 py-4 border-b border-[#E5E7EB]">
               <h3 className="font-semibold">Recent activity</h3>
-              <p className="text-xs text-[#8A8A8A] mt-1">
+              <p className="text-[14px] text-[#8A8A8A] mt-1">
                 Latest views, searches, saves, and likes.
               </p>
             </div>
             {analytics.recent_activity.length === 0 ? (
-              <div className="py-12 text-center text-sm text-[#8A8A8A]">
+              <div className="py-12 text-center text-[16px] text-[#8A8A8A]">
                 No activity recorded yet.
               </div>
             ) : (
@@ -252,7 +252,7 @@ export default function AdminAnalytics({
                       className="px-5 py-3 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4"
                     >
                       <span
-                        className="w-fit text-[11px] font-bold uppercase tracking-wide px-2 py-1 rounded-full"
+                        className="w-fit text-[13px] font-bold uppercase tracking-wide px-2 py-1 rounded-full"
                         style={{
                           backgroundColor:
                             item.event_type === "view"
@@ -271,8 +271,8 @@ export default function AdminAnalytics({
                         {item.event_type}
                       </span>
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm">{description}</p>
-                        <p className="text-xs text-[#8A8A8A] mt-0.5">
+                        <p className="text-[16px]">{description}</p>
+                        <p className="text-[14px] text-[#8A8A8A] mt-0.5">
                           {item.event_type === "view"
                             ? "Anonymous view"
                             : userLabel}{" "}
@@ -288,13 +288,13 @@ export default function AdminAnalytics({
         </>
       ) : (
         <div className="rounded-2xl bg-white border border-[#E5E7EB] py-16 text-center">
-          <p className="text-sm text-[#6F6F6F]">
+          <p className="text-[16px] text-[#6F6F6F]">
             Analytics could not be loaded.
           </p>
           <button
             type="button"
             onClick={loadAnalytics}
-            className="mt-4 h-10 px-4 rounded-lg bg-[#F26B21] text-white text-sm font-semibold"
+            className="mt-4 h-10 px-4 rounded-lg bg-[#F26B21] text-white text-[16px] font-semibold"
           >
             Try again
           </button>

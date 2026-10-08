@@ -229,7 +229,7 @@ export default function SearchScreen({
             }}
             onKeyDown={(e) => e.key === "Enter" && saveCurrentSearch()}
             autoFocus
-            className="flex-1 bg-transparent outline-none text-[16px] placeholder:text-[#6F6F6F]"
+            className="flex-1 bg-transparent outline-none text-[18px] placeholder:text-[#6F6F6F]"
             style={{ color: "#1F1F1F" }}
           />
           {query && (
@@ -257,7 +257,7 @@ export default function SearchScreen({
       </div>
 
       <div className="px-4 mb-4">
-        <p className="text-[16px] font-semibold" style={{ color: "#1F1F1F" }}>
+        <p className="text-[18px] font-semibold" style={{ color: "#1F1F1F" }}>
           {loading
             ? "Loading…"
             : query.trim()
@@ -293,25 +293,25 @@ export default function SearchScreen({
 
               <div className="flex-1 min-w-0">
                 <p
-                  className="font-semibold text-[16px] leading-snug truncate"
+                  className="font-semibold text-[18px] leading-snug truncate"
                   style={{ color: "#1F1F1F" }}
                 >
                   {recipe.title}
                 </p>
                 <div className="flex items-center gap-2 mt-1 flex-wrap">
                   <span
-                    className="text-[13px] px-2 py-0.5 rounded-full"
+                    className="text-[15px] px-2 py-0.5 rounded-full"
                     style={{ backgroundColor: "#F5F5F5", color: "#6F6F6F" }}
                   >
                     Filipino
                   </span>
                   <span
-                    className="text-[13px] px-2 py-0.5 rounded-full"
+                    className="text-[15px] px-2 py-0.5 rounded-full"
                     style={{ backgroundColor: "#F5F5F5", color: "#6F6F6F" }}
                   >
                     {recipe.difficulty}
                   </span>
-                  <span className="text-[13px]" style={{ color: "#6F6F6F" }}>
+                  <span className="text-[15px]" style={{ color: "#6F6F6F" }}>
                     {formatTime(recipe.total_time_minutes)}
                   </span>
                 </div>
@@ -336,12 +336,12 @@ export default function SearchScreen({
       ) : !loading ? (
         <div className="flex flex-col items-center justify-center px-4 py-16">
           <p
-            className="font-semibold text-[17px] mb-1"
+            className="font-semibold text-[19px] mb-1"
             style={{ color: "#1F1F1F" }}
           >
             No recipes found
           </p>
-          <p className="text-[15px] text-center" style={{ color: "#6F6F6F" }}>
+          <p className="text-[17px] text-center" style={{ color: "#6F6F6F" }}>
             Try a different keyword.
           </p>
         </div>
@@ -351,7 +351,7 @@ export default function SearchScreen({
         <div className="px-4 mt-6">
           <button
             onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
-            className="w-full h-12 rounded-[12px] text-[16px] font-medium"
+            className="w-full h-12 rounded-[12px] text-[18px] font-medium"
             style={{
               backgroundColor: "#F9F9F9",
               border: "1.5px solid #EAEAEA",

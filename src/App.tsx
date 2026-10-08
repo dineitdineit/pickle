@@ -558,7 +558,7 @@ export default function App() {
         <div className="bg-white min-h-screen max-w-md mx-auto relative">
           {loadingAuth ? (
             <div
-              className="px-4 py-20 text-center text-[15px]"
+              className="px-4 py-20 text-center text-[17px]"
               style={{ color: "#6F6F6F" }}
             >
               Loading profile…
@@ -612,7 +612,7 @@ export default function App() {
               type="button"
               onClick={() => setActiveNav(4)}
               aria-label="Open profile"
-              className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center font-semibold text-[14px]"
+              className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center font-semibold text-[16px]"
               style={{ backgroundColor: "#FFF0E6", color: "#F26B21" }}
             >
               {homeAvatarUrl && /^https?:\/\//.test(homeAvatarUrl) ? (
@@ -628,7 +628,7 @@ export default function App() {
           </div>
           <div className="px-4 mt-4 mb-4">
             <h1
-              className="font-bold text-[28px] leading-tight"
+              className="font-bold text-[31px] leading-tight"
               style={{ color: "#1F1F1F" }}
             >
               Hi, looking for
@@ -665,14 +665,14 @@ export default function App() {
                   }
                 }}
                 onFocus={() => setShowSearch(true)}
-                className="flex-1 bg-transparent outline-none text-[16px] placeholder:text-[#6F6F6F]"
+                className="flex-1 bg-transparent outline-none text-[18px] placeholder:text-[#6F6F6F]"
                 style={{ color: "#1F1F1F" }}
               />
             </div>
           </div>
           {loadingRecipes ? (
             <div
-              className="px-4 py-10 text-center text-[15px]"
+              className="px-4 py-10 text-center text-[17px]"
               style={{ color: "#6F6F6F" }}
             >
               Loading recipes…
@@ -688,7 +688,7 @@ export default function App() {
               <div className="mb-8">
                 <div className="px-4 mb-4">
                   <h2
-                    className="font-semibold text-[20px]"
+                    className="font-semibold text-[22px]"
                     style={{ color: "#1F1F1F" }}
                   >
                     Featured
@@ -743,12 +743,12 @@ export default function App() {
                             }}
                           />
                           <div className="absolute bottom-0 left-0 right-0 p-4 pb-10">
-                            <h2 className="font-semibold text-[17px] text-white mb-1">
+                            <h2 className="font-semibold text-[19px] text-white mb-1">
                               {recipe.title}
                             </h2>
                             <div className="flex items-center gap-2">
                               <span
-                                className="text-[13px] text-white/80 px-2.5 py-0.5 rounded-full"
+                                className="text-[15px] text-white/80 px-2.5 py-0.5 rounded-full"
                                 style={{
                                   backgroundColor: "rgba(255,255,255,0.18)",
                                 }}
@@ -756,14 +756,14 @@ export default function App() {
                                 Filipino
                               </span>
                               <span
-                                className="text-[13px] text-white/80 px-2.5 py-0.5 rounded-full"
+                                className="text-[15px] text-white/80 px-2.5 py-0.5 rounded-full"
                                 style={{
                                   backgroundColor: "rgba(255,255,255,0.18)",
                                 }}
                               >
                                 {recipe.difficulty}
                               </span>
-                              <span className="text-[13px] text-white/80">
+                              <span className="text-[15px] text-white/80">
                                 {formatTime(recipe.total_time_minutes)}
                               </span>
                             </div>

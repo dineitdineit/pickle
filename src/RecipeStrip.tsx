@@ -63,7 +63,7 @@ export default function RecipeStrip({
     <section className="mb-8">
       <div className="px-4 mb-3 flex items-end justify-between gap-3">
         <h2
-          className="font-semibold text-[20px] leading-none"
+          className="font-semibold text-[22px] leading-none"
           style={{ color: "#1F1F1F" }}
         >
           {title}
@@ -71,7 +71,7 @@ export default function RecipeStrip({
         <button
           type="button"
           onClick={onSeeMore}
-          className="flex-shrink-0 text-[13px] font-medium leading-none pb-[1px]"
+          className="flex-shrink-0 text-[15px] font-medium leading-none pb-[1px]"
           style={{ color: "#6F6F6F" }}
         >
           See more &gt;
@@ -108,12 +108,12 @@ export default function RecipeStrip({
               />
             </div>
             <p
-              className="font-semibold text-[16px] leading-[19px] min-h-[19px] line-clamp-2"
+              className="font-semibold text-[18px] leading-[21px] min-h-[21px] line-clamp-2"
               style={{ color: "#1F1F1F" }}
             >
               {recipe.title}
             </p>
-            <p className="text-[13px] mt-1" style={{ color: "#6F6F6F" }}>
+            <p className="text-[15px] mt-1" style={{ color: "#6F6F6F" }}>
               {recipe.difficulty} · {formatTime(recipe.total_time_minutes)}
             </p>
           </button>

@@ -424,13 +424,13 @@ export default function AdminDashboard() {
             <div className="mb-1">
               <PickleLogo size={24} />
             </div>
-            <h1 className="text-2xl font-bold text-[#1F1F1F]">Admin sign in</h1>
-            <p className="text-sm text-[#6F6F6F] mt-2">
+            <h1 className="text-[27px] font-bold text-[#1F1F1F]">Admin sign in</h1>
+            <p className="text-[16px] text-[#6F6F6F] mt-2">
               Use an account with the admin role.
             </p>
           </div>
 
-          <label className="block text-sm font-medium text-[#333333] mb-2">
+          <label className="block text-[16px] font-medium text-[#333333] mb-2">
             Email
           </label>
           <input
@@ -441,7 +441,7 @@ export default function AdminDashboard() {
             autoComplete="email"
           />
 
-          <label className="block text-sm font-medium text-[#333333] mb-2">
+          <label className="block text-[16px] font-medium text-[#333333] mb-2">
             Password
           </label>
           <input
@@ -453,7 +453,7 @@ export default function AdminDashboard() {
           />
 
           {pageMessage && (
-            <p className="text-sm text-[#C53D2E] mt-3">{pageMessage}</p>
+            <p className="text-[16px] text-[#C53D2E] mt-3">{pageMessage}</p>
           )}
 
           <button
@@ -472,12 +472,12 @@ export default function AdminDashboard() {
     return (
       <div className="min-h-screen bg-[#F6F7F8] flex items-center justify-center px-5">
         <div className="w-full max-w-md rounded-2xl bg-white border border-[#E5E7EB] p-6 text-center">
-          <h1 className="text-xl font-bold text-[#1F1F1F]">Access denied</h1>
-          <p className="text-sm text-[#6F6F6F] mt-2">
+          <h1 className="text-[22px] font-bold text-[#1F1F1F]">Access denied</h1>
+          <p className="text-[16px] text-[#6F6F6F] mt-2">
             This account does not have Pickle admin access.
           </p>
           {pageMessage && (
-            <p role="alert" className="text-sm text-[#C53D2E] mt-3">
+            <p role="alert" className="text-[16px] text-[#C53D2E] mt-3">
               {pageMessage}
             </p>
           )}
@@ -485,7 +485,7 @@ export default function AdminDashboard() {
             type="button"
             onClick={handleSignOut}
             disabled={signingOut}
-            className="mt-5 h-10 px-4 rounded-lg border border-[#D9DDE3] text-sm font-medium text-[#333333]"
+            className="mt-5 h-10 px-4 rounded-lg border border-[#D9DDE3] text-[16px] font-medium text-[#333333]"
           >
             Sign out
           </button>
@@ -499,13 +499,13 @@ export default function AdminDashboard() {
       <header className="sticky top-0 z-20 bg-white border-b border-[#E5E7EB]">
         <div className="max-w-7xl mx-auto px-5 lg:px-8 h-16 flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold text-[#F26B21]">PICKLE</p>
-            <h1 className="text-lg font-bold">Admin Dashboard</h1>
+            <p className="text-[14px] font-semibold text-[#F26B21]">PICKLE</p>
+            <h1 className="text-[20px] font-bold">Admin Dashboard</h1>
           </div>
           <div className="flex items-center gap-2">
             <a
               href="/"
-              className="h-9 px-3 rounded-lg border border-[#D9DDE3] flex items-center text-sm font-medium"
+              className="h-9 px-3 rounded-lg border border-[#D9DDE3] flex items-center text-[16px] font-medium"
             >
               Open app
             </a>
@@ -513,7 +513,7 @@ export default function AdminDashboard() {
               type="button"
               onClick={handleSignOut}
               disabled={signingOut}
-              className="h-9 px-3 rounded-lg border border-[#D9DDE3] text-sm font-medium"
+              className="h-9 px-3 rounded-lg border border-[#D9DDE3] text-[16px] font-medium"
             >
               Sign out
             </button>
@@ -531,7 +531,7 @@ export default function AdminDashboard() {
               key={value}
               type="button"
               onClick={() => setSection(value)}
-              className="h-10 px-4 rounded-lg text-sm font-semibold"
+              className="h-10 px-4 rounded-lg text-[16px] font-semibold"
               style={{
                 backgroundColor: section === value ? "#FFF0E6" : "#FFFFFF",
                 color: section === value ? "#F26B21" : "#6F6F6F",
@@ -554,8 +554,8 @@ export default function AdminDashboard() {
           <>
             <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 mb-6">
               <div>
-                <h2 className="text-2xl font-bold">Comment moderation</h2>
-                <p className="text-sm text-[#6F6F6F] mt-1">
+                <h2 className="text-[27px] font-bold">Comment moderation</h2>
+                <p className="text-[16px] text-[#6F6F6F] mt-1">
                   Review user reports and moderate comments.
                 </p>
               </div>
@@ -563,7 +563,7 @@ export default function AdminDashboard() {
                 type="button"
                 onClick={loadReports}
                 disabled={loadingReports}
-                className="h-10 px-4 rounded-lg bg-white border border-[#D9DDE3] text-sm font-medium disabled:opacity-50 self-start lg:self-auto"
+                className="h-10 px-4 rounded-lg bg-white border border-[#D9DDE3] text-[16px] font-medium disabled:opacity-50 self-start lg:self-auto"
               >
                 {loadingReports ? "Refreshing…" : "Refresh"}
               </button>
@@ -572,7 +572,7 @@ export default function AdminDashboard() {
             {actionMessage && (
               <p
                 role="status"
-                className="mb-5 rounded-xl bg-[#EDF7EE] px-4 py-3 text-sm text-[#397A46]"
+                className="mb-5 rounded-xl bg-[#EDF7EE] px-4 py-3 text-[16px] text-[#397A46]"
               >
                 {actionMessage}
               </p>
@@ -588,10 +588,10 @@ export default function AdminDashboard() {
                   key={label}
                   className="rounded-xl bg-white border border-[#E5E7EB] p-4"
                 >
-                  <p className="text-xs font-semibold uppercase tracking-wide text-[#8A8A8A]">
+                  <p className="text-[14px] font-semibold uppercase tracking-wide text-[#8A8A8A]">
                     {label}
                   </p>
-                  <p className="text-2xl font-bold mt-1">{value}</p>
+                  <p className="text-[27px] font-bold mt-1">{value}</p>
                 </div>
               ))}
             </div>
@@ -610,7 +610,7 @@ export default function AdminDashboard() {
                       key={option}
                       type="button"
                       onClick={() => setFilter(option)}
-                      className="h-8 px-3 rounded-full text-xs font-semibold capitalize"
+                      className="h-8 px-3 rounded-full text-[14px] font-semibold capitalize"
                       style={{
                         backgroundColor:
                           filter === option ? "#FFF0E6" : "#F5F5F5",
@@ -624,13 +624,13 @@ export default function AdminDashboard() {
               </div>
 
               {pageMessage && (
-                <div className="px-5 py-3 border-b border-[#E5E7EB] text-sm text-[#C53D2E] bg-[#FFF7F5]">
+                <div className="px-5 py-3 border-b border-[#E5E7EB] text-[16px] text-[#C53D2E] bg-[#FFF7F5]">
                   {pageMessage}
                 </div>
               )}
 
               {loadingReports ? (
-                <div className="py-16 text-center text-sm text-[#6F6F6F]">
+                <div className="py-16 text-center text-[16px] text-[#6F6F6F]">
                   Loading reports…
                 </div>
               ) : filteredGroups.length === 0 ? (
@@ -638,7 +638,7 @@ export default function AdminDashboard() {
                   <p className="font-semibold">
                     No {filter === "all" ? "" : filter} reports
                   </p>
-                  <p className="text-sm text-[#8A8A8A] mt-1">
+                  <p className="text-[16px] text-[#8A8A8A] mt-1">
                     Reported comments will appear here.
                   </p>
                 </div>
@@ -671,7 +671,7 @@ export default function AdminDashboard() {
                           <div className="min-w-0 flex-1">
                             <div className="flex flex-wrap items-center gap-2 mb-2">
                               <span
-                                className="text-[11px] font-bold uppercase tracking-wide px-2 py-1 rounded-full"
+                                className="text-[13px] font-bold uppercase tracking-wide px-2 py-1 rounded-full"
                                 style={{
                                   backgroundColor:
                                     group.status === "open"
@@ -689,11 +689,11 @@ export default function AdminDashboard() {
                               >
                                 {group.status}
                               </span>
-                              <span className="text-xs text-[#8A8A8A]">
+                              <span className="text-[14px] text-[#8A8A8A]">
                                 {group.reports.length} report
                                 {group.reports.length !== 1 ? "s" : ""}
                               </span>
-                              <span className="text-xs text-[#8A8A8A]">
+                              <span className="text-[14px] text-[#8A8A8A]">
                                 Latest {formatDate(group.latestAt)}
                               </span>
                             </div>
@@ -703,7 +703,7 @@ export default function AdminDashboard() {
                                 ([reason, count]) => (
                                   <span
                                     key={reason}
-                                    className="text-xs rounded-full bg-[#F5F5F5] px-2.5 py-1 text-[#555555]"
+                                    className="text-[14px] rounded-full bg-[#F5F5F5] px-2.5 py-1 text-[#555555]"
                                   >
                                     {REASON_LABELS[reason] ?? reason}
                                     {count > 1 ? ` · ${count}` : ""}
@@ -713,16 +713,16 @@ export default function AdminDashboard() {
                             </div>
 
                             <div className="rounded-xl bg-[#FAFAFA] border border-[#ECECEC] p-3.5">
-                              <p className="text-xs font-semibold text-[#8A8A8A] mb-1">
+                              <p className="text-[14px] font-semibold text-[#8A8A8A] mb-1">
                                 Reported comment
                               </p>
-                              <p className="text-sm leading-6 whitespace-pre-wrap break-words">
+                              <p className="text-[16px] leading-6 whitespace-pre-wrap break-words">
                                 {currentComment?.content ||
                                   latestReport.comment_snapshot}
                               </p>
                             </div>
 
-                            <div className="mt-3 grid sm:grid-cols-2 gap-x-6 gap-y-1 text-sm">
+                            <div className="mt-3 grid sm:grid-cols-2 gap-x-6 gap-y-1 text-[16px]">
                               <p>
                                 <span className="text-[#8A8A8A]">Author:</span>{" "}
                                 {reportedProfile?.display_name ||
@@ -755,7 +755,7 @@ export default function AdminDashboard() {
                                 href={`/?recipe=${recipe.id}`}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="inline-block mt-3 text-sm font-semibold text-[#F26B21]"
+                                className="inline-block mt-3 text-[16px] font-semibold text-[#F26B21]"
                               >
                                 Open recipe ↗
                               </a>
@@ -768,7 +768,7 @@ export default function AdminDashboard() {
                                 type="button"
                                 disabled={busy}
                                 onClick={() => moderate(group, "dismiss")}
-                                className="h-9 px-3 rounded-lg border border-[#D9DDE3] text-sm font-medium bg-white disabled:opacity-50"
+                                className="h-9 px-3 rounded-lg border border-[#D9DDE3] text-[16px] font-medium bg-white disabled:opacity-50"
                               >
                                 Dismiss
                               </button>
@@ -776,7 +776,7 @@ export default function AdminDashboard() {
                                 type="button"
                                 disabled={busy}
                                 onClick={() => moderate(group, "hide")}
-                                className="h-9 px-3 rounded-lg border border-[#F1C8B1] text-sm font-medium text-[#C85B20] bg-[#FFF8F4] disabled:opacity-50"
+                                className="h-9 px-3 rounded-lg border border-[#F1C8B1] text-[16px] font-medium text-[#C85B20] bg-[#FFF8F4] disabled:opacity-50"
                               >
                                 Hide comment
                               </button>
@@ -784,7 +784,7 @@ export default function AdminDashboard() {
                                 type="button"
                                 disabled={busy}
                                 onClick={() => moderate(group, "remove")}
-                                className="h-9 px-3 rounded-lg border border-[#E9B8B8] text-sm font-medium text-[#B83939] bg-[#FFF6F6] disabled:opacity-50"
+                                className="h-9 px-3 rounded-lg border border-[#E9B8B8] text-[16px] font-medium text-[#B83939] bg-[#FFF6F6] disabled:opacity-50"
                               >
                                 Remove
                               </button>

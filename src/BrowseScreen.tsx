@@ -84,7 +84,7 @@ export default function BrowseScreen({
     <div className="browse-screen pb-24">
       {/* Title */}
       <div className="px-4 pt-6 pb-2 flex items-center justify-center">
-        <h1 className="font-bold text-[24px]" style={{ color: "#1F1F1F" }}>
+        <h1 className="font-bold text-[27px]" style={{ color: "#1F1F1F" }}>
           Browse
         </h1>
       </div>
@@ -114,7 +114,7 @@ export default function BrowseScreen({
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && searchKeyword(searchValue)}
-            className="flex-1 bg-transparent outline-none text-[16px] placeholder:text-[#6F6F6F]"
+            className="flex-1 bg-transparent outline-none text-[18px] placeholder:text-[#6F6F6F]"
             style={{ color: "#1F1F1F" }}
           />
           {searchValue && (
@@ -153,7 +153,7 @@ export default function BrowseScreen({
       <div className="px-4 mb-8">
         <div className="flex items-center justify-between mb-4">
           <h2
-            className="font-semibold text-[20px]"
+            className="font-semibold text-[22px]"
             style={{ color: "#1F1F1F" }}
           >
             Recently Searched
@@ -162,7 +162,7 @@ export default function BrowseScreen({
             <button
               type="button"
               onClick={clearRecent}
-              className="text-[14px] font-medium"
+              className="text-[16px] font-medium"
               style={{ color: "#F26B21" }}
             >
               Clear
@@ -174,7 +174,7 @@ export default function BrowseScreen({
             recentSearches.map((item) => (
               <div
                 key={item}
-                className="flex items-center gap-1 rounded-full text-[14px] font-medium overflow-hidden"
+                className="flex items-center gap-1 rounded-full text-[16px] font-medium overflow-hidden"
                 style={{
                   backgroundColor: "#F9F9F9",
                   border: "1.5px solid #EAEAEA",
@@ -223,7 +223,7 @@ export default function BrowseScreen({
               </div>
             ))
           ) : (
-            <p className="text-[13px]" style={{ color: "#A0A0A0" }}>
+            <p className="text-[15px]" style={{ color: "#A0A0A0" }}>
               Your recent searches will appear here.
             </p>
           )}
@@ -236,12 +236,12 @@ export default function BrowseScreen({
           <section key={section.title}>
             <div className="mb-3">
               <h2
-                className="font-semibold text-[20px]"
+                className="font-semibold text-[22px]"
                 style={{ color: "#1F1F1F" }}
               >
                 {section.title}
               </h2>
-              <p className="text-[13px] mt-1" style={{ color: "#8A8A8A" }}>
+              <p className="text-[15px] mt-1" style={{ color: "#8A8A8A" }}>
                 {section.subtitle}
               </p>
             </div>
@@ -256,7 +256,7 @@ export default function BrowseScreen({
                   style={{ borderColor: "#EAEAEA", backgroundColor: "#FFFFFF" }}
                 >
                   <span
-                    className="text-[15px] font-medium truncate"
+                    className="text-[17px] font-medium truncate"
                     style={{ color: "#1F1F1F" }}
                   >
                     {item}

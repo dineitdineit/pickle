@@ -37,11 +37,11 @@ export default function RetryState({
           </svg>
         </div>
 
-        <p className="font-semibold text-[16px]" style={{ color: "#1F1F1F" }}>
+        <p className="font-semibold text-[18px]" style={{ color: "#1F1F1F" }}>
           {title}
         </p>
         <p
-          className="text-[13px] leading-5 mt-1.5"
+          className="text-[15px] leading-5 mt-1.5"
           style={{ color: "#6F6F6F" }}
         >
           {message}
@@ -50,7 +50,7 @@ export default function RetryState({
         <button
           type="button"
           onClick={onRetry}
-          className="h-10 px-5 rounded-[12px] mt-4 text-[14px] font-semibold text-white"
+          className="h-10 px-5 rounded-[12px] mt-4 text-[16px] font-semibold text-white"
           style={{ backgroundColor: "#F26B21" }}
         >
           Try again

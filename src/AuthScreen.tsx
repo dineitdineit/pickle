@@ -292,7 +292,7 @@ export default function AuthScreen({
     <div className="space-y-3">
       <div className="flex items-center gap-3 py-1">
         <div className="h-px flex-1" style={{ backgroundColor: "#E8E8E8" }} />
-        <span className="text-[12px]" style={{ color: "#A0A0A0" }}>
+        <span className="text-[14px]" style={{ color: "#A0A0A0" }}>
           or continue with
         </span>
         <div className="h-px flex-1" style={{ backgroundColor: "#E8E8E8" }} />
@@ -301,7 +301,7 @@ export default function AuthScreen({
         type="button"
         onClick={() => handleSocialAuth("google")}
         disabled={Boolean(socialLoading)}
-        className="w-full h-12 rounded-[8px] border flex items-center justify-center gap-3 text-[14px] font-semibold disabled:opacity-60"
+        className="w-full h-12 rounded-[8px] border flex items-center justify-center gap-3 text-[16px] font-semibold disabled:opacity-60"
         style={{
           borderColor: "#E5E5E5",
           backgroundColor: "#FFFFFF",
@@ -315,7 +315,7 @@ export default function AuthScreen({
         type="button"
         onClick={() => handleSocialAuth("apple")}
         disabled={Boolean(socialLoading)}
-        className="w-full h-12 rounded-[8px] flex items-center justify-center gap-3 text-[14px] font-semibold disabled:opacity-60"
+        className="w-full h-12 rounded-[8px] flex items-center justify-center gap-3 text-[16px] font-semibold disabled:opacity-60"
         style={{ backgroundColor: "#000000", color: "#FFFFFF" }}
       >
         <AppleIcon />
@@ -333,17 +333,17 @@ export default function AuthScreen({
             <PickleLogo size={28} iconSize={88} stacked />
           </div>
           <div className="text-center mb-7">
-            <h1 className="font-bold text-[24px]" style={{ color: "#1F1F1F" }}>
+            <h1 className="font-bold text-[27px]" style={{ color: "#1F1F1F" }}>
               Reset your password
             </h1>
-            <p className="text-[14px] mt-2" style={{ color: "#777777" }}>
+            <p className="text-[16px] mt-2" style={{ color: "#777777" }}>
               Enter your email and we'll send you a reset link.
             </p>
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label
-                className="block text-[13px] font-semibold mb-2"
+                className="block text-[15px] font-semibold mb-2"
                 style={{ color: "#444444" }}
               >
                 Email
@@ -353,7 +353,7 @@ export default function AuthScreen({
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]"
+                className="w-full h-12 px-4 rounded-[12px] border outline-none text-[17px]"
                 style={{
                   borderColor: "#E5E5E5",
                   backgroundColor: "#FAFAFA",
@@ -365,19 +365,19 @@ export default function AuthScreen({
               />
             </div>
             {errorMessage && (
-              <p className="text-[13px] leading-5" style={{ color: "#C53D2E" }}>
+              <p className="text-[15px] leading-5" style={{ color: "#C53D2E" }}>
                 {errorMessage}
               </p>
             )}
             {message && (
-              <p className="text-[13px] leading-5" style={{ color: "#5F6F52" }}>
+              <p className="text-[15px] leading-5" style={{ color: "#5F6F52" }}>
                 {message}
               </p>
             )}
             <button
               type="submit"
               disabled={loading}
-              className="w-full h-12 rounded-[8px] text-white text-[15px] font-semibold disabled:opacity-60"
+              className="w-full h-12 rounded-[8px] text-white text-[17px] font-semibold disabled:opacity-60"
               style={{ backgroundColor: "#F26B21" }}
             >
               {loading ? "Sending…" : "Send reset link"}
@@ -396,10 +396,10 @@ export default function AuthScreen({
             <PickleLogo size={28} iconSize={88} stacked />
           </div>
           <div className="text-center mb-7">
-            <h1 className="font-bold text-[24px]" style={{ color: "#1F1F1F" }}>
+            <h1 className="font-bold text-[27px]" style={{ color: "#1F1F1F" }}>
               Choose a new password
             </h1>
-            <p className="text-[14px] mt-2" style={{ color: "#777777" }}>
+            <p className="text-[16px] mt-2" style={{ color: "#777777" }}>
               {recoveryReady
                 ? "Enter and confirm your new password."
                 : "Verifying your reset link…"}
@@ -408,7 +408,7 @@ export default function AuthScreen({
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label
-                className="block text-[13px] font-semibold mb-2"
+                className="block text-[15px] font-semibold mb-2"
                 style={{ color: "#444444" }}
               >
                 New password
@@ -419,7 +419,7 @@ export default function AuthScreen({
                 minLength={6}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]"
+                className="w-full h-12 px-4 rounded-[12px] border outline-none text-[17px]"
                 style={{
                   borderColor: "#E5E5E5",
                   backgroundColor: "#FAFAFA",
@@ -431,7 +431,7 @@ export default function AuthScreen({
             </div>
             <div>
               <label
-                className="block text-[13px] font-semibold mb-2"
+                className="block text-[15px] font-semibold mb-2"
                 style={{ color: "#444444" }}
               >
                 Confirm new password
@@ -442,7 +442,7 @@ export default function AuthScreen({
                 minLength={6}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]"
+                className="w-full h-12 px-4 rounded-[12px] border outline-none text-[17px]"
                 style={{
                   borderColor: "#E5E5E5",
                   backgroundColor: "#FAFAFA",
@@ -453,19 +453,19 @@ export default function AuthScreen({
               />
             </div>
             {errorMessage && (
-              <p className="text-[13px] leading-5" style={{ color: "#C53D2E" }}>
+              <p className="text-[15px] leading-5" style={{ color: "#C53D2E" }}>
                 {errorMessage}
               </p>
             )}
             {message && (
-              <p className="text-[13px] leading-5" style={{ color: "#5F6F52" }}>
+              <p className="text-[15px] leading-5" style={{ color: "#5F6F52" }}>
                 {message}
               </p>
             )}
             <button
               type="submit"
               disabled={loading || !recoveryReady}
-              className="w-full h-12 rounded-[8px] text-white text-[15px] font-semibold disabled:opacity-50"
+              className="w-full h-12 rounded-[8px] text-white text-[17px] font-semibold disabled:opacity-50"
               style={{ backgroundColor: "#F26B21" }}
             >
               {loading ? "Updating…" : "Update password"}
@@ -485,17 +485,17 @@ export default function AuthScreen({
             <PickleLogo size={28} iconSize={88} stacked />
           </div>
           <div className="text-center mb-7">
-            <h1 className="font-bold text-[24px]" style={{ color: "#1F1F1F" }}>
+            <h1 className="font-bold text-[27px]" style={{ color: "#1F1F1F" }}>
               Create your account
             </h1>
-            <p className="text-[14px] mt-2" style={{ color: "#777777" }}>
+            <p className="text-[16px] mt-2" style={{ color: "#777777" }}>
               Save recipes and build your own Pickle profile.
             </p>
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label
-                className="block text-[13px] font-semibold mb-2"
+                className="block text-[15px] font-semibold mb-2"
                 style={{ color: "#444444" }}
               >
                 Display name
@@ -503,7 +503,7 @@ export default function AuthScreen({
               <input
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]"
+                className="w-full h-12 px-4 rounded-[12px] border outline-none text-[17px]"
                 style={{
                   borderColor: "#E5E5E5",
                   backgroundColor: "#FAFAFA",
@@ -515,7 +515,7 @@ export default function AuthScreen({
             </div>
             <div>
               <label
-                className="block text-[13px] font-semibold mb-2"
+                className="block text-[15px] font-semibold mb-2"
                 style={{ color: "#444444" }}
               >
                 Username
@@ -523,7 +523,7 @@ export default function AuthScreen({
               <input
                 value={username}
                 onChange={(e) => setUsername(e.target.value.replace(/\s/g, ""))}
-                className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]"
+                className="w-full h-12 px-4 rounded-[12px] border outline-none text-[17px]"
                 style={{
                   borderColor: "#E5E5E5",
                   backgroundColor: "#FAFAFA",
@@ -536,7 +536,7 @@ export default function AuthScreen({
             </div>
             <div>
               <label
-                className="block text-[13px] font-semibold mb-2"
+                className="block text-[15px] font-semibold mb-2"
                 style={{ color: "#444444" }}
               >
                 Email
@@ -546,7 +546,7 @@ export default function AuthScreen({
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]"
+                className="w-full h-12 px-4 rounded-[12px] border outline-none text-[17px]"
                 style={{
                   borderColor: "#E5E5E5",
                   backgroundColor: "#FAFAFA",
@@ -559,7 +559,7 @@ export default function AuthScreen({
             </div>
             <div>
               <label
-                className="block text-[13px] font-semibold mb-2"
+                className="block text-[15px] font-semibold mb-2"
                 style={{ color: "#444444" }}
               >
                 Password
@@ -570,7 +570,7 @@ export default function AuthScreen({
                 minLength={6}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]"
+                className="w-full h-12 px-4 rounded-[12px] border outline-none text-[17px]"
                 style={{
                   borderColor: "#E5E5E5",
                   backgroundColor: "#FAFAFA",
@@ -581,12 +581,12 @@ export default function AuthScreen({
               />
             </div>
             {errorMessage && (
-              <p className="text-[13px] leading-5" style={{ color: "#C53D2E" }}>
+              <p className="text-[15px] leading-5" style={{ color: "#C53D2E" }}>
                 {errorMessage}
               </p>
             )}
             {message && (
-              <p className="text-[13px] leading-5" style={{ color: "#5F6F52" }}>
+              <p className="text-[15px] leading-5" style={{ color: "#5F6F52" }}>
                 {message}
               </p>
             )}
@@ -595,7 +595,7 @@ export default function AuthScreen({
                 className="rounded-[12px] px-4 py-3 text-center"
                 style={{ backgroundColor: "#FFF8F3" }}
               >
-                <p className="text-[12px]" style={{ color: "#6F6F6F" }}>
+                <p className="text-[14px]" style={{ color: "#6F6F6F" }}>
                   Didn't get your email?{" "}
                   <button
                     type="button"
@@ -616,7 +616,7 @@ export default function AuthScreen({
             <button
               type="submit"
               disabled={loading || Boolean(socialLoading) || confirmationSent}
-              className="w-full h-12 rounded-[8px] text-white text-[15px] font-semibold disabled:opacity-60"
+              className="w-full h-12 rounded-[8px] text-white text-[17px] font-semibold disabled:opacity-60"
               style={{ backgroundColor: "#F26B21" }}
             >
               {loading
@@ -630,7 +630,7 @@ export default function AuthScreen({
               <button
                 type="button"
                 onClick={() => changeMode("signin")}
-                className="text-[12px] font-normal"
+                className="text-[14px] font-normal"
                 style={{ color: "#A0A0A0" }}
               >
                 Already have an account? Log in
@@ -671,17 +671,17 @@ export default function AuthScreen({
           <PickleLogo size={28} iconSize={88} stacked />
         </div>
         <div className="text-center mb-7">
-          <h1 className="font-bold text-[24px]" style={{ color: "#1F1F1F" }}>
+          <h1 className="font-bold text-[27px]" style={{ color: "#1F1F1F" }}>
             Welcome back
           </h1>
-          <p className="text-[14px] mt-2" style={{ color: "#777777" }}>
+          <p className="text-[16px] mt-2" style={{ color: "#777777" }}>
             Sign in to keep your Pickle activity with you.
           </p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label
-              className="auth-field-label block text-[13px] font-semibold mb-2"
+              className="auth-field-label block text-[15px] font-semibold mb-2"
               style={{ color: "#444444" }}
             >
               Email
@@ -691,7 +691,7 @@ export default function AuthScreen({
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="auth-field-input w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]"
+              className="auth-field-input w-full h-12 px-4 rounded-[12px] border outline-none text-[17px]"
               style={{
                 borderColor: "#E5E5E5",
                 backgroundColor: "#FAFAFA",
@@ -704,7 +704,7 @@ export default function AuthScreen({
           </div>
           <div>
             <label
-              className="auth-field-label block text-[13px] font-semibold mb-2"
+              className="auth-field-label block text-[15px] font-semibold mb-2"
               style={{ color: "#444444" }}
             >
               Password
@@ -715,7 +715,7 @@ export default function AuthScreen({
               minLength={6}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="auth-field-input w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]"
+              className="auth-field-input w-full h-12 px-4 rounded-[12px] border outline-none text-[17px]"
               style={{
                 borderColor: "#E5E5E5",
                 backgroundColor: "#FAFAFA",
@@ -726,25 +726,25 @@ export default function AuthScreen({
             />
           </div>
           {errorMessage && (
-            <p className="text-[13px] leading-5" style={{ color: "#C53D2E" }}>
+            <p className="text-[15px] leading-5" style={{ color: "#C53D2E" }}>
               {errorMessage}
             </p>
           )}
           {message && (
-            <p className="text-[13px] leading-5" style={{ color: "#5F6F52" }}>
+            <p className="text-[15px] leading-5" style={{ color: "#5F6F52" }}>
               {message}
             </p>
           )}
           <button
             type="submit"
             disabled={loading || Boolean(socialLoading)}
-            className="w-full h-12 rounded-[8px] text-white text-[15px] font-semibold disabled:opacity-60"
+            className="w-full h-12 rounded-[8px] text-white text-[17px] font-semibold disabled:opacity-60"
             style={{ backgroundColor: "#F26B21" }}
           >
             {loading ? "Please wait…" : "Log in"}
           </button>
           {socialButtons}
-          <div className="flex items-center justify-center gap-3 text-[12px]">
+          <div className="flex items-center justify-center gap-3 text-[14px]">
             <button
               type="button"
               onClick={() => changeMode("signup")}

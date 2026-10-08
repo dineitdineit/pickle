@@ -81,8 +81,8 @@ section.pt-6.border-t[style*="margin-top: 50px"] {
 }
 
 /* Comments: make timestamps and the action row easier to read. */
-section.border-t .text-\[7px\] {
-  font-size: 12px !important;
+section.border-t .text-\[9px\] {
+  font-size: 14px !important;
 }
 
 
@@ -331,3 +331,6 @@ html[data-theme="dark"] .comment-options-menu {
 html[data-theme="dark"] .comment-options-menu button:hover {
   background-color: rgba(255, 255, 255, 0.1);
 }
+
+/* Raise inherited text without scaling spacing or control dimensions. */
+body { font-size: 18px; }

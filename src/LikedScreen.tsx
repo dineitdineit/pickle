@@ -125,14 +125,14 @@ export default function LikedScreen({
             <polyline points="15 18 9 12 15 6" />
           </svg>
         </button>
-        <h1 className="font-bold text-[24px]" style={{ color: "#1F1F1F" }}>
+        <h1 className="font-bold text-[27px]" style={{ color: "#1F1F1F" }}>
           Liked Recipes
         </h1>
       </div>
 
       {loading ? (
         <div
-          className="px-4 py-16 text-center text-[14px]"
+          className="px-4 py-16 text-center text-[16px]"
           style={{ color: "#6F6F6F" }}
         >
           Loading liked recipes…
@@ -140,7 +140,7 @@ export default function LikedScreen({
       ) : visibleRecipes.length > 0 ? (
         <div className="web-saved-grid px-4 flex flex-col">
           {errorMessage && (
-            <p className="text-[12px] mb-2" style={{ color: "#C53D2E" }}>
+            <p className="text-[14px] mb-2" style={{ color: "#C53D2E" }}>
               {errorMessage}
             </p>
           )}
@@ -173,25 +173,25 @@ export default function LikedScreen({
 
                 <div className="flex-1 min-w-0">
                   <p
-                    className="font-semibold text-[16px] leading-snug truncate"
+                    className="font-semibold text-[18px] leading-snug truncate"
                     style={{ color: "#1F1F1F" }}
                   >
                     {recipe.title}
                   </p>
                   <div className="flex items-center gap-2 mt-1 flex-wrap">
                     <span
-                      className="text-[13px] px-2 py-0.5 rounded-full"
+                      className="text-[15px] px-2 py-0.5 rounded-full"
                       style={{ backgroundColor: "#F5F5F5", color: "#6F6F6F" }}
                     >
                       Filipino
                     </span>
                     <span
-                      className="text-[13px] px-2 py-0.5 rounded-full"
+                      className="text-[15px] px-2 py-0.5 rounded-full"
                       style={{ backgroundColor: "#F5F5F5", color: "#6F6F6F" }}
                     >
                       {recipe.difficulty}
                     </span>
-                    <span className="text-[13px]" style={{ color: "#6F6F6F" }}>
+                    <span className="text-[15px]" style={{ color: "#6F6F6F" }}>
                       {formatTime(recipe.total_time_minutes)}
                     </span>
                   </div>
@@ -245,16 +245,16 @@ export default function LikedScreen({
             </svg>
           </div>
           <p
-            className="font-semibold text-[17px] mb-1"
+            className="font-semibold text-[19px] mb-1"
             style={{ color: "#1F1F1F" }}
           >
             No liked recipes yet
           </p>
-          <p className="text-[14px] leading-5" style={{ color: "#6F6F6F" }}>
+          <p className="text-[16px] leading-5" style={{ color: "#6F6F6F" }}>
             Recipes you like will appear here.
           </p>
           {errorMessage && (
-            <p className="text-[12px] mt-3" style={{ color: "#C53D2E" }}>
+            <p className="text-[14px] mt-3" style={{ color: "#C53D2E" }}>
               {errorMessage}
             </p>
           )}

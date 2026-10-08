@@ -359,7 +359,7 @@ export default function RecipeDetailScreen({
   if (loading) {
     return (
       <div className="min-h-screen bg-white max-w-md mx-auto flex items-center justify-center">
-        <p className="text-[15px]" style={{ color: "#6F6F6F" }}>
+        <p className="text-[17px]" style={{ color: "#6F6F6F" }}>
           Loading recipe…
         </p>
       </div>
@@ -373,7 +373,7 @@ export default function RecipeDetailScreen({
           <button
             onClick={onBack}
             aria-label="Back"
-            className="mb-2 text-[15px] font-medium"
+            className="mb-2 text-[17px] font-medium"
             style={{ color: "#F26B21" }}
           >
             ← Back
@@ -439,14 +439,14 @@ export default function RecipeDetailScreen({
             <div className="min-w-0">
               {recipe.short_description && (
                 <p
-                  className="text-[13px] leading-5 mb-1.5"
+                  className="text-[15px] leading-5 mb-1.5"
                   style={{ color: "#6F6F6F" }}
                 >
                   {recipe.short_description}
                 </p>
               )}
               <h1
-                className="font-bold text-[28px] leading-tight"
+                className="font-bold text-[31px] leading-tight"
                 style={{ color: "#1F1F1F" }}
               >
                 {recipe.title}
@@ -555,7 +555,7 @@ export default function RecipeDetailScreen({
             <div className="mt-2 text-right">
               <p
                 role="status"
-                className="text-[12px]"
+                className="text-[14px]"
                 style={{ color: "#6F6F6F" }}
               >
                 {shareMessage}
@@ -566,14 +566,14 @@ export default function RecipeDetailScreen({
                   readOnly
                   value={recipeShareUrl(recipe.id)}
                   onFocus={(event) => event.currentTarget.select()}
-                  className="mt-2 w-full border rounded-lg p-2 text-[13px]"
+                  className="mt-2 w-full border rounded-lg p-2 text-[15px]"
                 />
               )}
             </div>
           )}
           {(saveMessage || likeMessage) && (
             <p
-              className="text-[12px] mt-2 text-right"
+              className="text-[14px] mt-2 text-right"
               style={{ color: "#C53D2E" }}
             >
               {likeMessage || saveMessage}
@@ -581,7 +581,7 @@ export default function RecipeDetailScreen({
           )}
 
           <div
-            className="flex items-center gap-4 mt-3 text-[12px]"
+            className="flex items-center gap-4 mt-3 text-[14px]"
             style={{ color: "#6F6F6F" }}
           >
             <div className="flex items-center gap-1.5">
@@ -627,11 +627,11 @@ export default function RecipeDetailScreen({
                 className="rounded-[12px] p-3 text-center"
                 style={{ backgroundColor: "#F9F9F9" }}
               >
-                <p className="text-[12px] mb-1" style={{ color: "#6F6F6F" }}>
+                <p className="text-[14px] mb-1" style={{ color: "#6F6F6F" }}>
                   {label}
                 </p>
                 <p
-                  className="font-semibold text-[14px]"
+                  className="font-semibold text-[16px]"
                   style={{ color: "#1F1F1F" }}
                 >
                   {value}
@@ -643,12 +643,12 @@ export default function RecipeDetailScreen({
           {recipe.description && (
             <section className="mt-8">
               <h2
-                className="font-semibold text-[20px] mb-3"
+                className="font-semibold text-[22px] mb-3"
                 style={{ color: "#1F1F1F" }}
               >
                 About
               </h2>
-              <p className="text-[15px] leading-6" style={{ color: "#6F6F6F" }}>
+              <p className="text-[17px] leading-6" style={{ color: "#6F6F6F" }}>
                 {recipe.description}
               </p>
             </section>
@@ -664,7 +664,7 @@ export default function RecipeDetailScreen({
               key={tab}
               type="button"
               onClick={() => setActiveTab(tab)}
-              className="flex-1 h-10 rounded-[16px] text-[14px] font-semibold transition-colors"
+              className="flex-1 h-10 rounded-[16px] text-[16px] font-semibold transition-colors"
               style={
                 activeTab === tab
                   ? {
@@ -704,7 +704,7 @@ export default function RecipeDetailScreen({
             style={{ borderColor: "#EEEEEE", marginTop: 50 }}
           >
             <h2
-              className="font-semibold text-[20px] mb-5"
+              className="font-semibold text-[22px] mb-5"
               style={{ color: "#1F1F1F" }}
             >
               More recipes
@@ -746,12 +746,12 @@ export default function RecipeDetailScreen({
                     />
                   </div>
                   <p
-                    className="font-semibold text-[16px] leading-[19px] line-clamp-2"
+                    className="font-semibold text-[18px] leading-[21px] line-clamp-2"
                     style={{ color: "#1F1F1F" }}
                   >
                     {item.title}
                   </p>
-                  <p className="text-[13px] mt-1" style={{ color: "#6F6F6F" }}>
+                  <p className="text-[15px] mt-1" style={{ color: "#6F6F6F" }}>
                     {item.difficulty || "—"} ·{" "}
                     {formatTime(item.total_time_minutes)}
                   </p>
@@ -762,7 +762,7 @@ export default function RecipeDetailScreen({
             <button
               type="button"
               onClick={onBrowse}
-              className="w-full h-12 mt-8 rounded-[14px] border text-[14px] font-semibold"
+              className="w-full h-12 mt-8 rounded-[14px] border text-[16px] font-semibold"
               style={{
                 borderColor: "#F26B21",
                 color: "#F26B21",

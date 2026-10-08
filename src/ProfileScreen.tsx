@@ -509,12 +509,12 @@ export default function ProfileScreen({
               <polyline points="15 18 9 12 15 6" />
             </svg>
           </button>
-          <h1 className="font-bold text-[24px]" style={{ color: "#1F1F1F" }}>
+          <h1 className="font-bold text-[27px]" style={{ color: "#1F1F1F" }}>
             Profile
           </h1>
         </div>
         <div
-          className="px-4 py-20 text-center text-[14px]"
+          className="px-4 py-20 text-center text-[16px]"
           style={{ color: "#6F6F6F" }}
         >
           Loading profile…
@@ -547,7 +547,7 @@ export default function ProfileScreen({
               <polyline points="15 18 9 12 15 6" />
             </svg>
           </button>
-          <h1 className="font-bold text-[24px]" style={{ color: "#1F1F1F" }}>
+          <h1 className="font-bold text-[27px]" style={{ color: "#1F1F1F" }}>
             Profile
           </h1>
         </div>
@@ -584,7 +584,7 @@ export default function ProfileScreen({
               <polyline points="15 18 9 12 15 6" />
             </svg>
           </button>
-          <h1 className="font-bold text-[24px]" style={{ color: "#1F1F1F" }}>
+          <h1 className="font-bold text-[27px]" style={{ color: "#1F1F1F" }}>
             Settings
           </h1>
         </div>
@@ -592,7 +592,7 @@ export default function ProfileScreen({
         <div className="px-4 space-y-7">
           <section>
             <p
-              className="text-[13px] font-semibold mb-2 px-1"
+              className="text-[15px] font-semibold mb-2 px-1"
               style={{ color: "#8A8A8A" }}
             >
               Notifications
@@ -603,13 +603,13 @@ export default function ProfileScreen({
             >
               <div className="flex-1">
                 <p
-                  className="text-[15px] font-medium"
+                  className="text-[17px] font-medium"
                   style={{ color: "#1F1F1F" }}
                 >
                   Notifications
                 </p>
                 <p
-                  className="text-[13px] leading-5 mt-1"
+                  className="text-[15px] leading-5 mt-1"
                   style={{ color: "#8A8A8A" }}
                 >
                   Get updates about activity related to your Pickle account.
@@ -635,7 +635,7 @@ export default function ProfileScreen({
 
           <section>
             <p
-              className="text-[13px] font-semibold mb-2 px-1"
+              className="text-[15px] font-semibold mb-2 px-1"
               style={{ color: "#8A8A8A" }}
             >
               Appearance
@@ -652,7 +652,7 @@ export default function ProfileScreen({
                     type="button"
                     onClick={() => chooseTheme(option)}
                     aria-pressed={selected}
-                    className="flex-1 min-h-[46px] rounded-[11px] flex items-center justify-center gap-2 text-[14px] font-medium transition-colors"
+                    className="flex-1 min-h-[46px] rounded-[11px] flex items-center justify-center gap-2 text-[16px] font-medium transition-colors"
                     style={{
                       backgroundColor: selected ? "#FFF0E6" : "transparent",
                       color: selected ? "#F26B21" : "#6F6F6F",
@@ -695,7 +695,7 @@ export default function ProfileScreen({
 
           <section>
             <p
-              className="text-[13px] font-semibold mb-2 px-1"
+              className="text-[15px] font-semibold mb-2 px-1"
               style={{ color: "#8A8A8A" }}
             >
               Account
@@ -714,13 +714,13 @@ export default function ProfileScreen({
               >
                 <span className="flex-1">
                   <span
-                    className="block text-[15px] font-medium"
+                    className="block text-[17px] font-medium"
                     style={{ color: "#C53D2E" }}
                   >
                     Delete account
                   </span>
                   <span
-                    className="block text-[12px] leading-5 mt-0.5"
+                    className="block text-[14px] leading-5 mt-0.5"
                     style={{ color: "#8A8A8A" }}
                   >
                     Permanently delete your Pickle account and activity.
@@ -773,13 +773,13 @@ export default function ProfileScreen({
                 </svg>
               </div>
               <h2
-                className="font-semibold text-[18px]"
+                className="font-semibold text-[20px]"
                 style={{ color: "#1F1F1F" }}
               >
                 Delete your account?
               </h2>
               <p
-                className="text-[14px] leading-6 mt-2"
+                className="text-[16px] leading-6 mt-2"
                 style={{ color: "#6F6F6F" }}
               >
                 This permanently deletes your profile, saved recipes, likes,
@@ -788,7 +788,7 @@ export default function ProfileScreen({
 
               {deleteAccountError && (
                 <p
-                  className="text-[12px] leading-5 mt-3"
+                  className="text-[14px] leading-5 mt-3"
                   style={{ color: "#C53D2E" }}
                 >
                   {deleteAccountError}
@@ -800,7 +800,7 @@ export default function ProfileScreen({
                   type="button"
                   onClick={() => setDeleteConfirmOpen(false)}
                   disabled={deletingAccount}
-                  className="flex-1 h-11 rounded-[12px] border text-[14px] font-semibold disabled:opacity-50"
+                  className="flex-1 h-11 rounded-[12px] border text-[16px] font-semibold disabled:opacity-50"
                   style={{
                     borderColor: "#E5E5E5",
                     color: "#6F6F6F",
@@ -813,7 +813,7 @@ export default function ProfileScreen({
                   type="button"
                   onClick={deleteAccount}
                   disabled={deletingAccount}
-                  className="flex-1 h-11 rounded-[12px] text-[14px] font-semibold text-white disabled:opacity-50"
+                  className="flex-1 h-11 rounded-[12px] text-[16px] font-semibold text-white disabled:opacity-50"
                   style={{ backgroundColor: "#C53D2E" }}
                 >
                   {deletingAccount ? "Deleting…" : "Delete account"}
@@ -850,7 +850,7 @@ export default function ProfileScreen({
               <polyline points="15 18 9 12 15 6" />
             </svg>
           </button>
-          <h1 className="font-bold text-[24px]" style={{ color: "#1F1F1F" }}>
+          <h1 className="font-bold text-[27px]" style={{ color: "#1F1F1F" }}>
             Contact Us
           </h1>
         </div>
@@ -867,13 +867,13 @@ export default function ProfileScreen({
               <MenuIcon name="mail" />
             </div>
             <h2
-              className="font-semibold text-[18px]"
+              className="font-semibold text-[20px]"
               style={{ color: "#1F1F1F" }}
             >
               How can we help?
             </h2>
             <p
-              className="text-[14px] leading-6 mt-2"
+              className="text-[16px] leading-6 mt-2"
               style={{ color: "#6F6F6F" }}
             >
               Questions, recipe feedback, bug reports, and general suggestions
@@ -890,13 +890,13 @@ export default function ProfileScreen({
               style={{ borderColor: "#EAEAEA" }}
             >
               <p
-                className="text-[12px] font-semibold"
+                className="text-[14px] font-semibold"
                 style={{ color: "#8A8A8A" }}
               >
                 EMAIL
               </p>
               <p
-                className="text-[15px] font-medium mt-1"
+                className="text-[17px] font-medium mt-1"
                 style={{ color: "#1F1F1F" }}
               >
                 support@pickle.app
@@ -907,13 +907,13 @@ export default function ProfileScreen({
               style={{ borderColor: "#EAEAEA" }}
             >
               <p
-                className="text-[12px] font-semibold"
+                className="text-[14px] font-semibold"
                 style={{ color: "#8A8A8A" }}
               >
                 RESPONSE TIME
               </p>
               <p
-                className="text-[15px] font-medium mt-1"
+                className="text-[17px] font-medium mt-1"
                 style={{ color: "#1F1F1F" }}
               >
                 Usually within 2–3 business days
@@ -921,13 +921,13 @@ export default function ProfileScreen({
             </div>
             <div className="px-5 py-4">
               <p
-                className="text-[12px] font-semibold"
+                className="text-[14px] font-semibold"
                 style={{ color: "#8A8A8A" }}
               >
                 SUPPORT HOURS
               </p>
               <p
-                className="text-[15px] font-medium mt-1"
+                className="text-[17px] font-medium mt-1"
                 style={{ color: "#1F1F1F" }}
               >
                 Monday–Friday, 9:00 AM–6:00 PM
@@ -936,7 +936,7 @@ export default function ProfileScreen({
           </section>
 
           <p
-            className="text-[12px] leading-5 px-1"
+            className="text-[14px] leading-5 px-1"
             style={{ color: "#A0A0A0" }}
           >
             Contact information on this preview screen is temporary and can be
@@ -971,17 +971,17 @@ export default function ProfileScreen({
               <polyline points="15 18 9 12 15 6" />
             </svg>
           </button>
-          <h1 className="font-bold text-[24px]" style={{ color: "#1F1F1F" }}>
+          <h1 className="font-bold text-[27px]" style={{ color: "#1F1F1F" }}>
             Privacy Policy
           </h1>
         </div>
 
         <div className="px-4">
-          <p className="text-[12px] mb-5" style={{ color: "#A0A0A0" }}>
+          <p className="text-[14px] mb-5" style={{ color: "#A0A0A0" }}>
             Last updated: October 6, 2026
           </p>
           <p
-            className="text-[14px] leading-6 mb-6"
+            className="text-[16px] leading-6 mb-6"
             style={{ color: "#6F6F6F" }}
           >
             This Privacy Policy explains how Pickle handles information when you
@@ -992,13 +992,13 @@ export default function ProfileScreen({
             {privacySections.map((section) => (
               <section key={section.title}>
                 <h2
-                  className="text-[16px] font-semibold mb-2"
+                  className="text-[18px] font-semibold mb-2"
                   style={{ color: "#1F1F1F" }}
                 >
                   {section.title}
                 </h2>
                 <p
-                  className="text-[14px] leading-6"
+                  className="text-[16px] leading-6"
                   style={{ color: "#6F6F6F" }}
                 >
                   {section.body}
@@ -1035,17 +1035,17 @@ export default function ProfileScreen({
               <polyline points="15 18 9 12 15 6" />
             </svg>
           </button>
-          <h1 className="font-bold text-[24px]" style={{ color: "#1F1F1F" }}>
+          <h1 className="font-bold text-[27px]" style={{ color: "#1F1F1F" }}>
             Terms of Service
           </h1>
         </div>
 
         <div className="px-4">
-          <p className="text-[12px] mb-5" style={{ color: "#A0A0A0" }}>
+          <p className="text-[14px] mb-5" style={{ color: "#A0A0A0" }}>
             Last updated: October 6, 2026
           </p>
           <p
-            className="text-[14px] leading-6 mb-6"
+            className="text-[16px] leading-6 mb-6"
             style={{ color: "#6F6F6F" }}
           >
             These Terms of Service govern your access to and use of Pickle.
@@ -1055,13 +1055,13 @@ export default function ProfileScreen({
             {termsSections.map((section) => (
               <section key={section.title}>
                 <h2
-                  className="text-[16px] font-semibold mb-2"
+                  className="text-[18px] font-semibold mb-2"
                   style={{ color: "#1F1F1F" }}
                 >
                   {section.title}
                 </h2>
                 <p
-                  className="text-[14px] leading-6"
+                  className="text-[16px] leading-6"
                   style={{ color: "#6F6F6F" }}
                 >
                   {section.body}
@@ -1098,14 +1098,14 @@ export default function ProfileScreen({
               <polyline points="15 18 9 12 15 6" />
             </svg>
           </button>
-          <h1 className="font-bold text-[24px]" style={{ color: "#1F1F1F" }}>
+          <h1 className="font-bold text-[27px]" style={{ color: "#1F1F1F" }}>
             FAQ
           </h1>
         </div>
 
         <div className="px-4">
           <p
-            className="text-[14px] leading-6 mb-5"
+            className="text-[16px] leading-6 mb-5"
             style={{ color: "#6F6F6F" }}
           >
             Quick answers to common questions about using Pickle.
@@ -1126,7 +1126,7 @@ export default function ProfileScreen({
               >
                 <summary className="list-none cursor-pointer px-5 py-4 flex items-center gap-3">
                   <span
-                    className="flex-1 text-[15px] font-semibold leading-5"
+                    className="flex-1 text-[17px] font-semibold leading-5"
                     style={{ color: "#1F1F1F" }}
                   >
                     {faq.question}
@@ -1146,7 +1146,7 @@ export default function ProfileScreen({
                   </svg>
                 </summary>
                 <p
-                  className="px-5 pb-4 text-[14px] leading-6"
+                  className="px-5 pb-4 text-[16px] leading-6"
                   style={{ color: "#6F6F6F" }}
                 >
                   {faq.answer}
@@ -1183,14 +1183,14 @@ export default function ProfileScreen({
               <polyline points="15 18 9 12 15 6" />
             </svg>
           </button>
-          <h1 className="font-bold text-[24px]" style={{ color: "#1F1F1F" }}>
+          <h1 className="font-bold text-[27px]" style={{ color: "#1F1F1F" }}>
             My Comments
           </h1>
         </div>
 
         {commentsLoading ? (
           <div
-            className="px-4 py-16 text-center text-[14px]"
+            className="px-4 py-16 text-center text-[16px]"
             style={{ color: "#6F6F6F" }}
           >
             Loading comments…
@@ -1204,16 +1204,16 @@ export default function ProfileScreen({
               <MenuIcon name="comment" />
             </div>
             <p
-              className="font-semibold text-[17px]"
+              className="font-semibold text-[19px]"
               style={{ color: "#1F1F1F" }}
             >
               No comments yet
             </p>
-            <p className="text-[14px] mt-1" style={{ color: "#6F6F6F" }}>
+            <p className="text-[16px] mt-1" style={{ color: "#6F6F6F" }}>
               Comments you leave on recipes will appear here.
             </p>
             {commentsMessage && (
-              <p className="text-[12px] mt-3" style={{ color: "#C53D2E" }}>
+              <p className="text-[14px] mt-3" style={{ color: "#C53D2E" }}>
                 {commentsMessage}
               </p>
             )}
@@ -1221,7 +1221,7 @@ export default function ProfileScreen({
         ) : (
           <div className="px-4 space-y-3">
             {commentsMessage && (
-              <p className="text-[12px]" style={{ color: "#C53D2E" }}>
+              <p className="text-[14px]" style={{ color: "#C53D2E" }}>
                 {commentsMessage}
               </p>
             )}
@@ -1248,13 +1248,13 @@ export default function ProfileScreen({
                     )}
                     <div className="min-w-0 flex-1">
                       <p
-                        className="text-[13px] font-semibold truncate"
+                        className="text-[15px] font-semibold truncate"
                         style={{ color: "#1F1F1F" }}
                       >
                         {recipe?.title || "Recipe"}
                       </p>
                       <p
-                        className="text-[11px] mt-0.5"
+                        className="text-[13px] mt-0.5"
                         style={{ color: "#A0A0A0" }}
                       >
                         {new Date(comment.created_at).toLocaleDateString()}
@@ -1262,7 +1262,7 @@ export default function ProfileScreen({
                     </div>
                   </div>
                   <p
-                    className="text-[14px] leading-5 mt-3 whitespace-pre-wrap break-words"
+                    className="text-[16px] leading-5 mt-3 whitespace-pre-wrap break-words"
                     style={{ color: "#555555" }}
                   >
                     {comment.content}
@@ -1271,7 +1271,7 @@ export default function ProfileScreen({
                     <button
                       type="button"
                       onClick={() => deleteMyComment(comment.id)}
-                      className="text-[12px]"
+                      className="text-[14px]"
                       style={{ color: "#A0A0A0" }}
                     >
                       Delete
@@ -1309,7 +1309,7 @@ export default function ProfileScreen({
             <polyline points="15 18 9 12 15 6" />
           </svg>
         </button>
-        <h1 className="font-bold text-[24px]" style={{ color: "#1F1F1F" }}>
+        <h1 className="font-bold text-[27px]" style={{ color: "#1F1F1F" }}>
           Profile
         </h1>
         <button
@@ -1345,7 +1345,7 @@ export default function ProfileScreen({
           />
         ) : (
           <div
-            className="w-[120px] h-[120px] rounded-full flex items-center justify-center text-[36px] font-bold"
+            className="w-[120px] h-[120px] rounded-full flex items-center justify-center text-[39px] font-bold"
             style={{ backgroundColor: "#FFF0E6", color: "#F26B21" }}
           >
             {initial}
@@ -1356,14 +1356,14 @@ export default function ProfileScreen({
           type="button"
           onClick={() => !uploadingAvatar && fileInputRef.current?.click()}
           disabled={uploadingAvatar}
-          className="mt-3 text-[13px] font-semibold disabled:opacity-60"
+          className="mt-3 text-[15px] font-semibold disabled:opacity-60"
           style={{ color: "#F26B21" }}
         >
           {uploadingAvatar ? "Uploading…" : "Upload new photo"}
         </button>
         {avatarMessage && (
           <p
-            className="text-[12px] mt-2 text-center"
+            className="text-[14px] mt-2 text-center"
             style={{
               color:
                 avatarMessage === "Profile photo updated."
@@ -1376,12 +1376,12 @@ export default function ProfileScreen({
         )}
 
         <h2
-          className="font-semibold text-[20px] mt-4"
+          className="font-semibold text-[22px] mt-4"
           style={{ color: "#1F1F1F" }}
         >
           {loading ? "Loading…" : displayName}
         </h2>
-        <p className="text-[13px] mt-1" style={{ color: "#8A8A8A" }}>
+        <p className="text-[15px] mt-1" style={{ color: "#8A8A8A" }}>
           {loading ? "" : username}
         </p>
       </section>
@@ -1390,7 +1390,7 @@ export default function ProfileScreen({
         {MENU_SECTIONS.map((section) => (
           <section key={section.title}>
             <p
-              className="text-[13px] font-semibold mb-2 px-1"
+              className="text-[15px] font-semibold mb-2 px-1"
               style={{ color: "#8A8A8A" }}
             >
               {section.title}
@@ -1436,7 +1436,7 @@ export default function ProfileScreen({
                     <MenuIcon name={item.icon} />
                   </span>
                   <span
-                    className="flex-1 text-[15px] font-medium"
+                    className="flex-1 text-[17px] font-medium"
                     style={{ color: "#1F1F1F" }}
                   >
                     {item.label}
@@ -1462,7 +1462,7 @@ export default function ProfileScreen({
         <button
           type="button"
           onClick={() => supabase.auth.signOut()}
-          className="w-full h-12 rounded-[12px] text-[15px] font-semibold"
+          className="w-full h-12 rounded-[12px] text-[17px] font-semibold"
           style={{
             border: "1.5px solid #E5E5E5",
             color: "#6F6F6F",

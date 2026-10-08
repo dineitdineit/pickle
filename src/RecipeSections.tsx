@@ -32,7 +32,7 @@ export function IngredientsSection({
       }`}
     >
       <h2
-        className="font-semibold text-[20px] mb-4"
+        className="font-semibold text-[22px] mb-4"
         style={{ color: "#1F1F1F" }}
       >
         Ingredients
@@ -51,7 +51,7 @@ export function IngredientsSection({
           <div key={group}>
             {group !== "Main" && (
               <h3
-                className="font-semibold text-[15px] mb-2"
+                className="font-semibold text-[17px] mb-2"
                 style={{ color: "#1F1F1F" }}
               >
                 {group}
@@ -65,11 +65,11 @@ export function IngredientsSection({
                   style={{ borderColor: "#EAEAEA" }}
                 >
                   <div className="min-w-0">
-                    <p className="text-[15px]" style={{ color: "#1F1F1F" }}>
+                    <p className="text-[17px]" style={{ color: "#1F1F1F" }}>
                       {item.ingredients?.name || "Ingredient"}
                       {item.optional ? (
                         <span
-                          className="text-[12px] ml-1"
+                          className="text-[14px] ml-1"
                           style={{ color: "#6F6F6F" }}
                         >
                           (optional)
@@ -78,7 +78,7 @@ export function IngredientsSection({
                     </p>
                     {item.substitute && (
                       <p
-                        className="text-[12px] mt-0.5"
+                        className="text-[14px] mt-0.5"
                         style={{ color: "#6F6F6F" }}
                       >
                         Sub: {item.substitute}
@@ -86,7 +86,7 @@ export function IngredientsSection({
                     )}
                   </div>
                   <p
-                    className="text-[14px] whitespace-nowrap font-medium"
+                    className="text-[16px] whitespace-nowrap font-medium"
                     style={{ color: "#1F1F1F" }}
                   >
                     {formatAmount(item.amount)} {item.unit || ""}
@@ -113,7 +113,7 @@ export function StepsSection({
       className={`recipe-content-section mt-6${!active ? " is-inactive" : ""}`}
     >
       <h2
-        className="font-semibold text-[20px] mb-4"
+        className="font-semibold text-[22px] mb-4"
         style={{ color: "#1F1F1F" }}
       >
         Steps
@@ -132,7 +132,7 @@ export function StepsSection({
             )}
             <div className="flex gap-3">
               <div
-                className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-white text-[14px] font-semibold"
+                className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-white text-[16px] font-semibold"
                 style={{ backgroundColor: "#F26B21" }}
               >
                 {step.step_number}
@@ -140,14 +140,14 @@ export function StepsSection({
               <div className="pt-0.5">
                 <div className="flex items-center gap-2 flex-wrap">
                   <h3
-                    className="font-semibold text-[17px]"
+                    className="font-semibold text-[19px]"
                     style={{ color: "#1F1F1F" }}
                   >
                     {step.title || `Step ${step.step_number}`}
                   </h3>
                   {step.step_time_minutes ? (
                     <span
-                      className="text-[12px] px-2 py-0.5 rounded-full"
+                      className="text-[14px] px-2 py-0.5 rounded-full"
                       style={{ backgroundColor: "#FFF0E6", color: "#F26B21" }}
                     >
                       {formatTime(step.step_time_minutes)}
@@ -155,7 +155,7 @@ export function StepsSection({
                   ) : null}
                 </div>
                 <p
-                  className="text-[15px] leading-6 mt-1.5"
+                  className="text-[17px] leading-6 mt-1.5"
                   style={{ color: "#6F6F6F" }}
                 >
                   {step.instruction}
@@ -185,12 +185,12 @@ export function NutritionSection({
         style={{ alignItems: "baseline" }}
       >
         <h2
-          className="font-semibold text-[20px] leading-none"
+          className="font-semibold text-[22px] leading-none"
           style={{ color: "#1F1F1F" }}
         >
           Nutrition
         </h2>
-        <span className="text-[12px] leading-none" style={{ color: "#8A8A8A" }}>
+        <span className="text-[14px] leading-none" style={{ color: "#8A8A8A" }}>
           Per serving
         </span>
       </div>
@@ -211,18 +211,18 @@ export function NutritionSection({
                   border: "1px solid #EEEEEE",
                 }}
               >
-                <p className="text-[13px] mb-2" style={{ color: "#6F6F6F" }}>
+                <p className="text-[15px] mb-2" style={{ color: "#6F6F6F" }}>
                   {label}
                 </p>
                 <div className="flex" style={{ alignItems: "baseline" }}>
                   <span
-                    className="font-semibold text-[22px] leading-none"
+                    className="font-semibold text-[24px] leading-none"
                     style={{ color: "#1F1F1F" }}
                   >
                     {value}
                   </span>
                   <span
-                    className="text-[12px] leading-none ml-1"
+                    className="text-[14px] leading-none ml-1"
                     style={{ color: "#8A8A8A" }}
                   >
                     {unit}
@@ -233,7 +233,7 @@ export function NutritionSection({
           </div>
           {nutrition.is_estimated && (
             <p
-              className="mt-3 text-[10px] leading-[14px]"
+              className="mt-3 text-[12px] leading-[16px]"
               style={{ color: "#A0A0A0" }}
             >
               *Nutrition values are estimates and may not be accurate.
@@ -245,7 +245,7 @@ export function NutritionSection({
           className="rounded-[14px] px-4 py-4"
           style={{ backgroundColor: "#FFF8F3" }}
         >
-          <p className="text-[13px] leading-5" style={{ color: "#6F6F6F" }}>
+          <p className="text-[15px] leading-5" style={{ color: "#6F6F6F" }}>
             Nutrition information is not available for this recipe yet.
           </p>
         </div>

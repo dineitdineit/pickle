@@ -404,7 +404,7 @@ export default function RecipeComments({
           />
         ) : (
           <div
-            className="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center text-[12px] font-semibold"
+            className="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center text-[14px] font-semibold"
             style={{ backgroundColor: "#F5F5F5", color: "#6F6F6F" }}
           >
             {initial}
@@ -413,12 +413,12 @@ export default function RecipeComments({
         <div className="flex-1 min-w-0 relative">
           <div className="flex items-center gap-2 pr-7">
             <p
-              className="comment-author-name font-semibold text-[14px] truncate"
+              className="comment-author-name font-semibold text-[16px] truncate"
               style={{ color: "#1F1F1F" }}
             >
               {name}
             </p>
-            <span className="text-[7px]" style={{ color: "#A0A0A0" }}>
+            <span className="text-[9px]" style={{ color: "#A0A0A0" }}>
               {timeAgo(comment.created_at)}
             </span>
           </div>
@@ -435,7 +435,7 @@ export default function RecipeComments({
               className="w-6 h-6 flex items-center justify-center"
               style={{ color: "#777777" }}
             >
-              <span className="text-[16px] leading-none">•••</span>
+              <span className="text-[18px] leading-none">•••</span>
             </button>
             {menuCommentId === comment.id && (
               <div
@@ -446,7 +446,7 @@ export default function RecipeComments({
                     <button
                       type="button"
                       onClick={() => startEdit(comment)}
-                      className="w-full flex items-center gap-3 px-3 py-3 rounded-[8px] text-left text-[14px]"
+                      className="w-full flex items-center gap-3 px-3 py-3 rounded-[8px] text-left text-[16px]"
                     >
                       <svg
                         width="20"
@@ -467,7 +467,7 @@ export default function RecipeComments({
                     <button
                       type="button"
                       onClick={() => deleteComment(comment.id)}
-                      className="w-full flex items-center gap-3 px-3 py-3 rounded-[8px] text-left text-[14px]"
+                      className="w-full flex items-center gap-3 px-3 py-3 rounded-[8px] text-left text-[16px]"
                       style={{ color: "#FF5C5C" }}
                     >
                       <svg
@@ -490,7 +490,7 @@ export default function RecipeComments({
                   <button
                     type="button"
                     onClick={() => openReport(comment)}
-                    className="w-full flex items-center gap-3 px-3 py-3 rounded-[8px] text-left text-[14px]"
+                    className="w-full flex items-center gap-3 px-3 py-3 rounded-[8px] text-left text-[16px]"
                   >
                     <svg
                       width="20"
@@ -519,13 +519,13 @@ export default function RecipeComments({
                 maxLength={1000}
                 value={editText}
                 onChange={(event) => setEditText(event.target.value)}
-                className="comment-textarea w-full resize-none rounded-[12px] border px-3 py-2 text-[13px] outline-none"
+                className="comment-textarea w-full resize-none rounded-[12px] border px-3 py-2 text-[15px] outline-none"
                 style={{ borderColor: "#E6E6E6" }}
               />
             </div>
           ) : (
             <p
-              className="comment-content text-[14px] leading-5 mt-1 whitespace-pre-wrap break-words"
+              className="comment-content text-[16px] leading-5 mt-1 whitespace-pre-wrap break-words"
               style={{ color: "#555555" }}
             >
               {comment.content}
@@ -534,7 +534,7 @@ export default function RecipeComments({
 
           <div className="flex items-center justify-between gap-3 mt-2">
             <div
-              className="flex items-center gap-3 text-[7px]"
+              className="flex items-center gap-3 text-[9px]"
               style={{ color: "#8A8A8A" }}
             >
               <button
@@ -589,7 +589,7 @@ export default function RecipeComments({
                 <button
                   type="button"
                   onClick={() => setEditingCommentId(null)}
-                  className="text-[13px]"
+                  className="text-[15px]"
                   style={{ color: "#888888" }}
                 >
                   Cancel
@@ -597,7 +597,7 @@ export default function RecipeComments({
                 <button
                   type="button"
                   onClick={() => saveEdit(comment.id)}
-                  className="text-[13px] font-semibold"
+                  className="text-[15px] font-semibold"
                   style={{ color: "#F26B21" }}
                 >
                   Save
@@ -615,7 +615,7 @@ export default function RecipeComments({
                 onChange={(event) => setReplyText(event.target.value)}
                 onKeyDown={(event) => handleCommentKeyDown(event, comment.id)}
                 placeholder={`Reply to ${name}...`}
-                className="comment-textarea w-full resize-none rounded-[12px] border px-3 py-2 text-[12px] outline-none"
+                className="comment-textarea w-full resize-none rounded-[12px] border px-3 py-2 text-[14px] outline-none"
                 style={{ borderColor: "#E6E6E6", backgroundColor: "#FAFAFA" }}
               />
               <div className="flex justify-end mt-1.5">
@@ -623,7 +623,7 @@ export default function RecipeComments({
                   type="button"
                   onClick={() => postComment(comment.id)}
                   disabled={posting || !replyText.trim()}
-                  className="h-7 px-3 rounded-full text-[10px] font-semibold text-white disabled:opacity-50"
+                  className="h-7 px-3 rounded-full text-[12px] font-semibold text-white disabled:opacity-50"
                   style={{ backgroundColor: "#F26B21" }}
                 >
                   Reply
@@ -674,13 +674,13 @@ export default function RecipeComments({
                     </svg>
                   </div>
                   <h3
-                    className="font-semibold text-[18px] mt-4"
+                    className="font-semibold text-[20px] mt-4"
                     style={{ color: "#1F1F1F" }}
                   >
                     Report submitted
                   </h3>
                   <p
-                    className="text-[14px] leading-5 mt-2"
+                    className="text-[16px] leading-5 mt-2"
                     style={{ color: "#6F6F6F" }}
                   >
                     Thanks for letting us know. The Pickle team will review this
@@ -689,7 +689,7 @@ export default function RecipeComments({
                   <button
                     type="button"
                     onClick={closeReport}
-                    className="w-full h-11 rounded-[12px] mt-5 text-[14px] font-semibold text-white"
+                    className="w-full h-11 rounded-[12px] mt-5 text-[16px] font-semibold text-white"
                     style={{ backgroundColor: "#F26B21" }}
                   >
                     Done
@@ -700,13 +700,13 @@ export default function RecipeComments({
                   <div className="flex items-center justify-between mb-4">
                     <div>
                       <h3
-                        className="font-semibold text-[18px]"
+                        className="font-semibold text-[20px]"
                         style={{ color: "#1F1F1F" }}
                       >
                         Report comment
                       </h3>
                       <p
-                        className="text-[12px] mt-1"
+                        className="text-[14px] mt-1"
                         style={{ color: "#8A8A8A" }}
                       >
                         Tell us why this comment should be reviewed.
@@ -738,7 +738,7 @@ export default function RecipeComments({
                     style={{ backgroundColor: "#F9F9F9" }}
                   >
                     <p
-                      className="text-[12px] leading-5 line-clamp-3"
+                      className="text-[14px] leading-5 line-clamp-3"
                       style={{ color: "#6F6F6F" }}
                     >
                       {reportComment.content}
@@ -766,7 +766,7 @@ export default function RecipeComments({
                           }}
                         >
                           <span
-                            className="flex-1 text-[14px]"
+                            className="flex-1 text-[16px]"
                             style={{ color: "#1F1F1F" }}
                           >
                             {reason.label}
@@ -795,7 +795,7 @@ export default function RecipeComments({
                     value={reportDetails}
                     onChange={(event) => setReportDetails(event.target.value)}
                     placeholder="Add details (optional)"
-                    className="comment-textarea w-full resize-none rounded-[12px] border px-3.5 py-3 mt-4 text-[13px] outline-none"
+                    className="comment-textarea w-full resize-none rounded-[12px] border px-3.5 py-3 mt-4 text-[15px] outline-none"
                     style={{
                       borderColor: "#E6E6E6",
                       backgroundColor: "#FAFAFA",
@@ -805,7 +805,7 @@ export default function RecipeComments({
 
                   {reportError && (
                     <p
-                      className="text-[12px] leading-5 mt-2"
+                      className="text-[14px] leading-5 mt-2"
                       style={{ color: "#C53D2E" }}
                     >
                       {reportError}
@@ -816,7 +816,7 @@ export default function RecipeComments({
                     type="button"
                     onClick={submitReport}
                     disabled={!reportReason || reporting}
-                    className="w-full h-11 rounded-[12px] mt-4 text-[14px] font-semibold text-white disabled:opacity-50"
+                    className="w-full h-11 rounded-[12px] mt-4 text-[16px] font-semibold text-white disabled:opacity-50"
                     style={{ backgroundColor: "#F26B21" }}
                   >
                     {reporting ? "Submitting…" : "Submit report"}
@@ -833,7 +833,7 @@ export default function RecipeComments({
         style={{ borderColor: "#EEEEEE", marginTop: 30, paddingTop: 15 }}
       >
         <h2
-          className="font-semibold text-[20px] mb-4"
+          className="font-semibold text-[22px] mb-4"
           style={{ color: "#1F1F1F" }}
         >
           Comments
@@ -847,7 +847,7 @@ export default function RecipeComments({
             />
           ) : (
             <div
-              className="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center text-[13px] font-semibold"
+              className="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center text-[15px] font-semibold"
               style={{ backgroundColor: "#FFF0E6", color: "#F26B21" }}
             >
               {currentInitial}
@@ -867,7 +867,7 @@ export default function RecipeComments({
               onFocus={() => {
                 if (!userId) onRequireLogin()
               }}
-              className="comment-textarea w-full resize-none rounded-[16px] border px-4 py-3 text-[14px] leading-5 outline-none"
+              className="comment-textarea w-full resize-none rounded-[16px] border px-4 py-3 text-[16px] leading-5 outline-none"
               style={{
                 borderColor: "#E6E6E6",
                 color: "#1F1F1F",
@@ -879,7 +879,7 @@ export default function RecipeComments({
                 type="button"
                 onClick={() => postComment(null)}
                 disabled={posting || !text.trim()}
-                className="h-9 px-4 rounded-full text-[13px] font-semibold text-white disabled:opacity-50"
+                className="h-9 px-4 rounded-full text-[15px] font-semibold text-white disabled:opacity-50"
                 style={{ backgroundColor: "#F26B21" }}
               >
                 {posting ? "Posting…" : "Post"}
@@ -888,18 +888,18 @@ export default function RecipeComments({
           </div>
         </div>
         {message && (
-          <p className="text-[12px] mt-3" style={{ color: "#C53D2E" }}>
+          <p className="text-[14px] mt-3" style={{ color: "#C53D2E" }}>
             {message}
           </p>
         )}
 
         <div className="mt-6 space-y-5">
           {loading ? (
-            <p className="text-[13px]" style={{ color: "#8A8A8A" }}>
+            <p className="text-[15px]" style={{ color: "#8A8A8A" }}>
               Loading comments…
             </p>
           ) : rootComments.length === 0 ? (
-            <p className="text-[13px]" style={{ color: "#8A8A8A" }}>
+            <p className="text-[15px]" style={{ color: "#8A8A8A" }}>
               No comments yet. Be the first to share your thoughts.
             </p>
           ) : (

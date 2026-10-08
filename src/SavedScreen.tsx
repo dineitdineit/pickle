@@ -150,14 +150,14 @@ export default function SavedScreen({
         className="relative px-4 pt-6 text-center"
         style={{ marginBottom: 40 }}
       >
-        <h1 className="font-bold text-[24px]" style={{ color: "#1F1F1F" }}>
+        <h1 className="font-bold text-[27px]" style={{ color: "#1F1F1F" }}>
           Saved Recipes
         </h1>
       </div>
 
       {loading || (loggedIn && savedIds.length > 0 && recipesLoading) ? (
         <div
-          className="px-4 py-16 text-center text-[14px]"
+          className="px-4 py-16 text-center text-[16px]"
           style={{ color: "#6F6F6F" }}
         >
           Loading saved recipes…
@@ -199,12 +199,12 @@ export default function SavedScreen({
             </svg>
           </div>
           <p
-            className="font-semibold text-[17px] mb-1"
+            className="font-semibold text-[19px] mb-1"
             style={{ color: "#1F1F1F" }}
           >
             Log in to save recipes
           </p>
-          <p className="text-[14px] leading-5" style={{ color: "#6F6F6F" }}>
+          <p className="text-[16px] leading-5" style={{ color: "#6F6F6F" }}>
             Your saved recipes are linked to your Pickle account.
           </p>
         </div>
@@ -213,7 +213,7 @@ export default function SavedScreen({
           {errorMessage && (
             <p
               role="alert"
-              className="saved-recipe-error text-[12px] mb-2"
+              className="saved-recipe-error text-[14px] mb-2"
               style={{ color: "#C53D2E" }}
             >
               {errorMessage}
@@ -250,16 +250,16 @@ export default function SavedScreen({
             </svg>
           </div>
           <p
-            className="font-semibold text-[17px] mb-1"
+            className="font-semibold text-[19px] mb-1"
             style={{ color: "#1F1F1F" }}
           >
             No saved recipes yet
           </p>
-          <p className="text-[14px] leading-5" style={{ color: "#6F6F6F" }}>
+          <p className="text-[16px] leading-5" style={{ color: "#6F6F6F" }}>
             Recipes you save will appear here.
           </p>
           {errorMessage && (
-            <p className="text-[12px] mt-3" style={{ color: "#C53D2E" }}>
+            <p className="text-[14px] mt-3" style={{ color: "#C53D2E" }}>
               {errorMessage}
             </p>
           )}
