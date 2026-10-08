@@ -3,14 +3,17 @@ begin;
 select set_config('request.jwt.claims',jsonb_build_object('sub',(select id from public.profiles limit 1),'role','authenticated','is_anonymous',false)::text,true);
 select set_config('test.submission_id',gen_random_uuid()::text,true);
 select set_config('test.tag_id',(select id::text from public.tags limit 1),true);
+select set_config('test.cover_image','community:'||auth.uid()::text||'/'||current_setting('test.submission_id')||'/cover.jpg',true);
+insert into storage.objects(bucket_id,name) values('community_recipe_images',substr(current_setting('test.cover_image'),11));
 set local role authenticated;
 do $$
-declare sid uuid:=current_setting('test.submission_id')::uuid; p jsonb; saved jsonb; published jsonb; rid uuid; version timestamptz; blocked boolean;
+declare sid uuid:=current_setting('test.submission_id')::uuid; p jsonb; saved jsonb; published jsonb; rid uuid; version timestamptz; blocked boolean; field text;
 begin
   if auth.uid() is null then raise exception 'Test needs an existing user profile'; end if;
-  p:='{"title":"Upload integration test","difficulty":"Easy","total_time_minutes":20,"servings":null,"ingredients":[{"name":"Water","group_name":"Ingredients","amount":null,"unit":"","optional":false},{"name":"Salt","group_name":"Seasoning","amount":0.5,"unit":"tsp","metric_amount":2,"metric_unit":"g","optional":true,"substitute":"Pepper"}],"steps":[{"instruction":"Boil water","step_time_minutes":5},{"instruction":"Season","is_final":true}],"tag_ids":[],"nutrition":{"calories":0,"protein_g":0,"carbs_g":0,"fat_g":0,"is_estimated":true}}';
+  p:='{"title":"Upload integration test","difficulty":"Easy","total_time_minutes":20,"servings":2,"description":"Integration soup recipe","ingredients":[{"name":"Water","group_name":"Ingredients","amount":500,"unit":"ml","optional":false},{"name":"Salt","group_name":"Seasoning","amount":0.5,"unit":"tsp","metric_amount":2,"metric_unit":"g","optional":true,"substitute":"Pepper"}],"steps":[{"instruction":"Boil water","step_time_minutes":5},{"instruction":"Season","is_final":true}],"tag_ids":[],"nutrition":{"calories":0,"protein_g":0,"carbs_g":0,"fat_g":0,"is_estimated":true}}';
+  p:=jsonb_set(p,'{cover_image}',to_jsonb(current_setting('test.cover_image')));
   p:=jsonb_set(p,'{tag_ids}',jsonb_build_array(current_setting('test.tag_id'),current_setting('test.tag_id')));
-  saved:=public.save_recipe_submission(sid,p,false,null);
+  saved:=public.save_recipe_submission(sid,jsonb_set(jsonb_set(p-'cover_image'-'description'-'servings','{ingredients,0,amount}','null'::jsonb),'{ingredients,0,unit}','null'::jsonb),false,null);
   version:=(saved->>'updated_at')::timestamptz;
   if saved->>'status'<>'draft' or not exists(select 1 from public.recipe_submissions where id=sid) then raise exception 'Draft save failed'; end if;
   blocked:=false;
@@ -22,10 +25,20 @@ begin
   blocked:=false;
   begin perform public.save_recipe_submission(sid,jsonb_set(p,'{cover_image}','"community:another-user/photo.jpg"'),false,version); exception when others then blocked:=true; end;
   if not blocked then raise exception 'Foreign image accepted'; end if;
+  foreach field in array array['cover_image','description','servings'] loop
+    blocked:=false;
+    begin perform public.save_recipe_submission(sid,p-field,true,version); exception when others then blocked:=true; end;
+    if not blocked then raise exception 'Missing % accepted',field; end if;
+  end loop;
+  foreach field in array array['amount','unit'] loop
+    blocked:=false;
+    begin perform public.save_recipe_submission(sid,jsonb_set(p,array['ingredients','0',field],'null'::jsonb),true,version); exception when others then blocked:=true; end;
+    if not blocked then raise exception 'Missing ingredient % accepted',field; end if;
+  end loop;
   published:=public.save_recipe_submission(sid,p,true,version);rid:=(published->>'recipe_id')::uuid;
   if published->>'status'<>'published' or rid is null then raise exception 'Publish failed'; end if;
-  if not exists(select 1 from public.recipes where id=rid and author_id=auth.uid() and servings is null and total_time_minutes=20) then raise exception 'Recipe mapping failed'; end if;
-  if (select count(*) from public.recipe_ingredients where recipe_id=rid)<>2 or not exists(select 1 from public.recipe_ingredients where recipe_id=rid and amount is null and group_name='Ingredients') then raise exception 'Ingredient mapping failed'; end if;
+  if not exists(select 1 from public.recipes where id=rid and author_id=auth.uid() and servings=2 and total_time_minutes=20) then raise exception 'Recipe mapping failed'; end if;
+  if (select count(*) from public.recipe_ingredients where recipe_id=rid)<>2 or not exists(select 1 from public.recipe_ingredients where recipe_id=rid and amount=500 and unit='ml' and group_name='Ingredients') then raise exception 'Ingredient mapping failed'; end if;
   if not exists(select 1 from public.recipe_ingredients where recipe_id=rid and optional and amount=0.5 and metric_amount=2 and display_order=1) then raise exception 'Ingredient options lost'; end if;
   if (select count(*) from public.recipe_steps where recipe_id=rid)<>2 or not exists(select 1 from public.recipe_steps where recipe_id=rid and step_number=2 and is_final) then raise exception 'Step ordering failed'; end if;
   if (select count(*) from public.recipe_tags where recipe_id=rid)<>1 then raise exception 'Tags not deduplicated'; end if;

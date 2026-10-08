@@ -57,6 +57,9 @@ export function restoreRecipeInput(payload: RecipeInput): RecipeInput {
 
 export function validateRecipeInput(input: RecipeInput, submit: boolean): string[] {
   const errors: string[] = []
+  if (submit && !input.cover_image.trim()) errors.push("Recipe photo is required.")
+  if (submit && !input.description.trim()) errors.push("Recipe description is required.")
+  if (submit && !input.servings.trim()) errors.push("Servings are required.")
   if (submit && !input.title.trim()) errors.push("Recipe name is required.")
   if (submit && !["Easy", "Intermediate", "Advanced"].includes(input.difficulty)) errors.push("Choose a difficulty.")
   if (submit && !input.total_time_minutes.trim()) errors.push("Total cooking time is required.")
@@ -70,6 +73,8 @@ export function validateRecipeInput(input: RecipeInput, submit: boolean): string
   input.ingredients.forEach((item, index) => {
     if (submit && !item.name.trim()) errors.push(`Ingredient ${index + 1} needs a name.`)
     if (submit && !item.group_name.trim()) errors.push(`Ingredient ${index + 1} needs a group.`)
+    if (submit && !item.amount.trim()) errors.push(`Ingredient ${index + 1} needs a quantity.`)
+    if (submit && !item.unit.trim()) errors.push(`Ingredient ${index + 1} needs a unit.`)
     number(item.amount, `Ingredient ${index + 1} quantity`, 0, false, 1000000)
     number(item.metric_amount, `Ingredient ${index + 1} metric quantity`, 0, false, 1000000)
   })
