@@ -279,3 +279,11 @@ html[data-theme="dark"] .comment-reply-node::after { border-color: #606060; }
     box-shadow: 0 0 0 1000px #29313E inset !important;
   }
 }
+
+html[data-theme="dark"] .comment-author-name {
+  color: #B8B8B8 !important;
+}
+
+html[data-theme="dark"] .comment-content {
+  color: #FFFFFF !important;
+}

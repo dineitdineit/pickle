@@ -413,7 +413,7 @@ export default function RecipeComments({
         <div className="flex-1 min-w-0 relative">
           <div className="flex items-center gap-2 pr-7">
             <p
-              className="font-semibold text-[14px] truncate"
+              className="comment-author-name font-semibold text-[14px] truncate"
               style={{ color: "#1F1F1F" }}
             >
               {name}
@@ -488,7 +488,7 @@ export default function RecipeComments({
             </div>
           ) : (
             <p
-              className="text-[14px] leading-5 mt-1 whitespace-pre-wrap break-words"
+              className="comment-content text-[14px] leading-5 mt-1 whitespace-pre-wrap break-words"
               style={{ color: "#555555" }}
             >
               {comment.content}
