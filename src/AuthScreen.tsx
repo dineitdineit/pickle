@@ -681,7 +681,7 @@ export default function AuthScreen({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label
-              className="block text-[13px] font-semibold mb-2"
+              className="auth-field-label block text-[13px] font-semibold mb-2"
               style={{ color: "#444444" }}
             >
               Email
@@ -704,7 +704,7 @@ export default function AuthScreen({
           </div>
           <div>
             <label
-              className="block text-[13px] font-semibold mb-2"
+              className="auth-field-label block text-[13px] font-semibold mb-2"
               style={{ color: "#444444" }}
             >
               Password

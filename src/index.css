@@ -258,3 +258,9 @@ div.relative.h-\[300px\] > button[aria-label="Back"] svg {
 html[data-theme="dark"] .comment-with-replies::before,
 html[data-theme="dark"] .comment-reply-node::before,
 html[data-theme="dark"] .comment-reply-node::after { border-color: #606060; }
+
+@media (max-width: 1023px) {
+  html[data-theme="dark"] .auth-field-label {
+    color: #FFFFFF !important;
+  }
+}
