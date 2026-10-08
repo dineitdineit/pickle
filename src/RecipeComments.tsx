@@ -474,7 +474,7 @@ export default function RecipeComments({
                 <button
                   type="button"
                   onClick={() => setEditingCommentId(null)}
-                  className="text-[10px]"
+                  className="text-[13px]"
                   style={{ color: "#888888" }}
                 >
                   Cancel
@@ -482,7 +482,7 @@ export default function RecipeComments({
                 <button
                   type="button"
                   onClick={() => saveEdit(comment.id)}
-                  className="text-[10px] font-semibold"
+                  className="text-[13px] font-semibold"
                   style={{ color: "#F26B21" }}
                 >
                   Save
