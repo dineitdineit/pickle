@@ -225,3 +225,36 @@ div.relative.h-\[300px\] > button[aria-label="Back"] svg {
   height: 19px !important;
   stroke: #1F1F1F !important;
 }
+
+/* Connect each reply to the parent avatar without covering the controls. */
+.comment-with-replies::before,
+.comment-reply-node::before,
+.comment-reply-node::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  border-color: #dedede;
+}
+.comment-with-replies::before {
+  left: 18px;
+  top: 36px;
+  bottom: -16px;
+  border-left-width: 1px;
+}
+.comment-reply-node { position: relative; margin-top: 16px; }
+.comment-reply-node::before {
+  left: 18px;
+  top: -16px;
+  bottom: 0;
+  border-left-width: 1px;
+}
+.comment-reply-node:last-child::before { bottom: auto; height: 34px; }
+.comment-reply-node::after {
+  left: 18px;
+  top: 18px;
+  width: 26px;
+  border-top-width: 1px;
+}
+html[data-theme="dark"] .comment-with-replies::before,
+html[data-theme="dark"] .comment-reply-node::before,
+html[data-theme="dark"] .comment-reply-node::after { border-color: #606060; }

@@ -379,7 +379,9 @@ export default function RecipeComments({
     return (
       <article
         key={comment.id}
-        className={`flex gap-3 ${isReply ? "ml-11 mt-4" : ""}`}
+        className={`relative flex gap-3 ${
+          isReply ? "ml-11" : replyCount > 0 ? "comment-with-replies" : ""
+        }`}
       >
         {profile?.avatar_url ? (
           <img
@@ -852,9 +854,11 @@ export default function RecipeComments({
             rootComments.map((comment) => (
               <div key={comment.id}>
                 {renderComment(comment)}
-                {(repliesByParent.get(comment.id) ?? []).map((reply) =>
-                  renderComment(reply, true),
-                )}
+                {(repliesByParent.get(comment.id) ?? []).map((reply) => (
+                  <div className="comment-reply-node" key={reply.id}>
+                    {renderComment(reply, true)}
+                  </div>
+                ))}
               </div>
             ))
           )}
