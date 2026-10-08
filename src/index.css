@@ -264,3 +264,18 @@ html[data-theme="dark"] .comment-reply-node::after { border-color: #606060; }
     color: #FFFFFF !important;
   }
 }
+
+@media (max-width: 1023px) {
+  html[data-theme="dark"] .auth-field-input {
+    background-color: #29313E !important;
+    border-color: #D1D5DB !important;
+    color: #F5F5F5 !important;
+    color-scheme: dark;
+  }
+
+  html[data-theme="dark"] .auth-field-input:autofill,
+  html[data-theme="dark"] .auth-field-input:-webkit-autofill {
+    -webkit-text-fill-color: #F5F5F5;
+    box-shadow: 0 0 0 1000px #29313E inset !important;
+  }
+}

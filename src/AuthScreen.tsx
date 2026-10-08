@@ -691,7 +691,7 @@ export default function AuthScreen({
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]"
+              className="auth-field-input w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]"
               style={{
                 borderColor: "#E5E5E5",
                 backgroundColor: "#FAFAFA",
@@ -715,7 +715,7 @@ export default function AuthScreen({
               minLength={6}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]"
+              className="auth-field-input w-full h-12 px-4 rounded-[12px] border outline-none text-[15px]"
               style={{
                 borderColor: "#E5E5E5",
                 backgroundColor: "#FAFAFA",
