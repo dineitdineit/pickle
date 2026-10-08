@@ -1,11 +1,12 @@
 import PickleLogo from "./PickleLogo"
-import type { FormEvent, ReactNode } from "react"
+import { useState, type FormEvent, type ReactNode } from "react"
 
 type DesktopShellProps = {
   children: ReactNode
   activeNav: number
   searching: boolean
-  accountLabel: string
+  loggedIn: boolean
+  avatarUrl: string | null
   accountView: boolean
   query: string
   onQueryChange: (query: string) => void
@@ -18,7 +19,8 @@ export default function DesktopShell({
   children,
   activeNav,
   searching,
-  accountLabel,
+  loggedIn,
+  avatarUrl,
   accountView,
   query,
   onQueryChange,
@@ -26,6 +28,8 @@ export default function DesktopShell({
   onNavigate,
   onUploadRecipe,
 }: DesktopShellProps) {
+  const [failedAvatar, setFailedAvatar] = useState<string | null>(null)
+  const showAvatar = loggedIn && avatarUrl && /^https?:\/\//.test(avatarUrl) && failedAvatar !== avatarUrl
   function submit(event: FormEvent) {
     event.preventDefault()
     onSearch()
@@ -94,23 +98,12 @@ export default function DesktopShell({
           </button>
           <button
             type="button"
-            className="web-account"
+            className={`web-account${loggedIn ? " web-account-avatar" : ""}`}
+            aria-label={loggedIn ? "Open profile" : "Log In"}
             onClick={() => onNavigate(4)}
             aria-current={accountView ? "page" : undefined}
           >
-            <svg
-              width="19"
-              height="19"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              aria-hidden="true"
-            >
-              <circle cx="12" cy="8" r="4" />
-              <path d="M4 22v-3a8 8 0 0 1 16 0v3" />
-            </svg>
-            {accountLabel}
+            {loggedIn ? showAvatar ? <img src={avatarUrl!} alt="" onError={() => setFailedAvatar(avatarUrl)} /> : <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4 22v-3a8 8 0 0 1 16 0v3" /></svg> : "Log In"}
           </button>
         </div>
       </header>

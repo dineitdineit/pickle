@@ -883,7 +883,8 @@ export default function App() {
         Boolean(selectedTagRecipeSection)
         || showMyRecipes
       }
-      accountLabel={authUser ? "My account" : "Log in"}
+      loggedIn={Boolean(authUser)}
+      avatarUrl={homeAvatarUrl}
       accountView={
         activeNav === 4 &&
         !selectedRecipeId &&

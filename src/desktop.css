@@ -59,6 +59,9 @@
   .web-header-search input { width: 100%; min-width: 0; outline: none; font-size: 16px; color: var(--web-ink); background: transparent; }
   .web-header-search button { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 28px; height: 28px; color: var(--web-muted); }
   .web-account { display: flex; gap: 8px; align-items: center; font-size: 16px; font-weight: 600; white-space: nowrap; flex-shrink: 0; }
+  .web-account-avatar { width:40px; height:40px; border-radius:50%; overflow:hidden; justify-content:center; background:#FFF0E6; color:var(--web-orange); }
+  .web-account-avatar img { width:100%; height:100%; object-fit:cover; }
+  .web-account-avatar:focus-visible { outline:2px solid var(--web-orange); outline-offset:3px; }
   .web-account[aria-current="page"] { color: var(--web-orange); }
   .desktop-screen { max-width: 1320px; margin: auto; padding: 36px 40px 64px; min-height: calc(100vh - 200px); outline: none; }
   .desktop-screen > .max-w-md { max-width: none; min-height: auto; }
