@@ -1,0 +1,52 @@
+.recipe-reviews, .review-delete-dialog { --review-text: #1f1f1f; --review-muted: #6f6f6f; --review-border: #eaeaea; --review-surface: #fafafa; color: var(--review-text); }
+.recipe-reviews { border-top: 1px solid var(--review-border); margin-top: 32px; padding-top: 24px; scroll-margin-top: 100px; }
+.recipe-reviews h2, .review-delete-dialog h2 { font-size: 22px; font-weight: 600; line-height: 1.4; }
+.recipe-reviews h3 { font-size: 18px; font-weight: 600; }
+.review-muted, .review-meta, .review-score > span:last-child { color: var(--review-muted); font-size: 14px; line-height: 1.6; }
+.review-stars { display: inline-flex; gap: 2px; vertical-align: middle; color: #f26b21; }
+.review-star { display: inline-block; position: relative; color: #f26b21; flex-shrink: 0; }
+.review-star > svg { width: 100%; height: 100%; display: block; }
+.review-star > span { position: absolute; top: 0; bottom: 0; left: 0; overflow: hidden; }
+.review-star > span > svg { max-width: none; display: block; }
+.recipe-rating-link { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; font-size: 14px; margin-top: 12px; color: #6f6f6f; text-align: left; }
+.recipe-rating-link strong { color: #1f1f1f; }
+.review-summary { display: flex; gap: 24px; align-items: center; margin: 20px 0; }
+.review-score { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; min-width: 96px; }
+.review-score strong { font-size: 48px; line-height: 1.1; font-weight: 500; }
+.review-distribution { flex: 1; min-width: 0; }
+.review-bar-row { display: flex; align-items: center; gap: 12px; margin: 5px 0; font-size: 14px; }
+.review-bar-row > div { height: 8px; border-radius: 8px; background: var(--review-border); width: 100%; overflow: hidden; }
+.review-bar-row > div > span { display: block; height: 100%; background: #f26b21; border-radius: 8px; }
+.review-rate-prompt { margin: 24px 0 8px; }
+.review-picker { display: flex; gap: 8px; margin: 12px 0; }
+.review-picker button { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 8px; }
+.review-outline { border: 1px solid var(--review-border); border-radius: 999px; padding: 9px 20px; color: #f26b21; font-size: 15px; font-weight: 600; margin: 8px 0; }
+.review-editor { background: var(--review-surface); border: 1px solid var(--review-border); border-radius: 16px; padding: 16px; margin-top: 24px; }
+.review-editor label { display: block; font-size: 15px; margin-bottom: 8px; }
+.review-editor textarea { width: 100%; padding: 12px; border: 1px solid var(--review-border); background: white; color: var(--review-text); border-radius: 12px; resize: vertical; font-size: 16px; line-height: 1.6; }
+.review-character-count { text-align: right; margin-top: 4px; }
+.review-form-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 16px; }
+.review-form-actions button { padding: 10px 18px; font-size: 15px; font-weight: 600; border-radius: 999px; }
+.review-primary { background: #f26b21; color: white; }
+.review-card { padding: 20px 0; border-bottom: 1px solid var(--review-border); }
+.review-author { display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 500; overflow-wrap: anywhere; }
+.review-author img, .review-avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+.review-avatar { display: flex; align-items: center; justify-content: center; background: var(--review-surface); color: #f26b21; }
+.review-meta { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 10px 0; }
+.review-content { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 16px; line-height: 1.6; }
+.review-own-actions { display: flex; gap: 20px; margin-top: 12px; font-size: 14px; color: #f26b21; }
+.review-delete, .review-error { color: #c53d2e; }
+.review-error { margin-top: 12px; font-size: 15px; }
+.review-error button { text-decoration: underline; margin-left: 8px; }
+.review-delete-dialog { width: calc(100% - 32px); max-width: 400px; border: 0; border-radius: 16px; padding: 24px; margin: auto; background: #fff; }
+.review-delete-dialog > p { margin-top: 12px; }
+.review-delete-dialog::backdrop { background: rgba(0,0,0,.5); }
+.review-danger { background: #c53d2e; }
+.recipe-reviews button:disabled, .review-delete-dialog button:disabled { opacity: .5; cursor: not-allowed; }
+.recipe-reviews button:focus-visible, .recipe-rating-link:focus-visible, .review-delete-dialog button:focus-visible { outline: 2px solid #f26b21; outline-offset: 3px; }
+html[data-theme="dark"] .recipe-reviews, html[data-theme="dark"] .review-delete-dialog { --review-text: #fff; --review-muted: #b8b8b8; --review-border: #444; --review-surface: #2a2a2a; }
+html[data-theme="dark"] .review-delete-dialog { background: #202020; }
+html[data-theme="dark"] .recipe-rating-link { color: #b8b8b8; }
+html[data-theme="dark"] .recipe-rating-link strong { color: #fff; }
+html[data-theme="dark"] .review-delete { color: #ff7070; }
+@media (prefers-reduced-motion: reduce) { #recipe-reviews { scroll-behavior: auto; } }

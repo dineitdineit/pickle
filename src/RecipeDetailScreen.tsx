@@ -12,6 +12,8 @@ import RetryState from "./RetryState"
 import { supabase } from "./lib/supabase"
 import { getCurrentUser } from "./lib/auth"
 import RecipeComments from "./RecipeComments"
+import RecipeReviews, { ReviewStars } from "./RecipeReviews"
+import { useRecipeReviews } from "./lib/reviews"
 
 type RecipeDetailScreenProps = {
   recipeId: string
@@ -71,6 +73,7 @@ export default function RecipeDetailScreen({
   const [shareMessage, setShareMessage] = useState("")
   const [showShareLink, setShowShareLink] = useState(false)
   const [commentCount, setCommentCount] = useState(0)
+  const reviewData = useRecipeReviews(recipeId)
 
   useEffect(() => {
     let ignore = false
@@ -616,6 +619,34 @@ export default function RecipeDetailScreen({
             </div>
           </div>
 
+          <button
+            type="button"
+            className="recipe-rating-link"
+            onClick={() =>
+              document
+                .getElementById("recipe-reviews")
+                ?.scrollIntoView({ behavior: "smooth", block: "start" })
+            }
+            aria-label="View ratings and reviews"
+          >
+            <ReviewStars value={reviewData.summary.average} size={17} />
+            {reviewData.error ? (
+              <span>Ratings unavailable</span>
+            ) : reviewData.loading && !reviewData.summary.total ? (
+              <span>Loading ratings…</span>
+            ) : reviewData.summary.total ? (
+              <>
+                <strong>{reviewData.summary.average.toFixed(1)}</strong>
+                <span>
+                  · {reviewData.summary.total.toLocaleString()}{" "}
+                  {reviewData.summary.total === 1 ? "rating" : "ratings"}
+                </span>
+              </>
+            ) : (
+              <span>No ratings yet</span>
+            )}
+          </button>
+
           <div className="grid grid-cols-3 gap-2 mt-5">
             {[
               ["Time", formatTime(recipe.total_time_minutes)],
@@ -692,6 +723,13 @@ export default function RecipeDetailScreen({
           active={activeTab === "Nutrition"}
         />
 
+        <RecipeReviews
+          key={recipeId}
+          recipeId={recipeId}
+          onRequireLogin={onRequireLogin}
+          data={reviewData}
+        />
+
         <RecipeComments
           recipeId={recipeId}
           onRequireLogin={onRequireLogin}
@@ -732,7 +770,11 @@ export default function RecipeDetailScreen({
                 >
                   <div
                     className="overflow-hidden bg-gray-100 mb-2"
-                    style={{ width: "100%", aspectRatio: "1", borderRadius: 16 }}
+                    style={{
+                      width: "100%",
+                      aspectRatio: "1",
+                      borderRadius: 16,
+                    }}
                   >
                     <img
                       src={recipeImageUrl(item.cover_image)}
@@ -751,7 +793,10 @@ export default function RecipeDetailScreen({
                   >
                     {item.title}
                   </p>
-                  <p className="text-[15px] mt-0.5" style={{ color: "#6F6F6F" }}>
+                  <p
+                    className="text-[15px] mt-0.5"
+                    style={{ color: "#6F6F6F" }}
+                  >
                     {item.difficulty || "—"} ·{" "}
                     {formatTime(item.total_time_minutes)}
                   </p>
