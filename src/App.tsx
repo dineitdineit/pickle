@@ -3,7 +3,7 @@ import RecipeStrip from "./RecipeStrip"
 import { formatTime } from "./lib/format"
 import { recipeImageUrl } from "./lib/recipe"
 import PickleLogo from "./PickleLogo"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { Fragment, useEffect, useMemo, useRef, useState } from "react"
 import BrowseScreen from "./BrowseScreen"
 import SearchScreen from "./SearchScreen"
 import SavedScreen from "./SavedScreen"
@@ -413,14 +413,40 @@ export default function App() {
     return () => cancelAnimationFrame(frame)
   }, [activeNav, showSearch, selectedRecipeId, loadingRecipes])
 
+  function openRecipeUpload() {
+    setSelectedRecipeId(null)
+    setSelectedTagRecipeSection(null)
+    setShowSearch(false)
+    setShowLikedRecipes(false)
+    setStartNewRecipe(true)
+    setShowMyRecipes(true)
+    window.scrollTo({ top: 0 })
+  }
+
   const NavBar = (
     <nav
       className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md border-t flex items-center justify-around py-3 bg-white z-50"
       style={{ borderColor: "#EAEAEA" }}
     >
       {NAV_ICONS.map((icon, i) => (
+        <Fragment key={i}>
+          {i === 4 && (
+            <button
+              type="button"
+              aria-label="Add recipe"
+              onClick={openRecipeUpload}
+              className="flex items-center justify-center w-12 h-10"
+              style={{ color: "#F26B21" }}
+            >
+              <svg width="30" height="30" viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                <circle cx="16" cy="16" r="13" />
+                <path d="M16 10v12M10 16h12" />
+              </svg>
+            </button>
+          )}
         <button
-          key={i}
+          type="button"
+          aria-label={["Home", "Browse", "Saved recipes", "Notifications", "Profile"][i]}
           onClick={() => {
             setShowMyRecipes(false)
             setActiveNav(i)
@@ -440,6 +466,7 @@ export default function App() {
             />
           )}
         </button>
+        </Fragment>
       ))}
     </nav>
   )
@@ -857,7 +884,7 @@ export default function App() {
       onQueryChange={setSearchValue}
       onSearch={() => desktopSearch()}
       onNavigate={navigate}
-      onUploadRecipe={() => { setSelectedRecipeId(null); setSelectedTagRecipeSection(null); setShowSearch(false); setStartNewRecipe(true); setShowMyRecipes(true); window.scrollTo({ top: 0 }) }}
+      onUploadRecipe={openRecipeUpload}
     >
       {renderScreen()}
     </DesktopShell>

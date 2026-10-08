@@ -86,6 +86,7 @@ export default function DesktopShell({
               onChange={(event) => onQueryChange(event.target.value)}
             />
           </form>
+          <button type="button" className="web-upload-recipe" onClick={onUploadRecipe}>+recipe</button>
           <button
             type="button"
             className="web-account"
@@ -106,7 +107,6 @@ export default function DesktopShell({
             </svg>
             {accountLabel}
           </button>
-          <button type="button" className="web-upload-recipe" onClick={onUploadRecipe}>Upload recipe</button>
         </div>
       </header>
       <main
