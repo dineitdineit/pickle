@@ -81,3 +81,9 @@ test('video sources use trusted provider embeds and preserve direct file URLs', 
   assert.equal(videoSource('https://youtube.com.evil.com/watch?v=abcdefghijk').kind, 'external')
   assert.equal(videoSource('javascript:alert(1)'), null)
 })
+
+test('upload accepts only YouTube and Instagram video links', () => {
+  const { validVideoUrl } = videoModule.exports
+  for (const url of ['', 'https://youtu.be/abcdefghijk?si=abc', 'https://www.youtube.com/watch?v=abcdefghijk', 'https://youtube.com/shorts/abcdefghijk', 'https://www.instagram.com/reel/ABC_123/?igsh=abc', 'https://instagram.com/p/ABC-123/']) assert.equal(validVideoUrl(url), true, url)
+  for (const url of ['https://vimeo.com/123456','https://example.com/video.mp4','https://tiktok.com/video/123','https://youtube.com.evil.com/watch?v=abcdefghijk','https://instagram.com.evil.com/reel/123/','https://www.instagram.com/profile/','https://youtube.com/','https://youtu.be/invalid']) assert.equal(validVideoUrl(url), false, url)
+})

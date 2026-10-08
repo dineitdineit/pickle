@@ -20,6 +20,16 @@ begin
   blocked:=false;
   begin perform public.save_recipe_submission(sid,jsonb_set(p,'{video_url}','"javascript:alert(1)"'),false,null); exception when others then blocked:=true; end;
   if not blocked then raise exception 'Unsafe video URL accepted'; end if;
+  foreach field in array array['https://vimeo.com/123456','https://example.com/video.mp4','https://youtube.com.evil.com/watch?v=abcdefghijk','https://www.instagram.com/profile/'] loop
+    blocked:=false;
+    begin perform public.save_recipe_submission(sid,jsonb_set(p,'{video_url}',to_jsonb(field)),false,null); exception when others then
+      if sqlerrm not like '%Only YouTube and Instagram%' then raise; end if;
+      blocked:=true;
+    end;
+    if not blocked then raise exception 'Unsupported platform accepted: %',field; end if;
+  end loop;
+  perform public.save_recipe_submission(gen_random_uuid(),jsonb_set(p-'cover_image'-'finished_image','{video_url}',to_jsonb('https://www.instagram.com/reel/ABC123/?igsh=abc'::text)),false,null);
+
   p:=jsonb_set(p,'{tag_ids}',jsonb_build_array(current_setting('test.tag_id'),current_setting('test.tag_id')));
   saved:=public.save_recipe_submission(sid,jsonb_set(jsonb_set(p-'cover_image'-'description'-'servings','{ingredients,0,amount}','null'::jsonb),'{ingredients,0,unit}','null'::jsonb),false,null);
   version:=(saved->>'updated_at')::timestamptz;

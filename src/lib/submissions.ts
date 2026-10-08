@@ -70,7 +70,7 @@ export function restoreRecipeInput(payload: RecipeInput): RecipeInput {
 export function validateRecipeInput(input: RecipeInput, submit: boolean, page?: 0 | 1 | 2): string[] {
   const errors: string[] = []
   if (page === undefined || page === 0) {
-    if (!validVideoUrl(input.video_url)) errors.push("Enter a valid HTTPS video link (up to 2048 characters).")
+    if (!validVideoUrl(input.video_url)) errors.push("Only YouTube and Instagram video links are allowed. Enter a valid video link.")
     if (submit && !input.cover_image.trim()) errors.push("Recipe photo is required.")
     if (submit && !input.description.trim()) errors.push("Recipe description is required.")
     if (submit && !input.title.trim()) errors.push("Recipe name is required.")
