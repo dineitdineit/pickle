@@ -298,7 +298,7 @@ export default function SearchScreen({
                 >
                   {recipe.title}
                 </p>
-                <div className="flex items-center gap-2 mt-1 flex-wrap">
+                <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                   <span
                     className="text-[15px] px-2 py-0.5 rounded-full"
                     style={{ backgroundColor: "#F5F5F5", color: "#6F6F6F" }}

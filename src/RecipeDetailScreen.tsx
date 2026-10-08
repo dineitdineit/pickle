@@ -439,7 +439,7 @@ export default function RecipeDetailScreen({
             <div className="min-w-0">
               {recipe.short_description && (
                 <p
-                  className="text-[15px] leading-5 mb-1.5"
+                  className="text-[15px] leading-5 mb-1"
                   style={{ color: "#6F6F6F" }}
                 >
                   {recipe.short_description}
@@ -581,7 +581,7 @@ export default function RecipeDetailScreen({
           )}
 
           <div
-            className="flex items-center gap-4 mt-3 text-[14px]"
+            className="flex items-center gap-3 mt-2.5 text-[14px]"
             style={{ color: "#6F6F6F" }}
           >
             <div className="flex items-center gap-1.5">
@@ -731,7 +731,7 @@ export default function RecipeDetailScreen({
                   style={{ width: "100%", minWidth: 0 }}
                 >
                   <div
-                    className="overflow-hidden bg-gray-100 mb-2.5"
+                    className="overflow-hidden bg-gray-100 mb-2"
                     style={{ width: "100%", aspectRatio: "1", borderRadius: 16 }}
                   >
                     <img
@@ -751,7 +751,7 @@ export default function RecipeDetailScreen({
                   >
                     {item.title}
                   </p>
-                  <p className="text-[15px] mt-1" style={{ color: "#6F6F6F" }}>
+                  <p className="text-[15px] mt-0.5" style={{ color: "#6F6F6F" }}>
                     {item.difficulty || "—"} ·{" "}
                     {formatTime(item.total_time_minutes)}
                   </p>

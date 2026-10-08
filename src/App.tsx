@@ -743,7 +743,7 @@ export default function App() {
                             }}
                           />
                           <div className="absolute bottom-0 left-0 right-0 p-4 pb-10">
-                            <h2 className="font-semibold text-[19px] text-white mb-1">
+                            <h2 className="font-semibold text-[19px] text-white mb-0.5">
                               {recipe.title}
                             </h2>
                             <div className="flex items-center gap-2">

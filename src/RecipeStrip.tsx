@@ -99,7 +99,7 @@ export default function RecipeStrip({
             }}
             className="flex-none w-[148px] text-left self-start"
           >
-            <div className="w-[148px] h-[148px] rounded-[12px] overflow-hidden mb-2 bg-gray-100">
+            <div className="w-[148px] h-[148px] rounded-[12px] overflow-hidden mb-1.5 bg-gray-100">
               <img
                 src={recipe.image}
                 alt={recipe.title}
@@ -113,7 +113,7 @@ export default function RecipeStrip({
             >
               {recipe.title}
             </p>
-            <p className="text-[15px] mt-1" style={{ color: "#6F6F6F" }}>
+            <p className="text-[15px] mt-0.5" style={{ color: "#6F6F6F" }}>
               {recipe.difficulty} · {formatTime(recipe.total_time_minutes)}
             </p>
           </button>
