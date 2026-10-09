@@ -1,6 +1,7 @@
 import { VideoBadge } from "./RecipeVideo"
 import { formatTime } from "./lib/format"
 import RetryState from "./RetryState"
+import HomeAdSidebar from "./HomeAdSidebar"
 
 type Recipe = {
   id: string
@@ -86,6 +87,7 @@ export default function DesktopHome({
   const lead = featured[0]
   return (
     <div className="desktop-home">
+      <div className="web-home-content">
       <div className="web-home-heading">
         <div>
           <h1>What are we cooking today?</h1>
@@ -175,6 +177,8 @@ export default function DesktopHome({
           />
         </>
       )}
+      </div>
+      {!loading && !error && lead && <HomeAdSidebar />}
     </div>
   )
 }
