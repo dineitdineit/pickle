@@ -116,6 +116,7 @@ html[data-theme="dark"] .submission-ui { --submission-text:#fff; --submission-mu
 .wizard-actions { display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); align-items:center; gap:16px; margin-top:28px; padding-bottom:max(16px,env(safe-area-inset-bottom)); }
 .wizard-draft-actions { justify-self:end; }
 .wizard-navigation { justify-content:center; flex-wrap:nowrap; }
+.wizard-mobile-label,.wizard-page-count,.wizard-previous-placeholder { display:none; }
 .wizard-cancel-actions { justify-self:start; }
 .wizard-cancel { padding:20px; border:1px solid #f26b21; border-radius:12px; margin:20px 0; }
 .wizard-cancel button { margin:12px 16px 0 0; }
@@ -132,10 +133,17 @@ html[data-theme="dark"] .submission-ui { --submission-text:#fff; --submission-mu
   .wizard-ingredient-row label:nth-child(2),.wizard-ingredient-row label:nth-child(3) { margin-top:0; }
   .wizard-group-heading,.wizard-ingredient-item { padding-left:14px; padding-right:14px; }
   .wizard-step-card { padding:16px; }
-  .wizard-actions { grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:12px; }
-  .wizard-draft-actions { grid-column:2; grid-row:1; }
+  .wizard-actions { grid-template-columns:minmax(0,1fr) 122px minmax(0,1fr); gap:4px; }
+  .wizard-draft-actions { grid-column:3; grid-row:1; flex-wrap:nowrap; }
   .wizard-cancel-actions { grid-column:1; grid-row:1; }
-  .wizard-navigation { grid-column:1 / -1; grid-row:2; justify-self:center; }
-  .wizard-actions .submission-primary,.wizard-actions .submission-secondary { padding:9px 14px; font-size:14px; }
+  .wizard-navigation { grid-column:2; grid-row:1; display:grid; grid-template-columns:44px 30px 44px; gap:2px; justify-self:center; align-items:center; }
+  .wizard-actions button { white-space:nowrap; }
+  .wizard-actions .submission-primary,.wizard-actions .submission-secondary { padding:8px; font-size:12px; }
+  .wizard-actions .wizard-page-button { width:44px; height:44px; padding:0; font-size:24px; }
+  .wizard-actions .wizard-publish-button { width:44px; height:44px; padding:0; font-size:11px; }
+  .wizard-desktop-label { display:none; }
+  .wizard-mobile-label { display:inline; }
+  .wizard-page-count { display:block; text-align:center; font-size:13px; font-variant-numeric:tabular-nums; color:var(--submission-muted); }
+  .wizard-previous-placeholder { display:block; visibility:hidden; }
   .wizard-title h1 { font-size:25px; }
 }
