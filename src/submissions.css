@@ -134,11 +134,13 @@ html[data-theme="dark"] .submission-ui { --submission-text:#fff; --submission-mu
   .wizard-group-heading,.wizard-ingredient-item { padding-left:14px; padding-right:14px; }
   .wizard-step-card { padding:16px; }
   .wizard-actions { grid-template-columns:minmax(0,1fr) 122px minmax(0,1fr); gap:4px; width:calc(100% + 32px); margin-left:-16px; margin-right:-16px; padding-left:16px; padding-right:16px; background:var(--submission-bg); }
-  .wizard-draft-actions { grid-column:3; grid-row:1; flex-wrap:nowrap; }
-  .wizard-cancel-actions { grid-column:1; grid-row:1; }
+  .wizard-draft-actions { grid-column:3; grid-row:1; flex-wrap:nowrap; justify-self:stretch; justify-content:center; }
+  .wizard-cancel-actions { grid-column:1; grid-row:1; justify-self:stretch; justify-content:center; }
   .wizard-navigation { grid-column:2; grid-row:1; display:grid; grid-template-columns:44px 30px 44px; width:122px; gap:2px; justify-self:center; align-items:center; }
   .wizard-actions button { white-space:nowrap; }
   .wizard-actions .submission-primary,.wizard-actions .submission-secondary { padding:8px; font-size:12px; }
+  .wizard-actions .wizard-cancel-actions > button,.wizard-actions .wizard-draft-actions > button { width:100%; min-height:44px; padding:8px 0; text-align:center; font-size:14px; font-weight:400; }
+  .wizard-actions .wizard-draft-actions > button { border:0; border-radius:0; background:transparent; color:#999; }
   .wizard-actions .wizard-page-button { position:relative; justify-self:center; width:36px; height:36px; min-height:36px; padding:0; font-size:20px; }
   .wizard-actions .wizard-page-button::before { content:""; position:absolute; inset:-4px; }
   .wizard-actions .wizard-publish-button { width:44px; height:44px; padding:0; font-size:11px; }
