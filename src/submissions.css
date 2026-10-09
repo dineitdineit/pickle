@@ -139,7 +139,8 @@ html[data-theme="dark"] .submission-ui { --submission-text:#fff; --submission-mu
   .wizard-navigation { grid-column:2; grid-row:1; display:grid; grid-template-columns:44px 30px 44px; width:122px; gap:2px; justify-self:center; align-items:center; }
   .wizard-actions button { white-space:nowrap; }
   .wizard-actions .submission-primary,.wizard-actions .submission-secondary { padding:8px; font-size:12px; }
-  .wizard-actions .wizard-page-button { width:44px; height:44px; padding:0; font-size:24px; }
+  .wizard-actions .wizard-page-button { position:relative; justify-self:center; width:36px; height:36px; min-height:36px; padding:0; font-size:20px; }
+  .wizard-actions .wizard-page-button::before { content:""; position:absolute; inset:-4px; }
   .wizard-actions .wizard-publish-button { width:44px; height:44px; padding:0; font-size:11px; }
   .wizard-desktop-label { display:none; }
   .wizard-mobile-label { display:inline; }
