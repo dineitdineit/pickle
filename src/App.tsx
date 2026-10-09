@@ -440,14 +440,14 @@ export default function App() {
         <button
           key={i}
           type="button"
-          aria-label={["Home", "Browse", "Saved recipes", "Notifications", "Profile"][i]}
+          aria-label={["Home", "Search", "Saved recipes", "Notifications", "Profile"][i]}
           onClick={() => {
             setShowMyRecipes(false)
             setActiveNav(i)
             setShowSearch(false)
             setShowLikedRecipes(false)
           }}
-          className="flex flex-col items-center justify-center flex-1 min-w-0 h-11 transition-colors"
+          className="relative flex flex-col items-center justify-center w-full min-w-0 h-14 transition-colors"
           style={{
             color: activeNav === i && !showSearch ? "#F26B21" : "#6F6F6F",
           }}
@@ -455,7 +455,7 @@ export default function App() {
           {NAV_ICONS[i]}
           {activeNav === i && !showSearch && (
             <div
-              className="w-1 h-1 rounded-full mt-1"
+              className="absolute bottom-1 w-1 h-1 rounded-full"
               style={{ backgroundColor: "#F26B21" }}
             />
           )}
@@ -465,11 +465,11 @@ export default function App() {
 
   const NavBar = (
     <nav
-      className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md border-t flex items-center py-3 bg-white z-50"
-      style={{ borderColor: "#EAEAEA" }}
+      className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md border-t grid items-center justify-items-center py-3 bg-white z-50"
+      style={{ borderColor: "#EAEAEA", gridTemplateColumns: "repeat(5, minmax(0, 1fr))" }}
       aria-label="Main navigation"
     >
-      <div className="flex flex-1 min-w-0 items-center">{[0, 1].map(navButton)}</div>
+      {[0, 1].map(navButton)}
       <button
         type="button"
         aria-label="Add recipe"
@@ -482,7 +482,7 @@ export default function App() {
           <path d="M16 10v12M10 16h12" />
         </svg>
       </button>
-      <div className="flex flex-1 min-w-0 items-center">{[2, 3, 4].map(navButton)}</div>
+      {[2, 4].map(navButton)}
     </nav>
   )
 
