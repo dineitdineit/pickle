@@ -48,7 +48,8 @@ export default function HomeAdSidebar() {
     try {
       if (!requested.current && !ad.current.hasAttribute("data-adsbygoogle-status")) {
         requested.current = true
-        (window.adsbygoogle = window.adsbygoogle || []).push({})
+        window.adsbygoogle = window.adsbygoogle || []
+        window.adsbygoogle.push({})
       }
     } catch {
       setFailed(true)
