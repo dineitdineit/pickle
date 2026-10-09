@@ -3,7 +3,7 @@ import RecipeStrip from "./RecipeStrip"
 import { formatTime } from "./lib/format"
 import { recipeImageUrl } from "./lib/recipe"
 import PickleLogo from "./PickleLogo"
-import { Fragment, useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import BrowseScreen from "./BrowseScreen"
 import SearchScreen from "./SearchScreen"
 import SavedScreen from "./SavedScreen"
@@ -435,28 +435,10 @@ export default function App() {
     window.scrollTo({ top: 0 })
   }
 
-  const NavBar = (
-    <nav
-      className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md border-t flex items-center justify-around py-3 bg-white z-50"
-      style={{ borderColor: "#EAEAEA" }}
-    >
-      {NAV_ICONS.map((icon, i) => (
-        <Fragment key={i}>
-          {i === 4 && (
-            <button
-              type="button"
-              aria-label="Add recipe"
-              onClick={openRecipeUpload}
-              className="flex items-center justify-center w-12 h-10"
-              style={{ color: "#F26B21" }}
-            >
-              <svg width="30" height="30" viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-                <circle cx="16" cy="16" r="13" />
-                <path d="M16 10v12M10 16h12" />
-              </svg>
-            </button>
-          )}
+  function navButton(i: number) {
+    return (
         <button
+          key={i}
           type="button"
           aria-label={["Home", "Browse", "Saved recipes", "Notifications", "Profile"][i]}
           onClick={() => {
@@ -465,12 +447,12 @@ export default function App() {
             setShowSearch(false)
             setShowLikedRecipes(false)
           }}
-          className="flex flex-col items-center justify-center w-12 h-10 transition-colors"
+          className="flex flex-col items-center justify-center flex-1 min-w-0 h-11 transition-colors"
           style={{
             color: activeNav === i && !showSearch ? "#F26B21" : "#6F6F6F",
           }}
         >
-          {icon}
+          {NAV_ICONS[i]}
           {activeNav === i && !showSearch && (
             <div
               className="w-1 h-1 rounded-full mt-1"
@@ -478,8 +460,29 @@ export default function App() {
             />
           )}
         </button>
-        </Fragment>
-      ))}
+    )
+  }
+
+  const NavBar = (
+    <nav
+      className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md border-t flex items-center py-3 bg-white z-50"
+      style={{ borderColor: "#EAEAEA" }}
+      aria-label="Main navigation"
+    >
+      <div className="flex flex-1 min-w-0 items-center">{[0, 1].map(navButton)}</div>
+      <button
+        type="button"
+        aria-label="Add recipe"
+        onClick={openRecipeUpload}
+        className="flex items-center justify-center w-14 h-14 shrink-0 rounded-full"
+        style={{ color: "#F26B21", backgroundColor: "#FFF0E6" }}
+      >
+        <svg width="40" height="40" viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+          <circle cx="16" cy="16" r="13" />
+          <path d="M16 10v12M10 16h12" />
+        </svg>
+      </button>
+      <div className="flex flex-1 min-w-0 items-center">{[2, 3, 4].map(navButton)}</div>
     </nav>
   )
 
