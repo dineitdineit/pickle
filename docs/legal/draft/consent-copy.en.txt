@@ -1,0 +1,41 @@
+Pickle — Current agreement and deletion copy
+Snapshot date: 2026-10-16
+Source: src/ContentConsent.tsx, src/AuthScreen.tsx, src/ProfileScreen.tsx
+Status: CURRENT SNAPSHOT. Explanatory labels below are not displayed in the app.
+
+CONTENT-SHARING DIALOG
+Heading: Before you share
+Introduction: Read and agree to both policies before sharing recipes, photos, comments, reviews or messages.
+Version label: Policy version: {policy.version}
+Document titles: Terms of Service / Content Policy
+Checkbox 1: I agree to the Terms of Service.
+Checkbox 2: I agree to the Content Policy.
+Buttons: Cancel / Agree and continue
+Pending button: Saving…
+
+Current behaviour:
+Both checkboxes start unchecked. Both must be checked to continue. Server records the signed-in user ID, accepted policy version and acceptance time. Each version contains the full terms and content policy text. The active version on this snapshot date is 2026-10-16.1. Privacy Policy is not a third document or checkbox in this dialog, and no privacy-notice acknowledgement is currently recorded here.
+
+ACCOUNT REGISTRATION
+Email registration uses a neutral Date of birth field and a 13+ client check. The server independently checks eligibility after login, including Google and existing accounts. Birth dates are not stored in Auth metadata or a date-of-birth field. The account stores rule version 13-plus-guardian-v1, eligibility category and confirmation time. Existing 18-plus-v1 declarations remain valid. Under-13 activation is rejected; declared age 13 requires reviewed guardian consent; age 14+ follows the ordinary check. Self-declaration is not identity verification. A minimum Auth record can exist before the post-login check. Safety reporting, privacy/support and account deletion remain available. Content-sharing agreement remains separate.
+
+GUARDIAN REVIEW
+Heading: Parent or guardian consent
+An inactive account shows its request number and the matching Terms/Content Policy plus the Privacy Policy. The adult guardian sends their own explicit consent email to admin@getpickleapp.com. Preparing or copying the statement does not send an email or approve the account. The operator checks guardian authority and consent, then an independent authorised administrator records an evidence reference and approves, declines or records withdrawal. Pending/revoked accounts cannot make ordinary writes; their profile/public content is hidden. Client changes to birthdays or metadata cannot remove the guardian requirement. Current-policy consent is required; prior approvals are not copied to new policy versions. Approved records persist with the active account and cascade on deletion; other requests/history expire after 30 days. Mailbox copies have separate controls. See docs/guardian-consent.md.
+
+
+ACCOUNT DELETION DIALOG
+Heading: Delete your account?
+Body: This requests deletion of your account, published recipes, drafts, uploaded photos, messages and linked activity. Your content becomes unavailable while cleanup runs; failed steps retry automatically. Minimal deletion receipts and encrypted application backups expire after 30 days. Detailed evidence is kept for 30 days and minimum enforcement history for 90 days after final case closure, with ongoing cases or active restrictions handled as described in the Privacy Policy. Provider backups have separate settings. Deletion cannot be undone.
+
+ACCOUNT ELIGIBILITY SCREEN
+Heading: Account eligibility
+Text: Pickle accounts are for people aged 13 and over. At age 13, a parent or legal guardian must complete a consent review before activation. We use your birth date to check eligibility and do not save it. We retain the eligibility result, rule version and confirmation time. Age entry is a self-declaration.
+Input: Date of birth
+Button: Continue
+Help: For account or privacy help: admin@getpickleapp.com
+Other actions: Sign out / Delete account / readable Privacy Policy and Terms of Service
+
+ACCOUNT DELETION IMPLEMENTATION NOTE
+The server returns accepted and completed separately, including an account-matched job reference. Clients accept only a matching confirmed queued request or completed deletion. A one-time session notice shows the reference/status after sign-out; its minimal local record expires after 30 days and is consumed when displayed. Confirmation does not contain an email or message body.
+The durable manifest and expiring worker leases support automatic bounded retries. Core photos/records are deleted rather than copied into a recovery backup. After completion a minimal encrypted receipt is backed up in private Storage, verified by download/hash, and expires after 30 days. Storage deletion must succeed before its ledger is removed. Detailed closed-case evidence expires after 30 days; minimum enforcement history after 90 days, with ongoing case/appeal/active-restriction exceptions. Provider-managed backups/logs/mailboxes remain separate.

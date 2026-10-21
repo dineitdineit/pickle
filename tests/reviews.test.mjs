@@ -26,6 +26,7 @@ function setup({ ownReview = null, userId = "user", rating = 5, text = "", respo
     async single() { return response },
   }
   const context = {
+    requireContentConsent: async () => true,
     userId, rating, text, ownReview, recipeId: "recipe", mutation: { current: false },
     supabase: { from(table) { assert.equal(table, "recipe_reviews"); return query } },
     console: { error() {} }, writeButton: { current: null },
@@ -41,6 +42,13 @@ test("rating-only review saves without required text and confirms persistence", 
   assert.equal(state.Editor, false)
   assert.equal(state.reloaded, true)
   assert.equal(state.Busy, false)
+})
+
+test('declining consent preserves the review form and sends no content write',async()=>{
+ const {calls,state,context}=setup({text:'Keep this review'})
+ context.requireContentConsent=async()=>false
+ await action('save',context)()
+ assert.deepEqual(calls,[]);assert.equal(state.Editor,undefined);assert.equal(state.Success,undefined);assert.equal(context.text,'Keep this review');assert.equal(context.mutation.current,false)
 })
 test("editing a review updates only the current user's row and trims optional text", async () => {
   const { calls, context } = setup({ ownReview: { id: "review" }, rating: 3, text: "  Cooked this today.  " })

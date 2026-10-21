@@ -1,0 +1,60 @@
+.social-screen { max-width: 680px; margin: 0 auto; padding: 22px 16px 140px; color: var(--color-ink); }
+.social-heading { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.social-heading h1 { flex: 1; font-size: var(--text-title); line-height: var(--text-title--line-height); font-weight: 700; }
+.social-back { font-size: var(--text-hero); line-height: var(--text-hero--line-height); width: 32px; }
+.social-link { color: var(--color-primary); font-size: var(--text-label); line-height: var(--text-label--line-height); }
+.social-person { display: flex; align-items: center; gap: 12px; padding: 16px 8px; border-bottom: 1px solid var(--color-border); }
+.social-person-info { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; text-align: left; }
+.social-moderation-notice { align-items: flex-start; }
+.social-moderation-icon { color: var(--color-primary); background: var(--color-primary-faint); flex-shrink: 0; display: grid; place-items: center; }
+.social-moderation-text { min-width: 0; display: grid; gap: 5px; overflow-wrap: anywhere; font-size: var(--text-label); line-height: var(--text-label--line-height); }
+.social-moderation-text strong { font-weight: 600; }
+.social-moderation-text small, .social-moderation-reason { color: var(--color-gray); font-size: var(--text-caption); line-height: var(--text-caption--line-height); }
+.social-person-info > span:last-child { min-width: 0; display: grid; gap: 4px; overflow-wrap: anywhere; }
+.social-person-info strong { font-weight: 600; }
+.social-person-info small { color: var(--color-gray); font-size: var(--text-caption); line-height: var(--text-caption--line-height); }
+.social-avatar { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: var(--color-primary-soft); color: var(--color-primary); }
+.social-follow { flex-shrink: 0; padding: 9px 14px; border-radius: 20px; background: var(--color-primary); color: white; font-size: var(--text-label); line-height: var(--text-label--line-height); font-weight: 600; }
+.social-follow.is-following { background: white; color: var(--color-ink); border: 1px solid var(--color-gray-faint); }
+.social-screen button:disabled { opacity: .55; cursor: default; }
+.social-screen button:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 3px; }
+.social-empty { padding: 35px 8px; text-align: center; color: var(--color-gray); }
+.social-empty button { margin-top: 16px; }
+.social-message { padding: 12px; background: var(--color-primary-soft); border-radius: 12px; font-size: var(--text-label); line-height: var(--text-label--line-height); margin: 12px 0; }
+.social-person.is-unread { background: var(--color-surface); }
+.social-notifications .social-person:not(.is-unread) { background: transparent; }
+.social-load-more { display: block; margin: 24px auto; }
+html[data-theme="dark"] .social-screen { color: var(--color-surface); }
+html[data-theme="dark"] .social-follow.is-following { background: var(--color-charcoal); color: var(--color-surface); }
+html[data-theme="dark"] .social-person { border-color: var(--color-charcoal); }
+html[data-theme="dark"] .social-person small, html[data-theme="dark"] .social-empty { color: var(--color-gray-faint); }
+html[data-theme="dark"] .social-person.is-unread { background: var(--color-charcoal); }
+html[data-theme="dark"] .social-message { background: var(--color-primary-dark-surface); }
+html[data-theme="dark"] .social-link, html[data-theme="dark"] .recipe-author-button { color: var(--color-primary); }
+
+.social-notifications { max-width: 560px; padding-top: 16px; }
+.social-notifications .social-heading { gap: 8px; margin-bottom: 12px; }
+.social-notifications .social-heading h1, .notification-settings-screen .social-heading h1 { font-size: var(--text-section); line-height: var(--text-section--line-height); }
+.social-notifications .social-back, .notification-icon-button { display: grid; place-items: center; width: 40px; min-width: 40px; height: 44px; color: inherit; border-radius: 10px; }
+.social-notifications .social-person { gap: 10px; min-height: 64px; margin: 4px 0; padding: 10px 8px; border-bottom: 0; border-radius: 10px; }
+.social-notifications .social-person-info { gap: 10px; font-size: var(--text-label); line-height: var(--text-label--line-height); }
+.social-notifications .social-avatar { width: 36px; height: 36px; font-size: var(--text-label); }
+.social-notifications .social-follow { padding: 8px 12px; border-radius: 8px; font-size: var(--text-caption); line-height: var(--text-caption--line-height); }
+.social-notifications .notification-copy { display: block; }
+.social-notifications .notification-copy time { color: var(--color-gray); font-size: var(--text-caption); white-space: nowrap; margin-left: 3px; }
+.social-notifications .social-moderation-text { gap: 3px; }
+.notification-settings-screen { max-width: 560px; padding-top: 16px; }
+.notification-settings-screen .social-heading { margin-bottom: 20px; gap: 8px; }
+.notification-settings-intro, .notification-settings-note { color: var(--color-gray); font-size: var(--text-label); line-height: var(--text-label--line-height); }
+.notification-settings-intro { margin-bottom: 16px; }
+.notification-settings-note { margin-top: 20px; font-size: var(--text-caption); line-height: var(--text-caption--line-height); }
+.notification-setting-row { display: flex; align-items: center; gap: 20px; padding: 16px 0; border-bottom: 1px solid var(--color-border); }
+.notification-setting-row > div { flex: 1; min-width: 0; }
+.notification-setting-row label { font-size: var(--text-label); font-weight: 600; }
+.notification-setting-row p { margin-top: 4px; font-size: var(--text-caption); line-height: var(--text-caption--line-height); color: var(--color-gray); }
+.notification-setting-switch { flex-shrink: 0; width: 44px; height: 26px; border-radius: 20px; padding: 3px; background: var(--color-gray-faint); }
+.notification-setting-switch span { display: block; width: 20px; height: 20px; border-radius: 50%; background: var(--color-white); transform: translateX(0); }
+.notification-setting-switch[aria-checked="true"] { background: var(--color-primary); }
+.notification-setting-switch[aria-checked="true"] span { transform: translateX(18px); }
+html[data-theme="dark"] .social-notifications .notification-copy time, html[data-theme="dark"] :is(.notification-settings-intro,.notification-settings-note,.notification-setting-row p) { color: var(--color-gray-faint); }
+html[data-theme="dark"] .notification-setting-row { border-color: var(--color-gray-strong); }

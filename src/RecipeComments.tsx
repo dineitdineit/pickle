@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react"
 import { createPortal } from "react-dom"
 import { supabase } from "./lib/supabase"
 import { getCurrentUser } from "./lib/auth"
-
+import RecipeAuthorBadge from "./RecipeAuthorBadge"
 type CommentRow = {
   id: string
   user_id: string
@@ -10,22 +10,20 @@ type CommentRow = {
   created_at: string
   parent_comment_id: string | null
 }
-
 type ProfileRow = {
   id: string
   username: string
   display_name: string
   avatar_url: string | null
 }
-
 type RecipeCommentsProps = {
   recipeId: string
+  recipeAuthorId?: string | null
+  initialCommentId?: string
   onRequireLogin: () => void
   onCountChange?: (count: number) => void
 }
-
 type ReportReason = "spam" | "harassment" | "hate_or_abusive" | "sexual_content" | "personal_information" | "off_topic" | "other"
-
 const REPORT_REASONS: {
   value: ReportReason
   label: string
@@ -38,7 +36,6 @@ const REPORT_REASONS: {
   { value: "off_topic", label: "Off-topic or inappropriate" },
   { value: "other", label: "Other" },
 ]
-
 function timeAgo(value: string) {
   const diff = Date.now() - new Date(value).getTime()
   const minutes = Math.max(0, Math.floor(diff / 60000))
@@ -50,31 +47,44 @@ function timeAgo(value: string) {
   if (days < 30) return `${days}d`
   return new Date(value).toLocaleDateString()
 }
-
 export default function RecipeComments({
   recipeId,
+  recipeAuthorId,
+  initialCommentId,
   onRequireLogin,
   onCountChange,
 }: RecipeCommentsProps) {
   const [comments, setComments] = useState<CommentRow[]>([])
+  const focusedComment = useRef("")
   const [profiles, setProfiles] = useState<Map<string, ProfileRow>>(new Map())
   const [likeCounts, setLikeCounts] = useState<Map<string, number>>(new Map())
   const [likedCommentIds, setLikedCommentIds] = useState<Set<string>>(new Set())
   const [userId, setUserId] = useState<string | null>(null)
   const [text, setText] = useState("")
   const [posting, setPosting] = useState(false)
+  const commentMutation = useRef(false)
   const [loading, setLoading] = useState(true)
+  useEffect(() => {
+    if (!initialCommentId || loading) return
+    const key = `${recipeId}:${initialCommentId}`
+    if (focusedComment.current === key) return
+    const frame = requestAnimationFrame(() => {
+      const target = document.getElementById(`comment-${initialCommentId}`)
+      target?.scrollIntoView({ behavior: "smooth", block: "center" })
+      target?.focus({ preventScroll: true })
+      if (target) focusedComment.current = key
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [recipeId, initialCommentId, loading, comments])
   const [message, setMessage] = useState("")
   const [menuCommentId, setMenuCommentId] = useState<string | null>(null)
   const [deleteCommentId, setDeleteCommentId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState("")
   const deleteDialogRef = useRef<HTMLDialogElement>(null)
-
   useEffect(() => {
     if (deleteCommentId) deleteDialogRef.current?.showModal()
   }, [deleteCommentId])
-
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null)
   const [editText, setEditText] = useState("")
   const [replyingToId, setReplyingToId] = useState<string | null>(null)
@@ -83,9 +93,15 @@ export default function RecipeComments({
   const [reportReason, setReportReason] = useState<ReportReason | null>(null)
   const [reportDetails, setReportDetails] = useState("")
   const [reporting, setReporting] = useState(false)
+  const reportGuard = useRef(false)
   const [reportSuccess, setReportSuccess] = useState(false)
   const [reportError, setReportError] = useState("")
-
+  const [safetyVersion, setSafetyVersion] = useState(0)
+  useEffect(() => {
+    const refresh = () => setSafetyVersion((value) => value + 1)
+    window.addEventListener("pickle:safety-refresh", refresh)
+    return () => window.removeEventListener("pickle:safety-refresh", refresh)
+  }, [])
   async function loadComments() {
     setLoading(true)
     const [{ data: userData }, commentResult] = await Promise.all([
@@ -97,19 +113,16 @@ export default function RecipeComments({
         .eq("moderation_status", "active")
         .order("created_at", { ascending: false }),
     ])
-
     const currentUserId = userData.user?.id ?? null
     setUserId(currentUserId)
-
     if (commentResult.error) {
-      console.error("Failed to load comments:", commentResult.error)
+      console.error("Failed to load comments:")
       setMessage("Could not load comments.")
       setComments([])
       onCountChange?.(0)
       setLoading(false)
       return
     }
-
     const activeRows = (commentResult.data ?? []) as CommentRow[]
     const rootIds = new Set(
       activeRows.filter((row) => !row.parent_comment_id).map((row) => row.id),
@@ -119,16 +132,14 @@ export default function RecipeComments({
     )
     setComments(rows)
     onCountChange?.(rows.length)
-
     const ids = [...new Set(rows.map((row) => row.user_id))]
     const commentIds = rows.map((row) => row.id)
-
     if (ids.length > 0) {
       const { data, error } = await supabase
         .from("profiles")
         .select("id, username, display_name, avatar_url")
         .in("id", ids)
-      if (error) console.error("Failed to load comment profiles:", error)
+      if (error) console.error("Failed to load comment profiles:")
       else
         setProfiles(
           new Map(
@@ -141,14 +152,13 @@ export default function RecipeComments({
     } else {
       setProfiles(new Map())
     }
-
     if (commentIds.length > 0) {
       const { data: likes, error: likesError } = await supabase
         .from("comment_likes")
         .select("comment_id, user_id")
         .in("comment_id", commentIds)
       if (likesError) {
-        console.error("Failed to load comment likes:", likesError)
+        console.error("Failed to load comment likes:")
       } else {
         const counts = new Map<string, number>()
         const liked = new Set<string>()
@@ -164,10 +174,8 @@ export default function RecipeComments({
       setLikeCounts(new Map())
       setLikedCommentIds(new Set())
     }
-
     setLoading(false)
   }
-
   useEffect(() => {
     void loadComments()
     const refreshComments = () => {
@@ -175,8 +183,7 @@ export default function RecipeComments({
     }
     window.addEventListener("focus", refreshComments)
     return () => window.removeEventListener("focus", refreshComments)
-  }, [recipeId])
-
+  }, [recipeId, safetyVersion])
   const rootComments = useMemo(
     () => comments.filter((comment) => !comment.parent_comment_id),
     [comments],
@@ -198,7 +205,6 @@ export default function RecipeComments({
       })
     return map
   }, [comments])
-
   function handleCommentKeyDown(
     event: KeyboardEvent<HTMLTextAreaElement>,
     parentCommentId: string | null = null,
@@ -210,39 +216,44 @@ export default function RecipeComments({
       event.nativeEvent.keyCode === 229
     )
       return
-
     event.preventDefault()
     if (!event.repeat) void postComment(parentCommentId)
   }
-
   async function postComment(parentCommentId: string | null = null) {
     const cleanText = (parentCommentId ? replyText : text).trim()
     if (!userId) {
       onRequireLogin()
       return
     }
-    if (!cleanText || posting) return
+    if (!cleanText || posting || commentMutation.current) return
+    commentMutation.current = true
     setPosting(true)
     setMessage("")
-    const { error } = await supabase.from("recipe_comments").insert({
-      recipe_id: recipeId,
-      user_id: userId,
-      content: cleanText,
-      parent_comment_id: parentCommentId,
-    })
-    if (error) {
-      console.error("Failed to post comment:", error)
-      setMessage("Could not post your comment.")
-    } else {
-      if (parentCommentId) {
-        setReplyText("")
-        setReplyingToId(null)
-      } else setText("")
-      await loadComments()
+    try {
+      if (!(await requireContentConsent(userId))) return
+      const { error } = await supabase.from("recipe_comments").insert({
+        recipe_id: recipeId,
+        user_id: userId,
+        content: cleanText,
+        parent_comment_id: parentCommentId,
+      })
+      if (error) {
+        console.error("Failed to post comment:")
+        setMessage("Could not post your comment.")
+      } else {
+        if (parentCommentId) {
+          setReplyText("")
+          setReplyingToId(null)
+        } else setText("")
+        await loadComments()
+      }
+    } catch {
+      setMessage("Could not post your comment. Please try again.")
+    } finally {
+      commentMutation.current = false
+      setPosting(false)
     }
-    setPosting(false)
   }
-
   async function toggleCommentLike(commentId: string) {
     if (!userId) {
       onRequireLogin()
@@ -260,7 +271,7 @@ export default function RecipeComments({
           .insert({ comment_id: commentId, user_id: userId })
     const { error } = await query
     if (error) {
-      console.error("Failed to update comment like:", error)
+      console.error("Failed to update comment like:")
       return
     }
     setLikedCommentIds((current) => {
@@ -277,39 +288,44 @@ export default function RecipeComments({
       return next
     })
   }
-
   function startEdit(comment: CommentRow) {
     setMenuCommentId(null)
     setEditingCommentId(comment.id)
     setEditText(comment.content)
   }
-
   async function saveEdit(commentId: string) {
-    if (!userId || !editText.trim()) return
-    const { error } = await supabase
-      .from("recipe_comments")
-      .update({
-        content: editText.trim(),
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", commentId)
-      .eq("user_id", userId)
-    if (error) {
-      console.error("Failed to edit comment:", error)
-      setMessage("Could not edit your comment.")
-      return
+    if (!userId || !editText.trim() || commentMutation.current) return
+    commentMutation.current = true
+    try {
+      if (!(await requireContentConsent(userId))) return
+      const { error } = await supabase
+        .from("recipe_comments")
+        .update({
+          content: editText.trim(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", commentId)
+        .eq("user_id", userId)
+      if (error) {
+        console.error("Failed to edit comment:")
+        setMessage("Could not edit your comment.")
+        return
+      }
+      setComments((current) =>
+        current.map((comment) =>
+          comment.id === commentId
+            ? { ...comment, content: editText.trim() }
+            : comment,
+        ),
+      )
+      setEditingCommentId(null)
+      setEditText("")
+    } catch {
+      setMessage("Could not edit your comment. Please try again.")
+    } finally {
+      commentMutation.current = false
     }
-    setComments((current) =>
-      current.map((comment) =>
-        comment.id === commentId
-          ? { ...comment, content: editText.trim() }
-          : comment,
-      ),
-    )
-    setEditingCommentId(null)
-    setEditText("")
   }
-
   async function deleteComment(commentId: string) {
     if (!userId || deleting) return
     setDeleting(true)
@@ -324,13 +340,12 @@ export default function RecipeComments({
       await loadComments()
       setDeleteCommentId(null)
     } catch (error) {
-      console.error("Failed to delete comment:", error)
+      console.error("Failed to delete comment:")
       setDeleteError("Could not delete your comment. Please try again.")
     } finally {
       setDeleting(false)
     }
   }
-
   function openReport(comment: CommentRow) {
     setMenuCommentId(null)
     if (!userId) {
@@ -343,36 +358,36 @@ export default function RecipeComments({
     setReportError("")
     setReportSuccess(false)
   }
-
   function closeReport() {
-    if (reporting) return
+    if (reportGuard.current) return
     setReportComment(null)
     setReportReason(null)
     setReportDetails("")
     setReportError("")
     setReportSuccess(false)
   }
-
   async function submitReport() {
     if (!userId) {
       closeReport()
       onRequireLogin()
       return
     }
-    if (!reportComment || !reportReason || reporting) return
-
+    if (!reportComment || !reportReason || reportGuard.current) return
+    reportGuard.current = true
     setReporting(true)
     setReportError("")
-
-    const { error } = await supabase.rpc("submit_comment_report", {
-      p_comment_id: reportComment.id,
-      p_reason: reportReason,
-      p_details: reportDetails.trim() || null,
-    })
-
-    if (error) {
-      console.error("Failed to report comment:", error)
-      const normalized = error.message.toLowerCase()
+    try {
+      const { data, error } = await supabase.rpc("submit_comment_report", {
+        p_comment_id: reportComment.id,
+        p_reason: reportReason,
+        p_details: reportDetails.trim() || null,
+      })
+      if (error || typeof data !== "string" || !data)
+        throw error ?? new Error("Report was not confirmed")
+      setReportSuccess(true)
+    } catch (error) {
+      const normalized =
+        error instanceof Error ? error.message.toLowerCase() : ""
       setReportError(
         normalized.includes("own comment")
           ? "You cannot report your own comment."
@@ -380,21 +395,17 @@ export default function RecipeComments({
             ? "This comment is no longer available for reporting."
             : "Could not submit your report. Please try again.",
       )
+    } finally {
+      reportGuard.current = false
       setReporting(false)
-      return
     }
-
-    setReportSuccess(true)
-    setReporting(false)
   }
-
   const currentProfile = useMemo(
     () => (userId ? profiles.get(userId) : undefined),
     [profiles, userId],
   )
   const currentInitial =
     currentProfile?.username?.charAt(0).toUpperCase() || "P"
-
   function renderComment(comment: CommentRow, isReply = false) {
     const profile = profiles.get(comment.user_id)
     const name = profile?.display_name || profile?.username || "Pickle User"
@@ -402,10 +413,11 @@ export default function RecipeComments({
     const ownComment = comment.user_id === userId
     const liked = likedCommentIds.has(comment.id)
     const replyCount = repliesByParent.get(comment.id)?.length ?? 0
-
     return (
       <article
         key={comment.id}
+        id={`comment-${comment.id}`}
+        tabIndex={-1}
         className={`relative flex gap-3 ${
           isReply ? "ml-11" : replyCount > 0 ? "comment-with-replies" : ""
         }`}
@@ -418,8 +430,11 @@ export default function RecipeComments({
           />
         ) : (
           <div
-            className="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center text-[14px] font-semibold"
-            style={{ backgroundColor: "#F5F5F5", color: "#6F6F6F" }}
+            className="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center text-label font-semibold"
+            style={{
+              backgroundColor: "var(--color-surface)",
+              color: "var(--color-gray)",
+            }}
           >
             {initial}
           </div>
@@ -427,16 +442,21 @@ export default function RecipeComments({
         <div className="flex-1 min-w-0 relative">
           <div className="flex items-center gap-2 pr-7">
             <p
-              className="comment-author-name font-semibold text-[16px] truncate"
-              style={{ color: "#1F1F1F" }}
+              className="comment-author-name font-semibold text-body truncate"
+              style={{ color: "var(--color-ink)" }}
             >
               {name}
             </p>
-            <span className="text-[9px]" style={{ color: "#A0A0A0" }}>
+            {recipeAuthorId && comment.user_id === recipeAuthorId && (
+              <RecipeAuthorBadge />
+            )}
+            <span
+              className="text-caption"
+              style={{ color: "var(--color-gray-soft)" }}
+            >
               {timeAgo(comment.created_at)}
             </span>
           </div>
-
           <div className="absolute right-0 top-0">
             <button
               type="button"
@@ -447,9 +467,9 @@ export default function RecipeComments({
               }
               aria-label="Comment options"
               className="w-6 h-6 flex items-center justify-center"
-              style={{ color: "#777777" }}
+              style={{ color: "var(--color-gray)" }}
             >
-              <span className="text-[18px] leading-none">•••</span>
+              <span className="text-lead leading-none">•••</span>
             </button>
             {menuCommentId === comment.id && (
               <div className="comment-options-menu absolute right-0 top-7 w-44 rounded-[12px] shadow-lg z-20 overflow-hidden p-1">
@@ -458,7 +478,7 @@ export default function RecipeComments({
                     <button
                       type="button"
                       onClick={() => startEdit(comment)}
-                      className="w-full flex items-center gap-3 px-3 py-3 rounded-[8px] text-left text-[16px]"
+                      className="w-full flex items-center gap-3 px-3 py-3 rounded-[8px] text-left text-body"
                     >
                       <svg
                         width="20"
@@ -483,7 +503,7 @@ export default function RecipeComments({
                         setDeleteError("")
                         setDeleteCommentId(comment.id)
                       }}
-                      className="w-full flex items-center gap-3 px-3 py-3 rounded-[8px] text-left text-[16px]"
+                      className="w-full flex items-center gap-3 px-3 py-3 rounded-[8px] text-left text-body"
                       style={{ color: "#FF5C5C" }}
                     >
                       <svg
@@ -506,7 +526,7 @@ export default function RecipeComments({
                   <button
                     type="button"
                     onClick={() => openReport(comment)}
-                    className="w-full flex items-center gap-3 px-3 py-3 rounded-[8px] text-left text-[16px]"
+                    className="w-full flex items-center gap-3 px-3 py-3 rounded-[8px] text-left text-body"
                   >
                     <svg
                       width="20"
@@ -527,7 +547,6 @@ export default function RecipeComments({
               </div>
             )}
           </div>
-
           {editingCommentId === comment.id ? (
             <div className="mt-1.5">
               <textarea
@@ -535,29 +554,32 @@ export default function RecipeComments({
                 maxLength={1000}
                 value={editText}
                 onChange={(event) => setEditText(event.target.value)}
-                className="comment-textarea w-full resize-none rounded-[12px] border px-3 py-2 text-[15px] outline-none"
-                style={{ borderColor: "#E6E6E6" }}
+                className="comment-textarea w-full resize-none rounded-[12px] border px-3 py-2 text-body outline-none"
+                style={{ borderColor: "var(--color-border)" }}
               />
             </div>
           ) : (
             <p
-              className="comment-content text-[16px] leading-5 mt-1 whitespace-pre-wrap break-words"
-              style={{ color: "#555555" }}
+              className="comment-content text-body leading-5 mt-1 whitespace-pre-wrap break-words"
+              style={{ color: "var(--color-gray-strong)" }}
             >
               {comment.content}
             </p>
           )}
-
           <div className="flex items-center justify-between gap-3 mt-2">
             <div
-              className="flex items-center gap-3 text-[9px]"
-              style={{ color: "#8A8A8A" }}
+              className="flex items-center gap-3 text-caption"
+              style={{ color: "var(--color-gray-soft)" }}
             >
               <button
                 type="button"
                 onClick={() => toggleCommentLike(comment.id)}
                 className="flex items-center gap-1"
-                style={{ color: liked ? "#F26B21" : "#8A8A8A" }}
+                style={{
+                  color: liked
+                    ? "var(--color-primary)"
+                    : "var(--color-gray-soft)",
+                }}
               >
                 <svg
                   width="11"
@@ -605,23 +627,22 @@ export default function RecipeComments({
                 <button
                   type="button"
                   onClick={() => setEditingCommentId(null)}
-                  className="text-[15px]"
-                  style={{ color: "#888888" }}
+                  className="text-body"
+                  style={{ color: "var(--color-gray)" }}
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
                   onClick={() => saveEdit(comment.id)}
-                  className="text-[15px] font-semibold"
-                  style={{ color: "#F26B21" }}
+                  className="text-body font-semibold"
+                  style={{ color: "var(--color-primary)" }}
                 >
                   Save
                 </button>
               </div>
             )}
           </div>
-
           {replyingToId === comment.id && (
             <div className="mt-2">
               <textarea
@@ -631,16 +652,19 @@ export default function RecipeComments({
                 onChange={(event) => setReplyText(event.target.value)}
                 onKeyDown={(event) => handleCommentKeyDown(event, comment.id)}
                 placeholder={`Reply to ${name}...`}
-                className="comment-textarea w-full resize-none rounded-[12px] border px-3 py-2 text-[14px] outline-none"
-                style={{ borderColor: "#E6E6E6", backgroundColor: "#FAFAFA" }}
+                className="comment-textarea w-full resize-none rounded-[12px] border px-3 py-2 text-label outline-none"
+                style={{
+                  borderColor: "var(--color-border)",
+                  backgroundColor: "var(--color-surface)",
+                }}
               />
               <div className="flex justify-end mt-1.5">
                 <button
                   type="button"
                   onClick={() => postComment(comment.id)}
                   disabled={posting || !replyText.trim()}
-                  className="h-7 px-3 rounded-full text-[12px] font-semibold text-white disabled:opacity-50"
-                  style={{ backgroundColor: "#F26B21" }}
+                  className="h-7 px-3 rounded-full text-caption font-semibold text-white disabled:opacity-50"
+                  style={{ backgroundColor: "var(--color-primary)" }}
                 >
                   Reply
                 </button>
@@ -651,7 +675,6 @@ export default function RecipeComments({
       </article>
     )
   }
-
   return (
     <>
       {deleteCommentId &&
@@ -659,7 +682,10 @@ export default function RecipeComments({
           <dialog
             ref={deleteDialogRef}
             className="comment-delete-dialog w-[calc(100%-32px)] max-w-sm rounded-[16px] border-0 p-6 shadow-xl m-auto"
-            style={{ backgroundColor: "#FFFFFF", color: "#1F1F1F" }}
+            style={{
+              backgroundColor: "var(--color-white)",
+              color: "var(--color-ink)",
+            }}
             aria-labelledby="comment-delete-title"
             aria-describedby="comment-delete-description"
             onCancel={(event) => {
@@ -667,13 +693,16 @@ export default function RecipeComments({
               else setDeleteCommentId(null)
             }}
           >
-            <h2 id="comment-delete-title" className="font-semibold text-[22px]">
+            <h2
+              id="comment-delete-title"
+              className="font-semibold text-section"
+            >
               Delete comment?
             </h2>
             <p
               id="comment-delete-description"
-              className="mt-2 text-[16px] leading-6"
-              style={{ color: "#6F6F6F" }}
+              className="mt-2 text-body leading-6"
+              style={{ color: "var(--color-gray)" }}
             >
               Are you sure you want to delete this comment? This cannot be
               undone.
@@ -681,7 +710,7 @@ export default function RecipeComments({
             {deleteError && (
               <p
                 role="alert"
-                className="mt-3 text-[15px]"
+                className="mt-3 text-body"
                 style={{ color: "#C53D2E" }}
               >
                 {deleteError}
@@ -693,7 +722,7 @@ export default function RecipeComments({
                 autoFocus
                 disabled={deleting}
                 onClick={() => setDeleteCommentId(null)}
-                className="px-4 py-2 rounded-[8px] text-[16px] font-semibold disabled:opacity-60"
+                className="px-4 py-2 rounded-[8px] text-body font-semibold disabled:opacity-60"
               >
                 Cancel
               </button>
@@ -701,7 +730,7 @@ export default function RecipeComments({
                 type="button"
                 disabled={deleting}
                 onClick={() => deleteComment(deleteCommentId)}
-                className="px-4 py-2 rounded-[8px] text-[16px] font-semibold text-white disabled:opacity-60"
+                className="px-4 py-2 rounded-[8px] text-body font-semibold text-white disabled:opacity-60"
                 style={{ backgroundColor: "#C53D2E" }}
               >
                 {deleting ? "Deleting…" : "Delete"}
@@ -722,7 +751,7 @@ export default function RecipeComments({
               style={{
                 borderTopLeftRadius: 24,
                 borderTopRightRadius: 24,
-                backgroundColor: "#FFFFFF",
+                backgroundColor: "var(--color-white)",
               }}
               onClick={(event) => event.stopPropagation()}
             >
@@ -730,7 +759,10 @@ export default function RecipeComments({
                 <div className="py-5 text-center">
                   <div
                     className="w-12 h-12 rounded-full mx-auto flex items-center justify-center"
-                    style={{ backgroundColor: "#FFF0E6", color: "#F26B21" }}
+                    style={{
+                      backgroundColor: "var(--color-primary-soft)",
+                      color: "var(--color-primary)",
+                    }}
                   >
                     <svg
                       width="22"
@@ -746,14 +778,14 @@ export default function RecipeComments({
                     </svg>
                   </div>
                   <h3
-                    className="font-semibold text-[20px] mt-4"
-                    style={{ color: "#1F1F1F" }}
+                    className="font-semibold text-section mt-4"
+                    style={{ color: "var(--color-ink)" }}
                   >
                     Report submitted
                   </h3>
                   <p
-                    className="text-[16px] leading-5 mt-2"
-                    style={{ color: "#6F6F6F" }}
+                    className="text-body leading-5 mt-2"
+                    style={{ color: "var(--color-gray)" }}
                   >
                     Thanks for letting us know. The Pickle team will review this
                     comment.
@@ -761,8 +793,8 @@ export default function RecipeComments({
                   <button
                     type="button"
                     onClick={closeReport}
-                    className="w-full h-11 rounded-[12px] mt-5 text-[16px] font-semibold text-white"
-                    style={{ backgroundColor: "#F26B21" }}
+                    className="w-full h-11 rounded-[12px] mt-5 text-body font-semibold text-white"
+                    style={{ backgroundColor: "var(--color-primary)" }}
                   >
                     Done
                   </button>
@@ -772,14 +804,14 @@ export default function RecipeComments({
                   <div className="flex items-center justify-between mb-4">
                     <div>
                       <h3
-                        className="font-semibold text-[20px]"
-                        style={{ color: "#1F1F1F" }}
+                        className="font-semibold text-section"
+                        style={{ color: "var(--color-ink)" }}
                       >
                         Report comment
                       </h3>
                       <p
-                        className="text-[14px] mt-1"
-                        style={{ color: "#8A8A8A" }}
+                        className="text-label mt-1"
+                        style={{ color: "var(--color-gray-soft)" }}
                       >
                         Tell us why this comment should be reviewed.
                       </p>
@@ -789,7 +821,10 @@ export default function RecipeComments({
                       onClick={closeReport}
                       aria-label="Close report"
                       className="w-8 h-8 rounded-full flex items-center justify-center"
-                      style={{ backgroundColor: "#F5F5F5", color: "#555555" }}
+                      style={{
+                        backgroundColor: "var(--color-surface)",
+                        color: "var(--color-gray-strong)",
+                      }}
                     >
                       <svg
                         width="16"
@@ -804,22 +839,20 @@ export default function RecipeComments({
                       </svg>
                     </button>
                   </div>
-
                   <div
                     className="rounded-[12px] px-3.5 py-3 mb-4"
-                    style={{ backgroundColor: "#F9F9F9" }}
+                    style={{ backgroundColor: "var(--color-surface)" }}
                   >
                     <p
-                      className="text-[14px] leading-5 line-clamp-3"
-                      style={{ color: "#6F6F6F" }}
+                      className="text-label leading-5 line-clamp-3"
+                      style={{ color: "var(--color-gray)" }}
                     >
                       {reportComment.content}
                     </p>
                   </div>
-
                   <div
                     className="rounded-[14px] border overflow-hidden"
-                    style={{ borderColor: "#EAEAEA" }}
+                    style={{ borderColor: "var(--color-border)" }}
                   >
                     {REPORT_REASONS.map((reason, index) => {
                       const selected = reportReason === reason.value
@@ -832,27 +865,31 @@ export default function RecipeComments({
                           style={{
                             borderBottom:
                               index < REPORT_REASONS.length - 1
-                                ? "1px solid #EAEAEA"
+                                ? "1px solid var(--color-border)"
                                 : undefined,
-                            backgroundColor: "#FFFFFF",
+                            backgroundColor: "var(--color-white)",
                           }}
                         >
                           <span
-                            className="flex-1 text-[16px]"
-                            style={{ color: "#1F1F1F" }}
+                            className="flex-1 text-body"
+                            style={{ color: "var(--color-ink)" }}
                           >
                             {reason.label}
                           </span>
                           <span
                             className="w-5 h-5 rounded-full border flex items-center justify-center"
                             style={{
-                              borderColor: selected ? "#F26B21" : "#CFCFCF",
+                              borderColor: selected
+                                ? "var(--color-primary)"
+                                : "var(--color-gray-faint)",
                             }}
                           >
                             {selected && (
                               <span
                                 className="w-2.5 h-2.5 rounded-full"
-                                style={{ backgroundColor: "#F26B21" }}
+                                style={{
+                                  backgroundColor: "var(--color-primary)",
+                                }}
                               />
                             )}
                           </span>
@@ -860,36 +897,33 @@ export default function RecipeComments({
                       )
                     })}
                   </div>
-
                   <textarea
                     rows={3}
                     maxLength={500}
                     value={reportDetails}
                     onChange={(event) => setReportDetails(event.target.value)}
                     placeholder="Add details (optional)"
-                    className="comment-textarea w-full resize-none rounded-[12px] border px-3.5 py-3 mt-4 text-[15px] outline-none"
+                    className="comment-textarea w-full resize-none rounded-[12px] border px-3.5 py-3 mt-4 text-body outline-none"
                     style={{
-                      borderColor: "#E6E6E6",
-                      backgroundColor: "#FAFAFA",
-                      color: "#1F1F1F",
+                      borderColor: "var(--color-border)",
+                      backgroundColor: "var(--color-surface)",
+                      color: "var(--color-ink)",
                     }}
                   />
-
                   {reportError && (
                     <p
-                      className="text-[14px] leading-5 mt-2"
+                      className="text-label leading-5 mt-2"
                       style={{ color: "#C53D2E" }}
                     >
                       {reportError}
                     </p>
                   )}
-
                   <button
                     type="button"
                     onClick={submitReport}
                     disabled={!reportReason || reporting}
-                    className="w-full h-11 rounded-[12px] mt-4 text-[16px] font-semibold text-white disabled:opacity-50"
-                    style={{ backgroundColor: "#F26B21" }}
+                    className="w-full h-11 rounded-[12px] mt-4 text-body font-semibold text-white disabled:opacity-50"
+                    style={{ backgroundColor: "var(--color-primary)" }}
                   >
                     {reporting ? "Submitting…" : "Submit report"}
                   </button>
@@ -899,14 +933,17 @@ export default function RecipeComments({
           </div>,
           document.body,
         )}
-
       <section
         className="border-t"
-        style={{ borderColor: "#EEEEEE", marginTop: 30, paddingTop: 15 }}
+        style={{
+          borderColor: "var(--color-border)",
+          marginTop: 30,
+          paddingTop: 15,
+        }}
       >
         <h2
-          className="font-semibold text-[22px] mb-4"
-          style={{ color: "#1F1F1F" }}
+          className="font-semibold text-section mb-4"
+          style={{ color: "var(--color-ink)" }}
         >
           Comments
         </h2>
@@ -919,8 +956,11 @@ export default function RecipeComments({
             />
           ) : (
             <div
-              className="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center text-[15px] font-semibold"
-              style={{ backgroundColor: "#FFF0E6", color: "#F26B21" }}
+              className="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center text-body font-semibold"
+              style={{
+                backgroundColor: "var(--color-primary-soft)",
+                color: "var(--color-primary)",
+              }}
             >
               {currentInitial}
             </div>
@@ -939,11 +979,11 @@ export default function RecipeComments({
               onFocus={() => {
                 if (!userId) onRequireLogin()
               }}
-              className="comment-textarea w-full resize-none rounded-[16px] border px-4 py-3 text-[16px] leading-5 outline-none"
+              className="comment-textarea w-full resize-none rounded-[16px] border px-4 py-3 text-body leading-5 outline-none"
               style={{
-                borderColor: "#E6E6E6",
-                color: "#1F1F1F",
-                backgroundColor: "#FAFAFA",
+                borderColor: "var(--color-border)",
+                color: "var(--color-ink)",
+                backgroundColor: "var(--color-surface)",
               }}
             />
             <div className="flex justify-end mt-2">
@@ -951,8 +991,8 @@ export default function RecipeComments({
                 type="button"
                 onClick={() => postComment(null)}
                 disabled={posting || !text.trim()}
-                className="h-9 px-4 rounded-full text-[15px] font-semibold text-white disabled:opacity-50"
-                style={{ backgroundColor: "#F26B21" }}
+                className="h-9 px-4 rounded-full text-body font-semibold text-white disabled:opacity-50"
+                style={{ backgroundColor: "var(--color-primary)" }}
               >
                 {posting ? "Posting…" : "Post"}
               </button>
@@ -960,18 +1000,23 @@ export default function RecipeComments({
           </div>
         </div>
         {message && (
-          <p className="text-[14px] mt-3" style={{ color: "#C53D2E" }}>
+          <p className="text-label mt-3" style={{ color: "#C53D2E" }}>
             {message}
           </p>
         )}
-
         <div className="mt-6 space-y-5">
           {loading ? (
-            <p className="text-[15px]" style={{ color: "#8A8A8A" }}>
+            <p
+              className="text-body"
+              style={{ color: "var(--color-gray-soft)" }}
+            >
               Loading comments…
             </p>
           ) : rootComments.length === 0 ? (
-            <p className="text-[15px]" style={{ color: "#8A8A8A" }}>
+            <p
+              className="text-body"
+              style={{ color: "var(--color-gray-soft)" }}
+            >
               No comments yet. Be the first to share your thoughts.
             </p>
           ) : (
@@ -991,3 +1036,4 @@ export default function RecipeComments({
     </>
   )
 }
+import { requireContentConsent } from "./ContentConsent"

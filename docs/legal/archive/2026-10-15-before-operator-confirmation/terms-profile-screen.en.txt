@@ -1,0 +1,40 @@
+Pickle — Current Profile-screen Terms
+Snapshot date: 2026-10-15
+Displayed last-updated date: October 14, 2026
+Source: src/profileContent.ts, termsSections; src/ProfileScreen.tsx
+
+Introduction shown in the app:
+These Terms of Service govern your access to and use of Pickle.
+
+1. Using Pickle
+By accessing or using Pickle, you agree to these Terms of Service. If you do not agree, do not use the service. You must use Pickle in compliance with applicable laws and these terms.
+
+2. Accounts
+Some features require an account. You are responsible for the accuracy of your account information and for keeping your login credentials secure. You are also responsible for activity that occurs through your account.
+
+3. Recipes and nutrition information
+Recipes, cooking times, substitutions, serving sizes, and nutrition values are provided for general informational purposes. Results can vary based on ingredients, equipment, brands, preparation methods, and individual circumstances. Use appropriate food-safety practices and your own judgment when cooking.
+
+4. User content
+You retain ownership of content you submit to Pickle, such as comments and profile information. By posting content, you give Pickle a non-exclusive, worldwide, royalty-free license to host, display, reproduce, and distribute that content as needed to operate and improve the service. You must have the right to post any content you submit.
+
+5. Acceptable use
+Do not use Pickle to harass others, post illegal or harmful content, impersonate others, infringe intellectual-property rights, distribute malware, interfere with the service, scrape the service in an abusive manner, or attempt to access accounts or systems without authorization.
+
+6. Pickle content and intellectual property
+The Pickle name, branding, app design, software, and original content are protected by applicable intellectual-property laws. These terms do not transfer ownership of Pickle or its content to you.
+
+7. Suspension and termination
+We may restrict or suspend access when reasonably necessary to protect Pickle, our users, or third parties, or when these terms are violated. You may stop using Pickle at any time.
+
+8. Service availability
+We work to keep Pickle available and reliable, but we do not guarantee uninterrupted or error-free operation. Features may change, be added, or be removed as the service develops.
+
+9. Disclaimer and limitation
+To the extent permitted by applicable law, Pickle is provided on an “as is” and “as available” basis. Pickle is not responsible for losses caused by reliance on recipe or nutrition information, service interruptions, or user-submitted content except where liability cannot legally be excluded.
+
+10. Changes to these terms
+We may update these Terms of Service as Pickle changes. When renewed agreement is required, you must accept the updated terms and content policy before publishing or editing recipes, comments or reviews.
+
+11. Contact
+If you have questions about these terms, use the Contact Us section in your Pickle profile.

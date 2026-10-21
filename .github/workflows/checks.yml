@@ -1,0 +1,41 @@
+name: Pickle checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pickle-checks-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web-checks:
+    name: Web checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Check source formatting
+        run: npm run format:check
+      - name: Run Node tests
+        run: npm test
+      - name: Typecheck and build
+        run: npm run build
+
+# Compilation only: no Supabase credentials, database tests, browser tests,
+# Android builds, deploys, or build artifacts are included in this job.

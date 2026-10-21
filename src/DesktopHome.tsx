@@ -1,41 +1,75 @@
+import RecipeImage from "./RecipeImage"
+
 import { VideoBadge } from "./RecipeVideo"
+
+import RecipeViewOverlay from "./RecipeViewOverlay"
+
 import { formatTime } from "./lib/format"
+
 import RetryState from "./RetryState"
+
+import type { ReactNode } from "react"
 
 type Recipe = {
   id: string
+
   title: string
+
   difficulty: string
+
   total_time_minutes: number
+
   video_url?: string | null
+
   image: string
+
+  view_count: number
 }
 
 type Props = {
   featured: Recipe[]
+
   trending: Recipe[]
+
   quick: Recipe[]
+
   party: Recipe[]
+
   loading: boolean
+
   error: string
+
   onRetry: () => void
+
   onSelect: (id: string) => void
+
   onCollection: (title: string) => void
+
   onKeyword: (keyword: string) => void
+
+  kitchens?: ReactNode
+  feedTabs?: ReactNode
 }
 
 function RecipeCollection({
   title,
+
   recipes,
+
   onSelect,
+
   onMore,
 }: {
   title: string
+
   recipes: Recipe[]
+
   onSelect: Props["onSelect"]
+
   onMore: () => void
 }) {
   if (recipes.length === 0) return null
+
   return (
     <section className="web-collection">
       <div className="web-section-heading">
@@ -54,7 +88,12 @@ function RecipeCollection({
           >
             <div className="web-card-image">
               <VideoBadge url={recipe.video_url} />
-              <img src={recipe.image} alt={recipe.title} loading="lazy" />
+              <RecipeImage
+                src={recipe.image}
+                alt={recipe.title}
+                loading="lazy"
+              />
+              <RecipeViewOverlay count={recipe.view_count} />
             </div>
             <div className="web-card-copy">
               <p className="web-card-meta">
@@ -73,19 +112,33 @@ function RecipeCollection({
 
 export default function DesktopHome({
   featured,
+
   trending,
+
   quick,
+
   party,
+
   loading,
+
   error,
+
   onRetry,
+
   onSelect,
+
   onCollection,
+
   onKeyword,
+
+  kitchens,
+  feedTabs,
 }: Props) {
   const lead = featured[0]
+
   return (
     <div className="desktop-home">
+      {feedTabs}
       <div className="web-home-heading">
         <div>
           <h1>What are we cooking today?</h1>
@@ -112,7 +165,12 @@ export default function DesktopHome({
               className="web-featured-lead"
               onClick={() => onSelect(lead.id)}
             >
-              <VideoBadge url={lead.video_url} /><img src={lead.image} alt={lead.title} fetchPriority="high" />
+              <VideoBadge url={lead.video_url} />
+              <RecipeImage
+                src={lead.image}
+                alt={lead.title}
+                fetchPriority="high"
+              />
               <div className="web-featured-copy">
                 <span className="web-featured-label">Featured recipe</span>
                 <h2>{lead.title}</h2>
@@ -135,7 +193,10 @@ export default function DesktopHome({
                   key={recipe.id}
                   onClick={() => onSelect(recipe.id)}
                 >
-                  <div className="recipe-menu-photo"><VideoBadge url={recipe.video_url} /><img src={recipe.image} alt={recipe.title} /></div>
+                  <div className="recipe-menu-photo">
+                    <VideoBadge url={recipe.video_url} />
+                    <RecipeImage src={recipe.image} alt={recipe.title} />
+                  </div>
                   <div>
                     <p>
                       {recipe.difficulty || "Filipino"} ·{" "}
@@ -167,6 +228,7 @@ export default function DesktopHome({
             onSelect={onSelect}
             onMore={() => onCollection("Under 30min")}
           />
+          {kitchens}
           <RecipeCollection
             title="Party Packs"
             recipes={party}

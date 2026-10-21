@@ -1,67 +1,172 @@
+import { applyTheme, readTheme } from "./lib/theme"
+
+import SettingsIcon from "./SettingsIcon"
+
+import NotificationSettingsScreen from "./NotificationSettingsScreen"
+
+import RecipeImage from "./RecipeImage"
+
+import { privateImage } from "./lib/imagePrivacy"
+
+import {
+  clearDeletedAccountCache,
+  confirmedDeletionReceipt,
+  rememberDeletionReceipt,
+} from "./lib/accountData"
+
+import BackIcon from "./BackIcon"
+
+import BlockedUsersScreen from "./BlockedUsersScreen"
+
+import AccountStatusScreen from "./AccountStatusScreen"
+
+import { requireContentConsent } from "./ContentConsent"
+
+import UserSafetyIcon from "./UserSafetyIcon"
+
 import { privacySections, termsSections, faqs } from "./profileContent"
+
 import { recipeImageUrl } from "./lib/recipe"
+
 import { ChangeEvent, useEffect, useRef, useState } from "react"
+
 import RetryState from "./RetryState"
+
 import { supabase } from "./lib/supabase"
 
 type ProfileScreenProps = {
   userId: string
+
   email?: string
+
   onOpenSaved: () => void
+
   onOpenLiked: () => void
+
   onOpenMyRecipes: () => void
+
+  onOpenCommunity: (mode: "followers" | "following" | "notifications") => void
+
+  unreadNotifications: number
+
   onBack: () => void
 }
 
 type Profile = {
   username: string
+
   display_name: string
+
   avatar_url: string | null
 }
 
 type MyComment = {
   id: string
+
   recipe_id: string
+
   content: string
+
   created_at: string
 }
 
 type RecipeSummary = {
   id: string
+
   title: string
+
   cover_image: string | null
 }
 
 const MAX_AVATAR_SIZE = 5 * 1024 * 1024
+
 const ALLOWED_AVATAR_TYPES = ["image/jpeg", "image/png", "image/webp"]
 
 const MENU_SECTIONS = [
   {
     title: "Your activity",
+
     items: [
       { label: "Saved Recipes", icon: "bookmark", action: "saved" },
+
       { label: "My Comments", icon: "comment", action: "comments" },
+
       { label: "Liked Recipes", icon: "heart", action: "liked" },
-      { label: "My Recipes", icon: "bookmark", action: "recipes" },
+
+      { label: "My Recipes", icon: "book", action: "recipes" },
+
+      { label: "Following", icon: "heart", action: "following" },
+
+      { label: "Notifications", icon: "bell", action: "notifications" },
     ],
   },
+
   {
     title: "Support",
+
     items: [
       { label: "Contact Us", icon: "mail", action: "contact" },
+
+      {
+        label: "Account status & appeals",
+
+        icon: "privacy",
+
+        action: "account_status",
+      },
+
       { label: "FAQ", icon: "help", action: "faq" },
     ],
   },
+
   {
     title: "Legal",
+
     items: [
       { label: "Privacy Policy", icon: "privacy", action: "privacy" },
+
       { label: "Terms of Service", icon: "terms", action: "terms" },
     ],
   },
 ] as const
 
 function MenuIcon({ name }: { name: string }) {
+  if (name === "book")
+    return (
+      <svg
+        width="19"
+        height="19"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M4 19.5A2.5 2.5 0 016.5 17H20M6.5 3H20v19H6.5A2.5 2.5 0 014 19.5v-14A2.5 2.5 0 016.5 3z" />
+        <path d="M8 7h8M8 11h6" />
+      </svg>
+    )
+
+  if (name === "bell")
+    return (
+      <svg
+        width="19"
+        height="19"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" />
+        <path d="M10 21h4" />
+      </svg>
+    )
+
   if (name === "bookmark")
     return (
       <svg
@@ -77,6 +182,7 @@ function MenuIcon({ name }: { name: string }) {
         <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" />
       </svg>
     )
+
   if (name === "comment")
     return (
       <svg
@@ -92,6 +198,7 @@ function MenuIcon({ name }: { name: string }) {
         <path d="M21 15a4 4 0 01-4 4H8l-5 3V7a4 4 0 014-4h10a4 4 0 014 4z" />
       </svg>
     )
+
   if (name === "heart")
     return (
       <svg
@@ -107,21 +214,9 @@ function MenuIcon({ name }: { name: string }) {
         <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z" />
       </svg>
     )
-  if (name === "settings")
-    return (
-      <svg
-        width="19"
-        height="19"
-        viewBox="0 0 512 512"
-        fill="currentColor"
-        aria-hidden="true"
-      >
-        <path
-          fillRule="evenodd"
-          d="M 225 0 L 205 14 L 193 63 L 160 77 L 107 50 L 54 95 L 49 121 L 76 162 L 61 197 L 4 217 L 0 286 L 14 306 L 63 318 L 77 351 L 52 387 L 51 408 L 95 457 L 124 461 L 162 435 L 196 450 L 216 507 L 285 511 L 305 497 L 316 449 L 351 435 L 387 460 L 406 461 L 456 417 L 461 390 L 435 349 L 450 315 L 507 295 L 511 226 L 497 206 L 449 195 L 435 161 L 459 127 L 461 104 L 417 55 L 390 50 L 349 76 L 314 61 L 294 4 Z M 232 28 L 279 29 L 291 83 L 347 107 L 399 78 L 433 112 L 404 155 L 426 217 L 483 232 L 483 278 L 429 291 L 404 346 L 433 399 L 399 433 L 352 403 L 294 426 L 278 483 L 233 483 L 220 429 L 167 405 L 113 434 L 79 400 L 108 357 L 86 296 L 28 279 L 28 234 L 82 221 L 107 165 L 78 112 L 111 79 L 155 108 L 215 86 Z M 246 145 L 201 159 L 170 185 L 149 225 L 145 263 L 149 286 L 159 310 L 185 341 L 225 362 L 263 366 L 286 362 L 310 352 L 341 326 L 362 286 L 366 246 L 352 201 L 325 169 L 286 149 Z M 246 174 L 279 177 L 307 192 L 326 214 L 337 246 L 334 279 L 319 307 L 297 326 L 282 333 L 264 337 L 232 334 L 204 319 L 184 295 L 174 264 L 177 232 L 192 204 L 214 185 Z"
-        />
-      </svg>
-    )
+
+  if (name === "settings") return <SettingsIcon />
+
   if (name === "mail")
     return (
       <svg
@@ -138,6 +233,7 @@ function MenuIcon({ name }: { name: string }) {
         <polyline points="22 6 12 13 2 6" />
       </svg>
     )
+
   if (name === "privacy")
     return (
       <svg
@@ -154,6 +250,7 @@ function MenuIcon({ name }: { name: string }) {
         <path d="M9 12l2 2 4-4" />
       </svg>
     )
+
   if (name === "terms")
     return (
       <svg
@@ -172,6 +269,7 @@ function MenuIcon({ name }: { name: string }) {
         <line x1="8" y1="17" x2="16" y2="17" />
       </svg>
     )
+
   return (
     <svg
       width="19"
@@ -192,9 +290,13 @@ function MenuIcon({ name }: { name: string }) {
 
 function avatarPathFromUrl(url: string | null) {
   if (!url) return null
+
   const marker = "/storage/v1/object/public/avatars/"
+
   const markerIndex = url.indexOf(marker)
+
   if (markerIndex === -1) return null
+
   return decodeURIComponent(
     url.slice(markerIndex + marker.length).split("?")[0],
   )
@@ -202,174 +304,291 @@ function avatarPathFromUrl(url: string | null) {
 
 export default function ProfileScreen({
   userId,
+
   email,
+
   onOpenSaved,
+
   onOpenLiked,
+
   onOpenMyRecipes,
+
+  onOpenCommunity,
+
+  unreadNotifications,
+
   onBack,
 }: ProfileScreenProps) {
   const [profile, setProfile] = useState<Profile | null>(null)
+
   const [loading, setLoading] = useState(true)
+
   const [profileError, setProfileError] = useState("")
+
   const [profileRetryKey, setProfileRetryKey] = useState(0)
+
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
+
   const [avatarMessage, setAvatarMessage] = useState("")
+
   const [showMyComments, setShowMyComments] = useState(false)
+
   const [commentsLoading, setCommentsLoading] = useState(false)
+
   const [myComments, setMyComments] = useState<MyComment[]>([])
+
   const [commentRecipes, setCommentRecipes] =
     useState<Map<string, RecipeSummary>>(new Map())
+
   const [commentsMessage, setCommentsMessage] = useState("")
+
   const [supportScreen, setSupportScreen] =
-    useState<"contact" | "faq" | "settings" | "privacy" | "terms" | null>(null)
+    useState<"contact" | "faq" | "settings" | "notification_settings" | "blocked" | "privacy" | "terms" | "account_status" | null>(
+      null,
+    )
+
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+
   const [deletingAccount, setDeletingAccount] = useState(false)
+
   const [deleteAccountError, setDeleteAccountError] = useState("")
-  const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(
-    () => {
-      try {
-        const stored = localStorage.getItem(`pickle:settings:${userId}`)
-        return stored ? (JSON.parse(stored).notificationsEnabled ?? true) : true
-      } catch {
-        return true
-      }
-    },
-  )
-  const [theme, setTheme] = useState<"Light" | "Dark">(() => {
-    try {
-      const stored = localStorage.getItem(`pickle:settings:${userId}`)
-      const value = stored ? JSON.parse(stored).theme : null
-      if (value === "Dark" || value === "Light") return value
-      return localStorage.getItem("pickle:theme") === "dark" ? "Dark" : "Light"
-    } catch {
-      return "Light"
-    }
-  })
+
+  const [theme, setTheme] = useState(() => readTheme(userId))
+
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const [followCounts, setFollowCounts] = useState<{
+    followers: number
+
+    following: number
+  } | null>(null)
+
+  const [followCountsError, setFollowCountsError] = useState(false)
+
+  const [followCountsRetry, setFollowCountsRetry] = useState(0)
+
+  useEffect(() => {
+    let ignore = false
+
+    let pending = false
+
+    setFollowCounts(null)
+
+    setFollowCountsError(false)
+
+    async function loadCounts() {
+      if (pending || document.visibilityState === "hidden") return
+
+      pending = true
+
+      try {
+        const [followers, following] = await Promise.all([
+          supabase
+
+            .from("user_follows")
+
+            .select("follower_id", { count: "exact", head: true })
+
+            .eq("followed_id", userId),
+
+          supabase
+
+            .from("user_follows")
+
+            .select("followed_id", { count: "exact", head: true })
+
+            .eq("follower_id", userId),
+        ])
+
+        if (followers.error || following.error)
+          throw followers.error ?? following.error
+
+        if (!ignore) {
+          setFollowCounts({
+            followers: followers.count ?? 0,
+
+            following: following.count ?? 0,
+          })
+
+          setFollowCountsError(false)
+        }
+      } catch {
+        if (!ignore) setFollowCountsError(true)
+      } finally {
+        pending = false
+      }
+    }
+
+    const refreshCounts = () => {
+      void loadCounts()
+    }
+
+    refreshCounts()
+
+    const timer = window.setInterval(refreshCounts, 30000)
+
+    window.addEventListener("focus", refreshCounts)
+
+    document.addEventListener("visibilitychange", refreshCounts)
+
+    return () => {
+      ignore = true
+
+      window.clearInterval(timer)
+
+      window.removeEventListener("focus", refreshCounts)
+
+      document.removeEventListener("visibilitychange", refreshCounts)
+    }
+  }, [userId, followCountsRetry])
 
   useEffect(() => {
     let ignore = false
 
     async function loadProfile() {
       setLoading(true)
+
       setProfileError("")
+
       const { data, error } = await supabase
+
         .from("profiles")
+
         .select("username, display_name, avatar_url")
+
         .eq("id", userId)
+
         .single()
 
       if (!ignore) {
         if (error) {
-          console.error("Failed to load profile:", error)
+          console.error("Failed to load profile:")
+
           setProfile(null)
+
           setProfileError("Could not load your profile.")
         } else {
           setProfile(data)
         }
+
         setLoading(false)
       }
     }
 
     loadProfile()
+
     return () => {
       ignore = true
     }
   }, [userId, profileRetryKey])
 
-  function saveSettings(
-    nextNotifications: boolean,
-    nextTheme: "Light" | "Dark",
-  ) {
-    localStorage.setItem(
-      `pickle:settings:${userId}`,
-      JSON.stringify({
-        notificationsEnabled: nextNotifications,
-        theme: nextTheme,
-      }),
-    )
-  }
-
-  function toggleNotifications() {
-    const next = !notificationsEnabled
-    setNotificationsEnabled(next)
-    saveSettings(next, theme)
-  }
-
   function chooseTheme(nextTheme: "Light" | "Dark") {
     setTheme(nextTheme)
-    saveSettings(notificationsEnabled, nextTheme)
-    const dark = nextTheme === "Dark"
-    localStorage.setItem("pickle:theme", dark ? "dark" : "light")
-    document.documentElement.dataset.theme = dark ? "dark" : "light"
-    document.documentElement.style.colorScheme = dark ? "dark" : "light"
   }
 
   useEffect(() => {
-    const dark = theme === "Dark"
-    localStorage.setItem("pickle:theme", dark ? "dark" : "light")
-    document.documentElement.dataset.theme = dark ? "dark" : "light"
-    document.documentElement.style.colorScheme = dark ? "dark" : "light"
-  }, [theme])
+    applyTheme(theme, userId)
+  }, [theme, userId])
 
   async function deleteAccount() {
     if (deletingAccount) return
 
     setDeletingAccount(true)
+
     setDeleteAccountError("")
 
-    const { error } = await supabase.functions.invoke("delete-account", {
-      body: {},
-    })
+    const { data: deletion, error } = await supabase.functions.invoke(
+      "delete-account",
 
-    if (error) {
-      console.error("Failed to delete account:", error)
+      {
+        body: {},
+      },
+    )
+
+    let receipt
+
+    try {
+      if (error) throw error
+
+      receipt = confirmedDeletionReceipt(deletion, userId)
+    } catch {
+      console.error("Failed to delete account:")
+
       setDeleteAccountError("Could not delete your account. Please try again.")
+
       setDeletingAccount(false)
+
       return
     }
 
-    localStorage.removeItem(`pickle:settings:${userId}`)
+    if (!(await clearDeletedAccountCache(userId)))
+      window.alert(
+        "Account deletion was requested, but this device’s cached drafts could not be cleared. Clear Pickle’s app storage in Android Settings, or clear this site’s data in your browser.",
+      )
+
+    rememberDeletionReceipt(receipt)
+
+    const { data: latestSession } = await supabase.auth.getSession()
+
+    if (latestSession.session?.user.id !== userId) return
+
     await supabase.auth.signOut({ scope: "local" })
+
     window.location.replace("/")
   }
 
   async function openMyComments() {
     setShowMyComments(true)
+
     setCommentsLoading(true)
+
     setCommentsMessage("")
 
     const { data, error } = await supabase
+
       .from("recipe_comments")
+
       .select("id, recipe_id, content, created_at")
+
       .eq("user_id", userId)
+
       .order("created_at", { ascending: false })
 
     if (error) {
-      console.error("Failed to load comment history:", error)
+      console.error("Failed to load comment history:")
+
       setCommentsMessage("Could not load your comments.")
+
       setMyComments([])
+
       setCommentsLoading(false)
+
       return
     }
 
     const rows = (data ?? []) as MyComment[]
+
     setMyComments(rows)
+
     const recipeIds = [...new Set(rows.map((comment) => comment.recipe_id))]
 
     if (recipeIds.length > 0) {
       const { data: recipeData, error: recipeError } = await supabase
+
         .from("recipes")
+
         .select("id, title, cover_image")
+
         .in("id", recipeIds)
 
       if (recipeError) {
-        console.error("Failed to load recipes for comments:", recipeError)
+        console.error("Failed to load recipes for comments:")
       } else {
         setCommentRecipes(
           new Map(
             ((recipeData ?? []) as RecipeSummary[]).map((recipe) => [
               recipe.id,
+
               recipe,
             ]),
           ),
@@ -384,14 +603,20 @@ export default function ProfileScreen({
 
   async function deleteMyComment(commentId: string) {
     const { error } = await supabase
+
       .from("recipe_comments")
+
       .delete()
+
       .eq("id", commentId)
+
       .eq("user_id", userId)
 
     if (error) {
-      console.error("Failed to delete comment:", error)
+      console.error("Failed to delete comment:")
+
       setCommentsMessage("Could not delete this comment.")
+
       return
     }
 
@@ -402,70 +627,122 @@ export default function ProfileScreen({
 
   async function handleAvatarChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
+
     event.target.value = ""
+
     if (!file) return
 
     setAvatarMessage("")
 
     if (!ALLOWED_AVATAR_TYPES.includes(file.type)) {
       setAvatarMessage("Please choose a JPG, PNG, or WebP image.")
+
       return
     }
 
     if (file.size > MAX_AVATAR_SIZE) {
       setAvatarMessage("Profile photos must be 5 MB or smaller.")
+
       return
     }
 
     setUploadingAvatar(true)
 
+    try {
+      if (!(await requireContentConsent(userId))) {
+        setUploadingAvatar(false)
+
+        return
+      }
+    } catch {
+      setAvatarMessage("Could not load the content policy. Please try again.")
+
+      setUploadingAvatar(false)
+
+      return
+    }
+
+    let cleanFile: File
+
+    try {
+      cleanFile = await privateImage(file)
+    } catch {
+      setAvatarMessage(
+        "Could not prepare this photo. Please choose another image.",
+      )
+
+      setUploadingAvatar(false)
+
+      return
+    }
+
     const extension =
-      file.type === "image/png"
+      cleanFile.type === "image/png"
         ? "png"
-        : file.type === "image/webp"
+        : cleanFile.type === "image/webp"
           ? "webp"
           : "jpg"
+
     const filePath = `${userId}/avatar-${Date.now()}.${extension}`
+
     const previousPath = avatarPathFromUrl(profile?.avatar_url ?? null)
 
     const { error: uploadError } = await supabase.storage
+
       .from("avatars")
-      .upload(filePath, file, {
+
+      .upload(filePath, cleanFile, {
         cacheControl: "3600",
+
         upsert: false,
-        contentType: file.type,
+
+        contentType: cleanFile.type,
       })
 
     if (uploadError) {
-      console.error("Failed to upload avatar:", uploadError)
+      console.error("Failed to upload avatar:")
+
       setAvatarMessage("Could not upload this photo. Please try again.")
+
       setUploadingAvatar(false)
+
       return
     }
 
     const { data: publicUrlData } = supabase.storage
+
       .from("avatars")
+
       .getPublicUrl(filePath)
+
     const avatarUrl = publicUrlData.publicUrl
 
     const { error: profileError } = await supabase
+
       .from("profiles")
+
       .update({ avatar_url: avatarUrl })
+
       .eq("id", userId)
 
     if (profileError) {
-      console.error("Failed to save avatar to profile:", profileError)
+      console.error("Failed to save avatar to profile:")
+
       await supabase.storage.from("avatars").remove([filePath])
+
       setAvatarMessage(
         "The photo uploaded, but your profile could not be updated.",
       )
+
       setUploadingAvatar(false)
+
       return
     }
 
     setProfile((current) =>
       current ? { ...current, avatar_url: avatarUrl } : current,
     )
+
     setAvatarMessage("Profile photo updated.")
 
     if (
@@ -474,10 +751,12 @@ export default function ProfileScreen({
       previousPath.startsWith(`${userId}/`)
     ) {
       const { error: deleteError } = await supabase.storage
+
         .from("avatars")
+
         .remove([previousPath])
-      if (deleteError)
-        console.error("Failed to remove previous avatar:", deleteError)
+
+      if (deleteError) console.error("Failed to remove previous avatar:")
     }
 
     setUploadingAvatar(false)
@@ -485,7 +764,9 @@ export default function ProfileScreen({
 
   const displayName =
     profile?.display_name || profile?.username || "Pickle User"
+
   const username = profile?.username ? `@${profile.username}` : email || ""
+
   const initial = profile?.username?.trim().charAt(0).toUpperCase() || "P"
 
   if (loading) {
@@ -497,28 +778,20 @@ export default function ProfileScreen({
             onClick={onBack}
             aria-label="Back"
             className="absolute left-4 top-5 w-9 h-9 flex items-center justify-center"
-            style={{ color: "#1F1F1F" }}
+            style={{ color: "var(--color-ink)" }}
           >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
+            <BackIcon />
           </button>
-          <h1 className="font-bold text-[27px]" style={{ color: "#1F1F1F" }}>
+          <h1
+            className="font-bold text-section"
+            style={{ color: "var(--color-ink)" }}
+          >
             Profile
           </h1>
         </div>
         <div
-          className="px-4 py-20 text-center text-[16px]"
-          style={{ color: "#6F6F6F" }}
+          className="px-4 py-20 text-center text-body"
+          style={{ color: "var(--color-gray)" }}
         >
           Loading profile…
         </div>
@@ -535,22 +808,14 @@ export default function ProfileScreen({
             onClick={onBack}
             aria-label="Back"
             className="absolute left-4 top-5 w-9 h-9 flex items-center justify-center"
-            style={{ color: "#1F1F1F" }}
+            style={{ color: "var(--color-ink)" }}
           >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
+            <BackIcon />
           </button>
-          <h1 className="font-bold text-[27px]" style={{ color: "#1F1F1F" }}>
+          <h1
+            className="font-bold text-section"
+            style={{ color: "var(--color-ink)" }}
+          >
             Profile
           </h1>
         </div>
@@ -563,6 +828,24 @@ export default function ProfileScreen({
     )
   }
 
+  if (supportScreen === "notification_settings")
+    return (
+      <NotificationSettingsScreen
+        key={userId}
+        userId={userId}
+        onBack={() => setSupportScreen("settings")}
+      />
+    )
+
+  if (supportScreen === "blocked")
+    return (
+      <BlockedUsersScreen
+        key={userId}
+        userId={userId}
+        onBack={() => setSupportScreen("settings")}
+      />
+    )
+
   if (supportScreen === "settings") {
     return (
       <div className="pb-28">
@@ -572,93 +855,98 @@ export default function ProfileScreen({
             onClick={() => setSupportScreen(null)}
             aria-label="Back to profile"
             className="absolute left-4 top-5 w-9 h-9 flex items-center justify-center"
-            style={{ color: "#1F1F1F" }}
+            style={{ color: "var(--color-ink)" }}
           >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
+            <BackIcon />
           </button>
-          <h1 className="font-bold text-[27px]" style={{ color: "#1F1F1F" }}>
+          <h1
+            className="font-bold text-section"
+            style={{ color: "var(--color-ink)" }}
+          >
             Settings
           </h1>
         </div>
-
         <div className="px-4 space-y-7">
           <section>
             <p
-              className="text-[15px] font-semibold mb-2 px-1"
-              style={{ color: "#8A8A8A" }}
+              className="text-body font-semibold mb-2 px-1"
+              style={{ color: "var(--color-gray-soft)" }}
+            >
+              Privacy
+            </p>
+            <button
+              type="button"
+              className="w-full rounded-[16px] border px-4 py-4 flex items-center gap-3 text-body"
+              style={{
+                borderColor: "var(--color-border)",
+
+                backgroundColor: "var(--color-white)",
+
+                color: "var(--color-ink)",
+              }}
+              onClick={() => setSupportScreen("blocked")}
+            >
+              <UserSafetyIcon kind="block" />
+              <span className="flex-1 text-left">Blocked users</span>
+              <span aria-hidden="true">›</span>
+            </button>
+          </section>
+          <section>
+            <p
+              className="text-body font-semibold mb-2 px-1"
+              style={{ color: "var(--color-gray-soft)" }}
             >
               Notifications
             </p>
-            <div
-              className="rounded-[16px] border px-4 py-4 flex items-center gap-4"
-              style={{ borderColor: "#EAEAEA", backgroundColor: "#FFFFFF" }}
-            >
-              <div className="flex-1">
-                <p
-                  className="text-[17px] font-medium"
-                  style={{ color: "#1F1F1F" }}
-                >
-                  Notifications
-                </p>
-                <p
-                  className="text-[15px] leading-5 mt-1"
-                  style={{ color: "#8A8A8A" }}
-                >
-                  Get updates about activity related to your Pickle account.
-                </p>
-              </div>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={notificationsEnabled}
-                onClick={toggleNotifications}
-                className="relative w-[48px] h-[28px] rounded-full flex-shrink-0 transition-colors"
-                style={{
-                  backgroundColor: notificationsEnabled ? "#F26B21" : "#D9D9D9",
-                }}
-              >
-                <span
-                  className="absolute top-[3px] w-[22px] h-[22px] rounded-full bg-white shadow-sm transition-all"
-                  style={{ left: notificationsEnabled ? 23 : 3 }}
-                />
-              </button>
-            </div>
-          </section>
+            <button
+              type="button"
+              className="w-full rounded-[16px] border px-4 py-4 flex items-center gap-4 text-left"
+              style={{
+                borderColor: "var(--color-border)",
 
+                backgroundColor: "var(--color-white)",
+
+                color: "var(--color-ink)",
+              }}
+              onClick={() => setSupportScreen("notification_settings")}
+            >
+              <span className="flex-1 text-body">Notification settings</span>
+              <span aria-hidden="true">›</span>
+            </button>
+          </section>
           <section>
             <p
-              className="text-[15px] font-semibold mb-2 px-1"
-              style={{ color: "#8A8A8A" }}
+              className="text-body font-semibold mb-2 px-1"
+              style={{ color: "var(--color-gray-soft)" }}
             >
               Appearance
             </p>
             <div
               className="rounded-[16px] border p-1.5 flex gap-1.5"
-              style={{ borderColor: "#EAEAEA", backgroundColor: "#FFFFFF" }}
+              style={{
+                borderColor: "var(--color-border)",
+
+                backgroundColor: "var(--color-white)",
+              }}
             >
               {(["Light", "Dark"] as const).map((option) => {
                 const selected = theme === option
+
                 return (
                   <button
                     key={option}
                     type="button"
                     onClick={() => chooseTheme(option)}
                     aria-pressed={selected}
-                    className="flex-1 min-h-[46px] rounded-[11px] flex items-center justify-center gap-2 text-[16px] font-medium transition-colors"
+                    className="flex-1 min-h-[46px] rounded-[11px] flex items-center justify-center gap-2 text-body font-medium transition-colors"
                     style={{
-                      backgroundColor: selected ? "#FFF0E6" : "transparent",
-                      color: selected ? "#F26B21" : "#6F6F6F",
+                      backgroundColor: selected
+                        ? "var(--color-primary-soft)"
+                        : "transparent",
+
+                      color: selected
+                        ? "var(--color-primary)"
+                        : "var(--color-gray)",
                     }}
                   >
                     {option === "Light" ? (
@@ -695,57 +983,40 @@ export default function ProfileScreen({
               })}
             </div>
           </section>
-
           <section>
             <p
-              className="text-[15px] font-semibold mb-2 px-1"
-              style={{ color: "#8A8A8A" }}
+              className="text-body font-semibold mb-2 px-1"
+              style={{ color: "var(--color-gray-soft)" }}
             >
               Account
             </p>
             <div
               className="rounded-[16px] border overflow-hidden"
-              style={{ borderColor: "#EAEAEA", backgroundColor: "#FFFFFF" }}
+              style={{
+                borderColor: "var(--color-border)",
+
+                backgroundColor: "var(--color-white)",
+              }}
             >
               <button
                 type="button"
                 onClick={() => {
                   setDeleteAccountError("")
+
                   setDeleteConfirmOpen(true)
                 }}
                 className="w-full min-h-[58px] px-4 flex items-center gap-3 text-left"
               >
-                <span className="flex-1">
-                  <span
-                    className="block text-[17px] font-medium"
-                    style={{ color: "#C53D2E" }}
-                  >
-                    Delete account
-                  </span>
-                  <span
-                    className="block text-[14px] leading-5 mt-0.5"
-                    style={{ color: "#8A8A8A" }}
-                  >
-                    Permanently delete your Pickle account and activity.
-                  </span>
-                </span>
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#C53D2E"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+                <span
+                  className="text-body font-medium"
+                  style={{ color: "#C53D2E" }}
                 >
-                  <polyline points="9 18 15 12 9 6" />
-                </svg>
+                  Delete Account
+                </span>
               </button>
             </div>
           </section>
         </div>
-
         {deleteConfirmOpen && (
           <div
             className="fixed inset-0 z-[120] flex items-end justify-center sm:items-center px-4"
@@ -754,7 +1025,11 @@ export default function ProfileScreen({
           >
             <div
               className="w-full max-w-sm rounded-[20px] border p-5 mb-4 sm:mb-0"
-              style={{ borderColor: "#EAEAEA", backgroundColor: "#FFFFFF" }}
+              style={{
+                borderColor: "var(--color-border)",
+
+                backgroundColor: "var(--color-white)",
+              }}
               onClick={(event) => event.stopPropagation()}
             >
               <div
@@ -776,38 +1051,46 @@ export default function ProfileScreen({
                 </svg>
               </div>
               <h2
-                className="font-semibold text-[20px]"
-                style={{ color: "#1F1F1F" }}
+                className="font-semibold text-section"
+                style={{ color: "var(--color-ink)" }}
               >
                 Delete your account?
               </h2>
               <p
-                className="text-[16px] leading-6 mt-2"
-                style={{ color: "#6F6F6F" }}
+                className="text-body leading-6 mt-2"
+                style={{ color: "var(--color-gray)" }}
               >
-                This permanently deletes your profile, saved recipes, likes,
-                comments, and account. This action cannot be undone.
+                This requests deletion of your account, published recipes,
+                drafts, uploaded photos, messages and linked activity. Your
+                content becomes unavailable while cleanup runs; failed steps
+                retry automatically. Minimal deletion receipts and encrypted
+                application backups expire after 30 days. Detailed evidence is
+                kept for 30 days and minimum enforcement history for 90 days
+                after final case closure, with ongoing cases or active
+                restrictions handled as described in the Privacy Policy.
+                Provider backups have separate settings. Deletion cannot be
+                undone.
               </p>
-
               {deleteAccountError && (
                 <p
-                  className="text-[14px] leading-5 mt-3"
+                  className="text-label leading-5 mt-3"
                   style={{ color: "#C53D2E" }}
                 >
                   {deleteAccountError}
                 </p>
               )}
-
               <div className="flex gap-2 mt-5">
                 <button
                   type="button"
                   onClick={() => setDeleteConfirmOpen(false)}
                   disabled={deletingAccount}
-                  className="flex-1 h-11 rounded-[12px] border text-[16px] font-semibold disabled:opacity-50"
+                  className="flex-1 h-11 rounded-[12px] border text-body font-semibold disabled:opacity-50"
                   style={{
-                    borderColor: "#E5E5E5",
-                    color: "#6F6F6F",
-                    backgroundColor: "#FFFFFF",
+                    borderColor: "var(--color-border)",
+
+                    color: "var(--color-gray)",
+
+                    backgroundColor: "var(--color-white)",
                   }}
                 >
                   Cancel
@@ -816,7 +1099,7 @@ export default function ProfileScreen({
                   type="button"
                   onClick={deleteAccount}
                   disabled={deletingAccount}
-                  className="flex-1 h-11 rounded-[12px] text-[16px] font-semibold text-white disabled:opacity-50"
+                  className="flex-1 h-11 rounded-[12px] text-body font-semibold text-white disabled:opacity-50"
                   style={{ backgroundColor: "#C53D2E" }}
                 >
                   {deletingAccount ? "Deleting…" : "Delete account"}
@@ -838,112 +1121,116 @@ export default function ProfileScreen({
             onClick={() => setSupportScreen(null)}
             aria-label="Back to profile"
             className="absolute left-4 top-5 w-9 h-9 flex items-center justify-center"
-            style={{ color: "#1F1F1F" }}
+            style={{ color: "var(--color-ink)" }}
           >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
+            <BackIcon />
           </button>
-          <h1 className="font-bold text-[27px]" style={{ color: "#1F1F1F" }}>
+          <h1
+            className="font-bold text-section"
+            style={{ color: "var(--color-ink)" }}
+          >
             Contact Us
           </h1>
         </div>
-
         <div className="px-4 space-y-5">
           <section
             className="rounded-[18px] border p-5"
-            style={{ borderColor: "#EAEAEA", backgroundColor: "#FFFFFF" }}
+            style={{
+              borderColor: "var(--color-border)",
+
+              backgroundColor: "var(--color-white)",
+            }}
           >
             <div
               className="w-11 h-11 rounded-full flex items-center justify-center mb-4"
-              style={{ backgroundColor: "#FFF0E6", color: "#F26B21" }}
+              style={{
+                backgroundColor: "var(--color-primary-soft)",
+
+                color: "var(--color-primary)",
+              }}
             >
               <MenuIcon name="mail" />
             </div>
             <h2
-              className="font-semibold text-[20px]"
-              style={{ color: "#1F1F1F" }}
+              className="font-semibold text-section"
+              style={{ color: "var(--color-ink)" }}
             >
               How can we help?
             </h2>
             <p
-              className="text-[16px] leading-6 mt-2"
-              style={{ color: "#6F6F6F" }}
+              className="text-body leading-6 mt-2"
+              style={{ color: "var(--color-gray)" }}
             >
-              Questions, recipe feedback, bug reports, and general suggestions
-              are all welcome.
+              For account support, technical issues, privacy questions or
+              feedback, email us.
             </p>
           </section>
-
           <section
             className="rounded-[18px] border overflow-hidden"
-            style={{ borderColor: "#EAEAEA", backgroundColor: "#FFFFFF" }}
+            style={{
+              borderColor: "var(--color-border)",
+
+              backgroundColor: "var(--color-white)",
+            }}
           >
             <div
               className="px-5 py-4 border-b"
-              style={{ borderColor: "#EAEAEA" }}
+              style={{ borderColor: "var(--color-border)" }}
             >
               <p
-                className="text-[14px] font-semibold"
-                style={{ color: "#8A8A8A" }}
+                className="text-label font-semibold"
+                style={{ color: "var(--color-gray-soft)" }}
               >
                 EMAIL
               </p>
-              <p
-                className="text-[17px] font-medium mt-1"
-                style={{ color: "#1F1F1F" }}
+              <a
+                href="mailto:admin@getpickleapp.com"
+                className="inline-block text-body font-medium mt-1 break-all"
+                style={{ color: "var(--color-ink)" }}
               >
-                support@pickle.app
-              </p>
+                admin@getpickleapp.com
+              </a>
             </div>
             <div
               className="px-5 py-4 border-b"
-              style={{ borderColor: "#EAEAEA" }}
+              style={{ borderColor: "var(--color-border)" }}
             >
               <p
-                className="text-[14px] font-semibold"
-                style={{ color: "#8A8A8A" }}
+                className="text-label font-semibold"
+                style={{ color: "var(--color-gray-soft)" }}
               >
                 RESPONSE TIME
               </p>
               <p
-                className="text-[17px] font-medium mt-1"
-                style={{ color: "#1F1F1F" }}
+                className="text-body font-medium mt-1"
+                style={{ color: "var(--color-ink)" }}
               >
-                Usually within 2–3 business days
+                We aim to reply within 3 business days. Response times may vary.
               </p>
             </div>
             <div className="px-5 py-4">
               <p
-                className="text-[14px] font-semibold"
-                style={{ color: "#8A8A8A" }}
+                className="text-label font-semibold"
+                style={{ color: "var(--color-gray-soft)" }}
               >
-                SUPPORT HOURS
+                EMAIL AVAILABILITY
               </p>
               <p
-                className="text-[17px] font-medium mt-1"
-                style={{ color: "#1F1F1F" }}
+                className="text-body font-medium mt-1"
+                style={{ color: "var(--color-ink)" }}
               >
-                Monday–Friday, 9:00 AM–6:00 PM
+                Email us anytime. We reply asynchronously.
               </p>
             </div>
           </section>
-
           <p
-            className="text-[14px] leading-5 px-1"
-            style={{ color: "#A0A0A0" }}
+            className="text-label leading-5 px-1"
+            style={{ color: "var(--color-gray-soft)" }}
           >
-            Contact information on this preview screen is temporary and can be
-            replaced before launch.
+            To report a recipe, review, comment or user, use the report option
+            in the app. For support, privacy questions or account-deletion
+            assistance, email admin@getpickleapp.com. Never send your password
+            or verification codes.
           </p>
         </div>
       </div>
@@ -959,50 +1246,43 @@ export default function ProfileScreen({
             onClick={() => setSupportScreen(null)}
             aria-label="Back to profile"
             className="absolute left-4 top-5 w-9 h-9 flex items-center justify-center"
-            style={{ color: "#1F1F1F" }}
+            style={{ color: "var(--color-ink)" }}
           >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
+            <BackIcon />
           </button>
-          <h1 className="font-bold text-[27px]" style={{ color: "#1F1F1F" }}>
+          <h1
+            className="font-bold text-section"
+            style={{ color: "var(--color-ink)" }}
+          >
             Privacy Policy
           </h1>
         </div>
-
         <div className="px-4">
-          <p className="text-[14px] mb-5" style={{ color: "#A0A0A0" }}>
-            Last updated: October 6, 2026
+          <p
+            className="text-label mb-5"
+            style={{ color: "var(--color-gray-soft)" }}
+          >
+            Last updated: October 16, 2026
           </p>
           <p
-            className="text-[16px] leading-6 mb-6"
-            style={{ color: "#6F6F6F" }}
+            className="text-body leading-6 mb-6"
+            style={{ color: "var(--color-gray)" }}
           >
             This Privacy Policy explains how Pickle handles information when you
             use the app and its related services.
           </p>
-
           <div className="space-y-6">
             {privacySections.map((section) => (
               <section key={section.title}>
                 <h2
-                  className="text-[18px] font-semibold mb-2"
-                  style={{ color: "#1F1F1F" }}
+                  className="text-lead font-semibold mb-2"
+                  style={{ color: "var(--color-ink)" }}
                 >
                   {section.title}
                 </h2>
                 <p
-                  className="text-[16px] leading-6"
-                  style={{ color: "#6F6F6F" }}
+                  className="text-body leading-6"
+                  style={{ color: "var(--color-gray)" }}
                 >
                   {section.body}
                 </p>
@@ -1023,49 +1303,42 @@ export default function ProfileScreen({
             onClick={() => setSupportScreen(null)}
             aria-label="Back to profile"
             className="absolute left-4 top-5 w-9 h-9 flex items-center justify-center"
-            style={{ color: "#1F1F1F" }}
+            style={{ color: "var(--color-ink)" }}
           >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
+            <BackIcon />
           </button>
-          <h1 className="font-bold text-[27px]" style={{ color: "#1F1F1F" }}>
+          <h1
+            className="font-bold text-section"
+            style={{ color: "var(--color-ink)" }}
+          >
             Terms of Service
           </h1>
         </div>
-
         <div className="px-4">
-          <p className="text-[14px] mb-5" style={{ color: "#A0A0A0" }}>
-            Last updated: October 6, 2026
+          <p
+            className="text-label mb-5"
+            style={{ color: "var(--color-gray-soft)" }}
+          >
+            Last updated: October 16, 2026
           </p>
           <p
-            className="text-[16px] leading-6 mb-6"
-            style={{ color: "#6F6F6F" }}
+            className="text-body leading-6 mb-6"
+            style={{ color: "var(--color-gray)" }}
           >
             These Terms of Service govern your access to and use of Pickle.
           </p>
-
           <div className="space-y-6">
             {termsSections.map((section) => (
               <section key={section.title}>
                 <h2
-                  className="text-[18px] font-semibold mb-2"
-                  style={{ color: "#1F1F1F" }}
+                  className="text-lead font-semibold mb-2"
+                  style={{ color: "var(--color-ink)" }}
                 >
                   {section.title}
                 </h2>
                 <p
-                  className="text-[16px] leading-6"
-                  style={{ color: "#6F6F6F" }}
+                  className="text-body leading-6"
+                  style={{ color: "var(--color-gray)" }}
                 >
                   {section.body}
                 </p>
@@ -1074,6 +1347,16 @@ export default function ProfileScreen({
           </div>
         </div>
       </div>
+    )
+  }
+
+  if (supportScreen === "account_status") {
+    return (
+      <AccountStatusScreen
+        key={userId}
+        userId={userId}
+        onBack={() => setSupportScreen(null)}
+      />
     )
   }
 
@@ -1086,37 +1369,31 @@ export default function ProfileScreen({
             onClick={() => setSupportScreen(null)}
             aria-label="Back to profile"
             className="absolute left-4 top-5 w-9 h-9 flex items-center justify-center"
-            style={{ color: "#1F1F1F" }}
+            style={{ color: "var(--color-ink)" }}
           >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
+            <BackIcon />
           </button>
-          <h1 className="font-bold text-[27px]" style={{ color: "#1F1F1F" }}>
+          <h1
+            className="font-bold text-section"
+            style={{ color: "var(--color-ink)" }}
+          >
             FAQ
           </h1>
         </div>
-
         <div className="px-4">
           <p
-            className="text-[16px] leading-6 mb-5"
-            style={{ color: "#6F6F6F" }}
+            className="text-body leading-6 mb-5"
+            style={{ color: "var(--color-gray)" }}
           >
             Quick answers to common questions about using Pickle.
           </p>
-
           <div
             className="rounded-[18px] border overflow-hidden"
-            style={{ borderColor: "#EAEAEA", backgroundColor: "#FFFFFF" }}
+            style={{
+              borderColor: "var(--color-border)",
+
+              backgroundColor: "var(--color-white)",
+            }}
           >
             {faqs.map((faq, index) => (
               <details
@@ -1124,13 +1401,15 @@ export default function ProfileScreen({
                 className="group"
                 style={{
                   borderBottom:
-                    index < faqs.length - 1 ? "1px solid #EAEAEA" : undefined,
+                    index < faqs.length - 1
+                      ? "1px solid var(--color-border)"
+                      : undefined,
                 }}
               >
                 <summary className="list-none cursor-pointer px-5 py-4 flex items-center gap-3">
                   <span
-                    className="flex-1 text-[17px] font-semibold leading-5"
-                    style={{ color: "#1F1F1F" }}
+                    className="flex-1 text-body font-semibold leading-5"
+                    style={{ color: "var(--color-ink)" }}
                   >
                     {faq.question}
                   </span>
@@ -1140,7 +1419,7 @@ export default function ProfileScreen({
                     height="16"
                     viewBox="0 0 24 24"
                     fill="none"
-                    stroke="#8A8A8A"
+                    stroke="var(--color-gray-soft)"
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -1149,8 +1428,8 @@ export default function ProfileScreen({
                   </svg>
                 </summary>
                 <p
-                  className="px-5 pb-4 text-[16px] leading-6"
-                  style={{ color: "#6F6F6F" }}
+                  className="px-5 pb-4 text-body leading-6"
+                  style={{ color: "var(--color-gray)" }}
                 >
                   {faq.answer}
                 </p>
@@ -1171,30 +1450,21 @@ export default function ProfileScreen({
             onClick={() => setShowMyComments(false)}
             aria-label="Back to profile"
             className="absolute left-4 top-5 w-9 h-9 flex items-center justify-center"
-            style={{ color: "#1F1F1F" }}
+            style={{ color: "var(--color-ink)" }}
           >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
+            <BackIcon />
           </button>
-          <h1 className="font-bold text-[27px]" style={{ color: "#1F1F1F" }}>
+          <h1
+            className="font-bold text-section"
+            style={{ color: "var(--color-ink)" }}
+          >
             My Comments
           </h1>
         </div>
-
         {commentsLoading ? (
           <div
-            className="px-4 py-16 text-center text-[16px]"
-            style={{ color: "#6F6F6F" }}
+            className="px-4 py-16 text-center text-body"
+            style={{ color: "var(--color-gray)" }}
           >
             Loading comments…
           </div>
@@ -1202,21 +1472,28 @@ export default function ProfileScreen({
           <div className="px-6 py-20 text-center">
             <div
               className="w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center"
-              style={{ backgroundColor: "#FFF0E6", color: "#F26B21" }}
+              style={{
+                backgroundColor: "var(--color-primary-soft)",
+
+                color: "var(--color-primary)",
+              }}
             >
               <MenuIcon name="comment" />
             </div>
             <p
-              className="font-semibold text-[19px]"
-              style={{ color: "#1F1F1F" }}
+              className="font-semibold text-lead"
+              style={{ color: "var(--color-ink)" }}
             >
               No comments yet
             </p>
-            <p className="text-[16px] mt-1" style={{ color: "#6F6F6F" }}>
+            <p
+              className="text-body mt-1"
+              style={{ color: "var(--color-gray)" }}
+            >
               Comments you leave on recipes will appear here.
             </p>
             {commentsMessage && (
-              <p className="text-[14px] mt-3" style={{ color: "#C53D2E" }}>
+              <p className="text-label mt-3" style={{ color: "#C53D2E" }}>
                 {commentsMessage}
               </p>
             )}
@@ -1224,21 +1501,26 @@ export default function ProfileScreen({
         ) : (
           <div className="px-4 space-y-3">
             {commentsMessage && (
-              <p className="text-[14px]" style={{ color: "#C53D2E" }}>
+              <p className="text-label" style={{ color: "#C53D2E" }}>
                 {commentsMessage}
               </p>
             )}
             {myComments.map((comment) => {
               const recipe = commentRecipes.get(comment.recipe_id)
+
               return (
                 <article
                   key={comment.id}
                   className="rounded-[16px] border p-3.5"
-                  style={{ borderColor: "#EAEAEA", backgroundColor: "#FFFFFF" }}
+                  style={{
+                    borderColor: "var(--color-border)",
+
+                    backgroundColor: "var(--color-white)",
+                  }}
                 >
                   <div className="flex gap-3">
                     {recipe?.cover_image ? (
-                      <img
+                      <RecipeImage
                         src={recipeImageUrl(recipe.cover_image)}
                         alt={recipe.title}
                         className="w-14 h-14 rounded-[10px] object-cover flex-shrink-0"
@@ -1246,27 +1528,27 @@ export default function ProfileScreen({
                     ) : (
                       <div
                         className="w-14 h-14 rounded-[10px] flex-shrink-0"
-                        style={{ backgroundColor: "#F5F5F5" }}
+                        style={{ backgroundColor: "var(--color-surface)" }}
                       />
                     )}
                     <div className="min-w-0 flex-1">
                       <p
-                        className="text-[15px] font-semibold truncate"
-                        style={{ color: "#1F1F1F" }}
+                        className="text-body font-semibold truncate"
+                        style={{ color: "var(--color-ink)" }}
                       >
                         {recipe?.title || "Recipe"}
                       </p>
                       <p
-                        className="text-[13px] mt-0.5"
-                        style={{ color: "#A0A0A0" }}
+                        className="text-label mt-0.5"
+                        style={{ color: "var(--color-gray-soft)" }}
                       >
                         {new Date(comment.created_at).toLocaleDateString()}
                       </p>
                     </div>
                   </div>
                   <p
-                    className="text-[16px] leading-5 mt-3 whitespace-pre-wrap break-words"
-                    style={{ color: "#555555" }}
+                    className="text-body leading-5 mt-3 whitespace-pre-wrap break-words"
+                    style={{ color: "var(--color-gray-strong)" }}
                   >
                     {comment.content}
                   </p>
@@ -1274,8 +1556,8 @@ export default function ProfileScreen({
                     <button
                       type="button"
                       onClick={() => deleteMyComment(comment.id)}
-                      className="text-[14px]"
-                      style={{ color: "#A0A0A0" }}
+                      className="text-label"
+                      style={{ color: "var(--color-gray-soft)" }}
                     >
                       Delete
                     </button>
@@ -1297,22 +1579,14 @@ export default function ProfileScreen({
           onClick={onBack}
           aria-label="Back"
           className="absolute left-4 top-5 w-9 h-9 flex items-center justify-center"
-          style={{ color: "#1F1F1F" }}
+          style={{ color: "var(--color-ink)" }}
         >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
+          <BackIcon />
         </button>
-        <h1 className="font-bold text-[27px]" style={{ color: "#1F1F1F" }}>
+        <h1
+          className="font-bold text-section"
+          style={{ color: "var(--color-ink)" }}
+        >
           Profile
         </h1>
         <button
@@ -1320,16 +1594,12 @@ export default function ProfileScreen({
           onClick={() => setSupportScreen("settings")}
           aria-label="Open settings"
           className="absolute right-4 top-5 w-9 h-9 flex items-center justify-center"
-          style={{ color: "#1F1F1F" }}
+          style={{ color: "var(--color-ink)" }}
         >
           <MenuIcon name="settings" />
         </button>
       </div>
-
-      <section
-        className="px-4 pb-8 flex flex-col items-center"
-        style={{ paddingTop: 50 }}
-      >
+      <section className="px-4 pt-5 pb-6 flex flex-col items-center">
         <input
           ref={fileInputRef}
           type="file"
@@ -1339,34 +1609,36 @@ export default function ProfileScreen({
           tabIndex={-1}
           style={{ display: "none" }}
         />
-
         {profile?.avatar_url && /^https?:\/\//.test(profile.avatar_url) ? (
-          <img
+          <RecipeImage
             src={profile.avatar_url}
             alt={displayName}
-            className="w-[120px] h-[120px] rounded-full object-cover"
+            className="w-[88px] h-[88px] rounded-full object-cover"
           />
         ) : (
           <div
-            className="w-[120px] h-[120px] rounded-full flex items-center justify-center text-[39px] font-bold"
-            style={{ backgroundColor: "#FFF0E6", color: "#F26B21" }}
+            className="w-[88px] h-[88px] rounded-full flex items-center justify-center text-page font-bold"
+            style={{
+              backgroundColor: "var(--color-primary-soft)",
+
+              color: "var(--color-primary)",
+            }}
           >
             {initial}
           </div>
         )}
-
         <button
           type="button"
           onClick={() => !uploadingAvatar && fileInputRef.current?.click()}
           disabled={uploadingAvatar}
-          className="mt-3 text-[15px] font-semibold disabled:opacity-60"
-          style={{ color: "#F26B21" }}
+          className="mt-2 min-h-9 text-label font-semibold disabled:opacity-60"
+          style={{ color: "var(--color-primary)" }}
         >
           {uploadingAvatar ? "Uploading…" : "Upload new photo"}
         </button>
         {avatarMessage && (
           <p
-            className="text-[14px] mt-2 text-center"
+            className="text-label mt-2 text-center"
             style={{
               color:
                 avatarMessage === "Profile photo updated."
@@ -1377,81 +1649,150 @@ export default function ProfileScreen({
             {avatarMessage}
           </p>
         )}
-
         <h2
-          className="font-semibold text-[22px] mt-4"
-          style={{ color: "#1F1F1F" }}
+          className="max-w-full text-center break-words font-semibold text-lead mt-2"
+          style={{ color: "var(--color-ink)" }}
         >
           {loading ? "Loading…" : displayName}
         </h2>
-        <p className="text-[15px] mt-1" style={{ color: "#8A8A8A" }}>
+        <p
+          className="max-w-full text-center break-words text-label mt-0.5"
+          style={{ color: "var(--color-gray-soft)" }}
+        >
           {loading ? "" : username}
         </p>
+        <div
+          className="mt-3 flex items-center justify-center gap-8"
+          aria-label="Follow counts"
+        >
+          {(["followers", "following"] as const).map((kind) => (
+            <button
+              key={kind}
+              type="button"
+              className="min-w-[72px] min-h-11 flex flex-col items-center justify-center gap-0.5"
+              onClick={() => onOpenCommunity(kind)}
+            >
+              <strong
+                className="text-body font-semibold"
+                style={{ color: "var(--color-ink)" }}
+              >
+                {followCounts
+                  ? followCounts[kind].toLocaleString()
+                  : followCountsError
+                    ? "—"
+                    : "…"}
+              </strong>
+              <span
+                className="text-label"
+                style={{ color: "var(--color-gray)" }}
+              >
+                {kind === "followers" ? "Followers" : "Following"}
+              </span>
+            </button>
+          ))}
+        </div>
+        {followCountsError && (
+          <p
+            role="status"
+            className="mt-2 text-label"
+            style={{ color: "var(--color-gray)" }}
+          >
+            Could not refresh follow counts.{" "}
+            <button
+              type="button"
+              onClick={() => setFollowCountsRetry((value) => value + 1)}
+              style={{ color: "var(--color-primary)" }}
+            >
+              Retry
+            </button>
+          </p>
+        )}
       </section>
-
       <div className="px-4 space-y-7">
         {MENU_SECTIONS.map((section) => (
           <section key={section.title}>
             <p
-              className="text-[15px] font-semibold mb-2 px-1"
-              style={{ color: "#8A8A8A" }}
+              className="text-body font-semibold mb-2 px-1"
+              style={{ color: "var(--color-gray-soft)" }}
             >
               {section.title}
             </p>
             <div
               className="rounded-[16px] border overflow-hidden"
-              style={{ borderColor: "#EAEAEA" }}
+              style={{ borderColor: "var(--color-border)" }}
             >
               {section.items.map((item, index) => (
                 <button
                   key={item.label}
                   type="button"
                   onClick={
-                    item.action === "recipes"
-                      ? onOpenMyRecipes
-                      : item.action === "saved"
-                      ? onOpenSaved
-                      : item.action === "liked"
-                        ? onOpenLiked
-                        : item.action === "comments"
-                          ? openMyComments
-                          : item.action === "contact"
-                            ? () => setSupportScreen("contact")
-                            : item.action === "faq"
-                              ? () => setSupportScreen("faq")
-                              : item.action === "privacy"
-                                ? () => setSupportScreen("privacy")
-                                : item.action === "terms"
-                                  ? () => setSupportScreen("terms")
-                                  : undefined
+                    item.action === "following" ||
+                    item.action === "notifications"
+                      ? () => onOpenCommunity(item.action)
+                      : item.action === "recipes"
+                        ? onOpenMyRecipes
+                        : item.action === "saved"
+                          ? onOpenSaved
+                          : item.action === "liked"
+                            ? onOpenLiked
+                            : item.action === "comments"
+                              ? openMyComments
+                              : item.action === "contact"
+                                ? () => setSupportScreen("contact")
+                                : item.action === "account_status"
+                                  ? () => setSupportScreen("account_status")
+                                  : item.action === "faq"
+                                    ? () => setSupportScreen("faq")
+                                    : item.action === "privacy"
+                                      ? () => setSupportScreen("privacy")
+                                      : item.action === "terms"
+                                        ? () => setSupportScreen("terms")
+                                        : undefined
                   }
                   className="w-full h-[58px] px-4 flex items-center gap-3 text-left"
                   style={{
                     borderBottom:
                       index < section.items.length - 1
-                        ? "1px solid #EAEAEA"
+                        ? "1px solid var(--color-border)"
                         : undefined,
-                    backgroundColor: "#FFFFFF",
+
+                    backgroundColor: "var(--color-white)",
                   }}
                 >
                   <span
                     className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
-                    style={{ backgroundColor: "#F9F9F9", color: "#5F5F5F" }}
+                    style={{
+                      backgroundColor: "var(--color-surface)",
+
+                      color: "var(--color-gray-strong)",
+                    }}
                   >
                     <MenuIcon name={item.icon} />
                   </span>
                   <span
-                    className="flex-1 text-[17px] font-medium"
-                    style={{ color: "#1F1F1F" }}
+                    className="flex-1 text-body font-medium"
+                    style={{ color: "var(--color-ink)" }}
                   >
                     {item.label}
+                    {item.action === "notifications" &&
+                      unreadNotifications > 0 && (
+                        <span
+                          className="ml-2 text-label"
+                          style={{ color: "var(--color-primary)" }}
+                        >
+                          {unreadNotifications > 99
+                            ? "99+"
+                            : unreadNotifications}{" "}
+                          unread
+                        </span>
+                      )}
                   </span>
                   <svg
                     width="16"
                     height="16"
                     viewBox="0 0 24 24"
                     fill="none"
-                    stroke="#B0B0B0"
+                    stroke="var(--color-gray-soft)"
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -1463,15 +1804,16 @@ export default function ProfileScreen({
             </div>
           </section>
         ))}
-
         <button
           type="button"
           onClick={() => supabase.auth.signOut()}
-          className="w-full h-12 rounded-[12px] text-[17px] font-semibold"
+          className="w-full h-12 rounded-[12px] text-body font-semibold"
           style={{
-            border: "1.5px solid #E5E5E5",
-            color: "#6F6F6F",
-            backgroundColor: "#FFFFFF",
+            border: "1.5px solid var(--color-border)",
+
+            color: "var(--color-gray)",
+
+            backgroundColor: "var(--color-white)",
           }}
         >
           Log out

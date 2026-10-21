@@ -1,0 +1,30 @@
+Pickle — Current Content Policy
+Snapshot: 2026-10-15
+Server agreement version: 2026-10-15.3
+
+1. Content covered by this policy
+Pickle accounts are for people aged 18 and over. This policy applies to recipes, photos, comments, reviews, profiles and messages. You must have permission to share your content. Honest low ratings, respectful criticism, different tastes and ordinary cooking failures are not policy violations.
+
+2. Prohibited content and behaviour
+Do not post harassment, threats, bullying, hateful discrimination or incitement to violence; sexual exploitation, explicit sexual content, non-consensual sexual images or child sexual abuse content; private identifying information or private conversations without permission; scams, phishing, spam or deceptive promotions; content that infringes another person's rights or impersonates them; instructions that encourage harm, clearly dangerous cooking practices or unsupported promises to cure disease; manipulated reviews or engagement; or content or accounts intended to evade moderation.
+
+3. Reporting and responsibility
+Pickle is operated by Taelim Auh, an individual based in the Republic of Korea. Report recipes, reviews, comments and users in the app, and block users when needed. Designated Pickle administrators review reports. The responsible Pickle operator reviews long or permanent suspensions and reversals. Reviewers must not handle cases in which they are the reported person or reporter. Contact admin@getpickleapp.com for additional information or questions.
+
+4. Review process and response targets
+Reports are received, prioritised and grouped by incident. Reviewers consider the full context, relevant evidence, established previous violations and any additional information needed before deciding. Content may be provisionally hidden to prevent ongoing harm without confirming a violation. Urgent and high-priority cases have a 24-hour first-review target; ordinary reports have a 3-business-day target. These are operational goals, not guaranteed response times.
+
+5. Content actions
+Possible outcomes include no violation confirmed, requests for changes or information, provisional hiding, hiding, removal and restoration. Content removal means removal from the service's public display; it is different from irreversible deletion of every stored record. A report or allegation alone does not establish infringement or unsafe conduct. Report count alone never determines a sanction.
+
+6. Account warnings and restrictions
+A minor first confirmed incident normally receives a warning and an appropriate content action. Repeated confirmed incidents may lead to a 3-day restriction on publishing, photo uploads and messages, or a 7-day or 30-day suspension that also restricts social interactions. Critical risk may lead to a provisional 24-hour suspension and immediate content hiding while a long or permanent suspension is reviewed. Severe violations or proven repeated evasion may justify permanent suspension without prior warnings. Long and permanent suspensions require a separate final approval step. Suspended accounts may still view notices, report safety concerns, appeal, delete their own content and request account deletion.
+
+7. Repeat violations, expiry and false reports
+Repeated violations are assessed using confirmed incidents within the preceding 90 days. Duplicate reports about the same incident count once; dismissed, provisional and overturned findings do not count. Restrictions expire at the stated end time; permanent suspension has no automatic end date. Proven malicious false reporting may lead to a warning or temporary reporting restriction. A report that is merely dismissed does not justify restricting the reporter.
+
+8. Notices, privacy and appeals
+Authors receive the affected content or account action, policy clause, public reason and any restriction duration through in-app notices and email. Reporter identity and internal administrator notes are not shared with the author. Reporters receive only a limited review result. You may appeal within 14 days of the decision notice through Profile > Account status & appeals. We aim to review appeals within 7 business days, using another uninvolved reviewer where available. If the decision was mistaken, its violation count and restriction are cancelled and content is restored unless another standing decision still applies.
+
+9. Records and account deletion
+Review decisions, responsible administrators, reasons, times and appeal results are recorded for oversight. Detailed report snapshots, evidence and notes expire 30 days after case closure or final appeal review, whichever is later. Minimum enforcement history is retained for 90 days. Open cases/appeals and the minimum state needed to enforce an active restriction remain until resolved or the restriction ends. Account deletion immediately attempts removal of the account, published recipes and uploaded account/recipe/chat photos; the account's public profile/content is hidden while failed steps retry automatically. The application keeps minimal deletion-processing records and an encrypted receipt backup for 30 days after successful deletion, without making a backup copy of recipe, message or photo content. Expired files are removed through the storage service; failed cleanup is retried and visible to the operator. Vendor-managed logs, mailbox copies and infrastructure backups have separate settings; this does not assert that those providers' lifecycles have been changed to 30 days. Contact admin@getpickleapp.com for privacy/deletion assistance.

@@ -1,0 +1,21 @@
+.recipe-author-card { margin: 18px 0 0; padding: 18px 0; border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); color: var(--color-ink); font-size: var(--text-label); line-height: var(--text-label--line-height); }
+.recipe-author-row { display: flex; align-items: center; gap: 12px; }
+.recipe-author-identity { min-width: 0; flex: 1; display: flex; align-items: center; gap: 10px; text-align: left; }
+.recipe-author-avatar { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; flex-shrink: 0; display: flex; justify-content: center; align-items: center; background: var(--color-primary-soft); color: var(--color-primary); font-size: var(--text-lead); line-height: var(--text-lead--line-height); }
+.recipe-author-info { display: grid; gap: 4px; min-width: 0; }
+.recipe-author-info strong { font-size: var(--text-body); line-height: var(--text-body--line-height); font-weight: 600; overflow-wrap: anywhere; }
+.recipe-author-info small { font-size: var(--text-caption); line-height: var(--text-caption--line-height); color: var(--color-gray); }
+.recipe-author-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.recipe-author-follow { padding: 9px 12px; border: 1px solid var(--color-primary); border-radius: 20px; background: var(--color-primary); color: var(--color-white); font-size: var(--text-label); line-height: var(--text-label--line-height); font-weight: 600; }
+.recipe-author-follow.is-following { background: white; color: var(--color-ink); border-color: var(--color-gray-faint); }
+.recipe-author-bell { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 1px solid var(--color-gray-faint); -webkit-tap-highlight-color: transparent; }
+.recipe-author-bell.is-enabled { color: var(--color-primary); border-color: var(--color-primary); background: var(--color-primary-soft); }
+.recipe-author-card button:disabled { opacity: .55; cursor: default; }
+.recipe-author-card button:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 3px; }
+.recipe-author-message { margin-top: 12px; color: var(--color-gray); font-size: var(--text-label); line-height: var(--text-label--line-height); line-height: 1.5; }
+.recipe-author-retry { margin-top: 10px; color: var(--color-primary); }
+@media(max-width: 350px) { .recipe-author-row { flex-wrap: wrap; } .recipe-author-identity { flex-basis: 100%; } .recipe-author-actions { margin-left: auto; } }
+html[data-theme="dark"] .recipe-author-card { color: var(--color-surface); border-color: var(--color-charcoal); }
+html[data-theme="dark"] .recipe-author-info small, html[data-theme="dark"] .recipe-author-message { color: var(--color-gray-faint); }
+html[data-theme="dark"] .recipe-author-follow.is-following { background: var(--color-charcoal); color: var(--color-surface); border-color: var(--color-gray-strong); }
+html[data-theme="dark"] .recipe-author-bell { border-color: var(--color-gray-strong); }

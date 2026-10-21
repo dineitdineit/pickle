@@ -1,0 +1,96 @@
+Pickle 데이터·SDK 사용 점검
+후속 보완 적용: data-use-hardening-2026-10-15.ko.txt를 우선 확인하세요. 아래는 수정 전 점검 기록입니다.
+점검일: 2026-10-15
+대상 브랜치: capacitor-android-bootstrap
+
+범위와 판정 방식
+현재 작업 폴더의 소스/설치된 JS 패키지/Android 설정, 연결된 Supabase 운영 DB의 스키마·RLS·권한·함수·버킷·예약 작업, Vercel pickle 프로젝트의 제한된 설정 응답과 Drains 목록을 읽기 전용으로 점검했습니다.
+실제 고객 이메일·메시지·사진·검색어·로그 본문과 비밀번호/API 키는 조회하거나 이 문서에 저장하지 않았습니다. 고객 데이터 생성·변경·삭제, 배포, 공개 약관 개정은 하지 않았습니다.
+실행 중인 앱의 전체 네트워크 캡처, 최종 출시 AAB의 전이 네이티브 의존성/병합 권한 검사, 모든 공급자의 관리 화면 설정까지 검증한 결과는 아닙니다. 현재 로컬 코드가 Vercel 최신 배포나 사용자의 설치 APK와 동일하다는 보장도 별도 확인이 필요합니다.
+
+1. 이메일·인증 정보
+처리: Supabase Auth의 이메일/비밀번호 인증, 인증 메일·비밀번호 재설정, Google OAuth. 앱은 Google OAuth 추가 scope를 지정하지 않습니다. Apple은 현재 안내 문구만 있으며 로그인 버튼은 제공하지 않습니다.
+공개: public.profiles에는 이메일 컬럼이 없습니다. 공개 프로필은 계정 UUID/이름/태그/사진/소개 등을 사용합니다. Auth 이메일이 공개 프로필 데이터에 포함되는 구조는 확인되지 않았습니다.
+외부 전달: 인증 이메일은 운영자가 설정했다고 확인한 Resend SMTP, 제재 서비스 이메일은 서버 함수→Resend API. 후자는 수신 이메일·발신 주소·제목·공개 안내 본문을 전달하고, 제공자 응답 본문을 오류 기록으로 저장하지 않습니다.
+문의: admin@getpickleapp.com→Porkbun 전달→Gmail. 문의 발신자와 내용은 이 공급자들을 통과합니다.
+보관: 계정 사용 중 Auth 보관, 탈퇴 처리 시 Auth 삭제를 시도하고 실패하면 숨김/쓰기 제한 상태로 재시도. 앱 발송 대기열은 정해진 30일 정책 대상이나, Resend 자체 기록과 수신 메일함은 별도입니다.
+미확인: SMTP 관리 화면의 실제 발신/도메인 설정, Google의 실제 동의 화면/반환 claim 목록, 제공자 기록 수명. 이번 점검은 실제 메일 발송 테스트가 아닙니다.
+근거: src/AuthScreen.tsx, src/lib/supabase.ts, supabase/functions/moderation-email-worker/worker.ts, 운영 profiles 컬럼.
+
+2. 이름·아이디·프로필
+처리: 계정 UUID, username, display_name, avatar_url, bio, role, 생성일, 숨김 상태.
+공개: 이름·@태그·프로필 사진·소개 및 표시 통계. 사용자 UUID도 데이터 API/공개 검색 결과에 등장하므로 이를 비밀 식별자로 취급하면 안 됩니다.
+통제: profiles 읽기에 RLS 활성화. 숨김 프로필/차단 관계는 RESTRICTIVE 정책으로 추가 제한합니다. 이름/태그는 현재 일반 사용자 UI에서 고정입니다.
+탈퇴: 프로필/연결 데이터는 계정 삭제 처리 대상입니다. 이미 다른 사용자가 복사한 공개 정보는 회수할 수 없습니다.
+근거: 운영 profiles 컬럼 및 public_read_profiles/moderated_profile_visibility/block_profile_read 정책, src/UserProfileScreen.tsx.
+
+3. 프로필·레시피·채팅 사진
+실제 버킷: avatars/public, community_recipe_images/public, 기존 recipe_images/public, chat_images/private, retention-backups/private.
+현재 신규 사용자 업로드: avatars/community_recipe_images/chat_images는 JPEG·PNG·WebP, 최대 5 MiB. 기존 recipe_images는 버킷 차원의 MIME/크기 제한이 없습니다. 이것만으로 일반 사용자가 그 버킷에 업로드할 수 있다는 뜻은 아닙니다.
+프로필 사진은 원본 File을 직접 업로드합니다. 레시피 사진도 원본 유지 경로에서는 원본 File을 업로드합니다. 자르기를 적용하면 canvas에서 새 이미지로 인코딩하지만, 모든 업로드에 공통 메타데이터 제거 단계는 없습니다. 채팅 사진도 원본 File 업로드입니다.
+확인된 보완점: EXIF GPS·촬영 정보가 포함된 사진을 선택하면 원본 경로를 통해 해당 메타데이터가 저장/전달될 가능성이 있습니다. 앱이 위치 권한을 요청하지 않는 것과 사진 속 위치정보 제거는 별개입니다. 실제 사용자 사진의 EXIF는 열어보지 않았습니다.
+공개 사진 URL은 화면의 숨김/차단 정책만으로 접근을 철회할 수 없습니다. 파일을 알고 있는 사람에게 차단이 파일 접근 통제로 작동한다고 안내하면 안 됩니다.
+채팅 사진: 참여자 정책과 300초 서명 URL 사용, 240초마다 갱신. 이미 발급된 URL이나 받은 사본의 즉시 회수는 보장되지 않습니다. 종단간 암호화 기능은 없습니다.
+탈퇴: 서버가 UID 폴더와 관련 대화 사진을 목록화해 Storage API로 지우고, 파일 삭제 성공 확인 후 Auth 삭제를 진행합니다. 실패는 재시도합니다.
+확인된 보완점: 레시피 개별 삭제 private.delete_recipe_submission은 recipes/recipe_submissions DB 행만 삭제합니다. 해당 두 테이블의 비내부 DELETE 트리거도 없습니다. 클라이언트는 삭제 RPC 후 기기 초안 캐시만 지웁니다. 이 경로에서 공개 사진 파일 파기 작업은 확인되지 않았습니다. 사진 교체/업로드 취소로 남는 파일의 정기 정리도 별도 필요합니다. 계정 탈퇴 파일 정리와 혼동하면 안 됩니다.
+근거: 운영 storage.buckets/Storage 정책/삭제 함수·트리거, src/ProfileScreen.tsx, src/RecipeUploadScreen.tsx, src/PhotoCropDialog.tsx, src/lib/chatPhotos.ts, src/MessagePhoto.tsx, src/MyRecipesScreen.tsx, retention_helpers.refresh_files.
+
+4. 레시피·댓글·리뷰
+처리/공개: 레시피 제목·설명·재료·단계·사진·태그·선택 영양 정보·영상 링크, 댓글/답글 본문, 리뷰/별점, 작성자 ID와 시각. 공개 콘텐츠는 방문자도 볼 수 있습니다.
+초안: recipe_submissions의 소유자 RLS와 계정별 기기 초안 캐시 사용. 비공개 초안의 사진도 공개 버킷에 먼저 올라갈 수 있으므로, 초안 DB 비공개가 사진 파일 자체의 비공개를 의미하지 않습니다.
+신고/제재: 별도 권한 검사와 증거/결정/이의신청 자료 처리. 상세 증거 30일, 최소 제재 이력 90일, 미결 사건/활성 제한 예외는 retention-policy.ko.txt 기준입니다.
+탈퇴: 계정/레시피 연결 CASCADE 및 삭제 전 정리 적용. 개별 사진 파기 문제는 3번 참고.
+근거: 운영 recipes/recipe_comments/recipe_reviews/recipe_submissions 컬럼·RLS, docs/content-moderation.md, docs/data-retention.md.
+
+5. 팔로우·알림 선택
+처리: follower_id, followed_id, 생성 시각, notify_new_recipes. 팔로우 관계와 새 레시피 알림/통계에 사용합니다.
+접근: 직접 user_follows 읽기는 로그인한 관계 당사자에 한정됩니다. 전체 관계 목록을 모든 방문자에게 공개하는 테이블 정책은 아닙니다. 공개 통계/목록 RPC가 반환하는 정보와 직접 테이블 권한은 구분해야 합니다.
+최소화 보완점: 관계 당사자는 SELECT 권한이 있는 notify_new_recipes 컬럼도 API로 읽을 수 있습니다. UI에 노출하지 않더라도 상대방의 알림 켜기/끄기 선택을 비공개로 보장하는 구조는 아닙니다. 선택을 팔로워 본인만 보게 하려면 전용 테이블/컬럼 접근 제한과 RPC가 필요합니다.
+차단 시 상호작용 제한/관계 정리 정책은 별도로 존재하며, 탈퇴 시 연결 활동은 삭제 대상입니다.
+근거: 운영 user_follows 컬럼 권한/read_own_follow_connections 정책, src/SocialScreen.tsx, docs/user-blocking.md.
+
+6. 검색·조회 기록
+일반 검색 제출: 검색어·정규화 검색어·결과 수·시각·로그인 시 계정 ID가 search_events에 저장됩니다. 입력하는 모든 글자를 같은 이벤트로 기록하는 방식은 아닙니다. 프로필 내부 레시피 검색은 이 기록 경로에서 제외합니다.
+서버 원시 검색 기록은 관리자 전용 읽기이며, 30일 파기 작업 대상입니다.
+추천 공개: 최근 30일 중 결과가 있고 같은 정규화 검색어가 2회 이상인 항목이 추천 후보가 됩니다. 서로 다른 2명의 검색이라는 조건은 없습니다. 검색자 ID를 반환하지 않아도 민감한 검색 문구 자체가 노출될 수 있습니다. 민감어/연락처 필터링이나 다수 고유 사용자 기준은 현재 함수에서 확인되지 않았습니다.
+기기 최근 검색: localStorage에 공용 키로 최대 4개, 자동 시간 만료 없음. 항목 삭제는 서버 검색 이벤트 삭제가 아닙니다. 일반 로그아웃 경로는 이 목록을 지우지 않으므로 같은 기기의 다음 사용자가 볼 수 있습니다. 탈퇴 접수 후에는 현 기기 공용 최근 검색과 해당 계정 초안/설정 캐시를 정리합니다.
+조회: recipe_views는 id/recipe_id/viewed_at만 있으며 계정 ID/IP 컬럼은 없습니다. sessionStorage에 레시피별 중복 방지 표식을 둡니다. 원시 조회 시각 행도 공개 읽기 정책이 있어 집계 숫자만 노출되는 구조는 아닙니다. 조회 정보가 공급자의 요청 로그와 결합될 가능성까지 완전 익명이라고 단정할 수 없습니다.
+현재 레시피 통계에는 계정 식별자 검색 기록과 같은 30일 TTL이 적용되지 않습니다. 장기 집계로 전환하고 원시 시각 행 노출/보관을 줄이는 방안은 별도 작업입니다.
+근거: src/SearchScreen.tsx, src/recentSearches.ts, src/RecipeDetailScreen.tsx, 운영 search_events/recipe_views 및 get_search_suggestions 함수, 보관 예약 작업.
+
+7. 서버 로그
+Supabase: API Gateway/Auth/DB/Storage/Realtime/Edge Function 요청·오류 로그는 앱 검색/조회 테이블과 별개입니다. 실제 고객 로그를 읽지 않았으므로 특정 필드가 이 프로젝트의 모든 요청에서 남는다고 단정하지 않습니다.
+확인한 Postgres 설정: log_statement=ddl, log_min_error_statement=error, log_parameter_max_length=-1, log_parameter_max_length_on_error=0, log_connections=off, log_disconnections=off.
+이는 일반 SELECT 본문을 항상 기록하는 설정은 아니지만, 오류를 일으킨 SQL/SQL에 직접 포함된 리터럴/다른 로그 소스의 민감 정보까지 모두 제거한다는 보장은 아닙니다. 파라미터 설정만으로 안전한 로그 전체를 보장할 수 없습니다.
+Edge worker는 고정 오류 코드/집계 위주이며 이메일 제공자 응답 본문을 저장하지 않습니다. 프런트엔드는 여러 위치에서 SDK 오류 객체를 console.error로 출력하므로 개발자 도구/기기 진단 시 데이터가 포함될 가능성은 별도로 점검해야 합니다. 전용 원격 오류 수집 SDK로 이를 전송하는 코드는 찾지 못했습니다.
+Vercel: 연결된 pickle 프로젝트 확인. 해당 프로젝트 필터로 조회한 Drains 목록은 빈 배열이었습니다. 반환된 get_project 결과에는 Web Analytics/Speed Insights 활성 필드가 없어 활성/비활성을 확정할 수 없습니다. 운영자는 해당 설정 여부를 모른다고 답했습니다. 기본 플랫폼 로그가 없다는 뜻은 아닙니다.
+Supabase/Vercel/Resend 실제 플랜별 로그 수명·Log Drain 외 추가 통합·메일함 보관은 미확인입니다. 앱의 30일 작업이 이들 기록을 지우지는 않습니다.
+근거: 운영 pg_settings, Vercel get_project/list_drains 읽기 응답, src의 console.error 위치, supabase/functions.
+
+8. SDK·권한·외부 요청
+확인한 직접 JS 의존성: @supabase/supabase-js 2.116.0, Capacitor Android/Core/App/Browser 8.x, React/ReactDOM 19.x, @fontsource/inter 5.3.0.
+Supabase SDK: Auth/DB/Storage/Realtime/서버 함수 데이터 전송. 기본 세션 지속/자동 갱신을 사용하고 WebView/브라우저 localStorage에 인증 세션을 보관합니다. 별도 네이티브 보안 저장소 설정은 없습니다.
+Supabase의 OpenTelemetry API는 선택적 peer 의존성입니다. 앱에서 tracing 초기화/tracePropagation 활성화를 찾지 못했으므로, 의존성 이름만으로 외부 분석 전송을 한다고 판단하지 않았습니다.
+Capacitor App/Browser는 앱 생명주기/뒤로가기 및 브라우저 동작용입니다. 앱 코드의 전용 광고·외부 분석·Crashlytics/Sentry/Firebase Analytics SDK나 광고 ID 수집 코드는 찾지 못했습니다. Android의 Google services 플러그인 템플릿만으로 Firebase 수집을 한다고 볼 수 없고, 현재 android/app/google-services.json도 없습니다.
+앱 소스 manifest의 요청 권한은 INTERNET입니다. 위치·연락처·마이크·전화 권한은 선언되어 있지 않습니다. 최종 병합 manifest/AAB와 SDK 전이 의존성에 대한 별도 출시 검사는 남아 있습니다.
+Android allowBackup=true이며 fullBackupContent/dataExtractionRules는 앱 manifest에 지정되지 않았습니다. 기기/OS 조건에 따라 로컬 데이터가 백업·이전될 가능성을 검토하고 인증 세션/초안 등 제외 규칙을 정해야 합니다. 실제 기기 백업·복원 범위는 이번에 테스트하지 않았습니다.
+Inter 폰트는 패키지에서 앱에 포함하며 Google Fonts CDN 요청은 확인되지 않았습니다.
+동영상: 사용자가 재생 화면을 열면 YouTube nocookie 임베드, 기존 Vimeo/직접 동영상 재생 경로가 요청을 보낼 수 있습니다. Instagram 등 외부 링크는 실행 시 해당 사이트로 이동합니다. 신규 입력 허용은 YouTube/Instagram이지만 기존 재생 코드는 더 넓습니다. nocookie 호스트가 외부 데이터 처리가 전혀 없다는 뜻은 아닙니다.
+근거: package.json/package-lock.json, 설치 SDK 기본 설정, capacitor.config.ts, android/app/build.gradle 및 capacitor.build.gradle/소스 manifest, src/main.tsx, src/lib/supabase.ts, src/RecipeVideo.tsx, src/lib/video.ts.
+
+9. 현재 개인정보처리방침 대조
+current/privacy-policy.en.txt 제1·2·3·5·6·7·11·12조에 요청하신 주요 데이터/목적/공개 범위/제공자/30·90일 보관/문의처가 기재되어 있습니다.
+추가 명시·구체화 후보: 원본 이미지의 내장 메타데이터, Supabase 세션 저장과 Android 백업, SDK 명칭/역할, 공급자 로그의 기술 정보 종류와 확인된 수명, 개별 레시피 삭제 시 물리 파일 처리, 초안 사진의 공개 URL 가능성.
+권한/보관 동작을 먼저 확정·수정하고 실제 동작과 맞춰 개정해야 합니다. 이번 점검에서 공개 약관 또는 서버 동의 버전을 변경하지 않았습니다.
+
+10. 우선순위와 후속 검증
+높음: 개별 레시피/초안 삭제·사진 교체/취소의 파일 정리 및 재시도, 비공개 초안 사진 접근 설계, 모든 업로드 이미지 공통 메타데이터 제거.
+높음: Android 인증/초안 등 백업·이전 제외 정책 및 실제 기기 복원 검증.
+중간: 검색 추천 민감어/연락처 노출 완화, 같은 기기 로그아웃 후 최근 검색 격리/정리, notify_new_recipes 본인 전용 접근, 조회 원시 행 대신 집계 노출 최소화.
+출시 전 확인: Vercel Analytics/Speed Insights 관리 화면, 공급자 로그/백업/메일함 수명, 실제 Google OAuth claim, 최종 AAB의 SDK/권한과 프록시 네트워크 점검, 확정 결과에 맞춘 개인정보처리방침·Play Data safety 작성.
+기존 보안 어드바이저: 관리자 분석 SECURITY DEFINER 호출 경고(함수의 관리자 가드 별도 존재), 유출 비밀번호 보호 비활성 경고, 의도된 기본 차단 visibility_epoch 테이블 정보. 이번 읽기 점검으로 새 DB 객체나 권한은 추가하지 않았습니다.
+
+공식 기술 참고(확인일 2026-10-15)
+https://supabase.com/docs/guides/observability/logs
+https://developer.android.com/identity/data/autobackup
+위 자료는 공급자의 일반 동작 설명이며 이 프로젝트 플랜/설정의 완료 증거는 아닙니다.

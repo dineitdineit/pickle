@@ -1,0 +1,49 @@
+.user-profile { max-width: 680px; margin: 0 auto; padding: 16px 16px 140px; color: var(--color-ink); }
+.user-profile-header { display: flex; gap: 10px; align-items: center; margin-bottom: 28px; }
+.user-profile-header h1 { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; font-size: var(--text-lead); line-height: var(--text-lead--line-height); font-weight: 600; }
+.user-profile-icon { width: 36px; height: 40px; display: grid; place-items: center; flex-shrink: 0; -webkit-tap-highlight-color: transparent; }
+.user-profile-summary { display: flex; gap: 16px; align-items: center; }
+.user-profile-summary-info { flex: 1; min-width: 0; height: 96px; display: flex; flex-direction: column; justify-content: space-between; gap: 6px; }
+.user-profile-identity { display: grid; gap: 0; overflow-wrap: anywhere; }
+.user-profile-identity strong { font-size: var(--text-body); line-height: 1.25; font-weight: 600; }
+.user-profile-identity > span { margin-top: -3px; font-size: var(--text-label); line-height: 1.25; color: var(--color-gray); }
+.user-profile-avatar { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; flex-shrink: 0; background: var(--color-primary-soft); color: var(--color-primary); font-size: var(--text-hero); line-height: var(--text-hero--line-height); display: grid; place-items: center; }
+.user-profile-stats { min-width: 0; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); text-align: left; }
+.user-profile-stats > * { display: grid; gap: 2px; padding: 0; text-align: left; }
+.user-profile-stats strong { font-size: var(--text-lead); line-height: var(--text-lead--line-height); font-weight: 700; }
+.user-profile-stats span { font-size: var(--text-caption); line-height: var(--text-caption--line-height); }
+.user-profile-bio { display: grid; gap: 4px; margin: 18px 0; font-size: var(--text-label); line-height: var(--text-label--line-height); overflow-wrap: anywhere; }
+.user-profile-bio:empty { margin: 10px 0; }
+.user-profile-bio p { margin-top: 5px; white-space: pre-wrap; }
+.user-profile-actions { display: flex; gap: 10px; }
+.user-profile-actions button { flex: 1; padding: 10px; border-radius: 9px; background: var(--color-surface); font-size: var(--text-label); line-height: var(--text-label--line-height); font-weight: 600; }
+.user-profile-actions .user-profile-follow { background: var(--color-primary); color: white; }
+.user-profile-message-count { display: inline-block; margin-left: 6px; padding: 1px 6px; border-radius: 10px; background: var(--color-primary); color: white; font-size: var(--text-caption); line-height: var(--text-caption--line-height); }
+.user-profile-actions button:disabled, .user-profile-icon:disabled { opacity: .45; }
+.user-profile-hint { color: var(--color-gray); font-size: var(--text-caption); line-height: var(--text-caption--line-height); margin-top: 7px; text-align: right; }
+.user-profile-status { padding: 12px; background: var(--color-primary-soft); border-radius: 9px; font-size: var(--text-label); line-height: var(--text-label--line-height); margin-top: 12px; }
+.user-profile-recipes-title { border-bottom: 1px solid var(--color-border); font-size: var(--text-body); line-height: var(--text-body--line-height); font-weight: 600; padding: 18px 0 12px; margin-bottom: 3px; }
+.user-profile-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 3px; }
+.user-profile-grid button { position: relative; aspect-ratio: 1; overflow: hidden; background: var(--color-surface); text-align: left; }
+.user-profile-grid img { width: 100%; height: 100%; object-fit: cover; }
+.user-profile-grid-caption { position: absolute; inset: auto 0 0; display: grid; gap: 0; padding: 20px 7px 4px; color: var(--color-white); background: linear-gradient(transparent,rgba(0,0,0,.7)); pointer-events: none; }
+.user-profile-grid-caption strong { font-size: var(--text-tiny); line-height: var(--text-tiny--line-height); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,.5); }
+.user-profile-grid-caption small { margin-top: 0; font-size: var(--text-tiny); line-height: var(--text-tiny--line-height); text-shadow: 0 1px 2px rgba(0,0,0,.5); }
+.user-profile-grid-caption .user-profile-view-count svg { width: 10px; height: 10px; }
+.user-profile-empty { padding: 35px 8px; color: var(--color-gray); text-align: center; }
+.user-profile-more { display: block; margin: 24px auto; color: var(--color-primary); font-size: var(--text-label); line-height: var(--text-label--line-height); }
+.user-profile button:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 3px; }
+html[data-theme="dark"] .user-profile { color: var(--color-surface); }
+html[data-theme="dark"] .user-profile-actions button, html[data-theme="dark"] .user-profile-grid button { background: var(--color-charcoal); }
+html[data-theme="dark"] .user-profile-actions .user-profile-follow { background: var(--color-primary); }
+html[data-theme="dark"] .user-profile-identity > span, html[data-theme="dark"] .user-profile-empty, html[data-theme="dark"] .user-profile-hint { color: var(--color-gray-faint); }
+html[data-theme="dark"] .user-profile-status { background: var(--color-primary-dark-surface); }
+html[data-theme="dark"] .user-profile-recipes-title { border-color: var(--color-charcoal); }
+@media(max-width: 350px) { .user-profile-avatar { width: 88px; height: 88px; } .user-profile-summary-info { height: 88px; } .user-profile-summary { gap: 10px; } .user-profile-stats span { font-size: var(--text-caption); line-height: var(--text-caption--line-height); } }
+.user-profile-popular .user-profile-recipes-title { border-bottom: 0; padding-bottom: 0; margin-bottom: 0; }
+.user-profile-popular-list { display: grid; gap: 14px; padding-top: 12px; }
+.user-profile-view-count { display: inline-flex; align-items: center; gap: 3px; }
+.user-profile-view-count svg { flex-shrink: 0; }
+.user-profile-icon[hidden] {
+  display: none;
+}

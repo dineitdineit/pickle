@@ -1,6 +1,9 @@
+import RecipeImage from "./RecipeImage"
+import BackIcon from "./BackIcon"
 import RecipeVideo, { PlayIcon, VideoBadge } from "./RecipeVideo"
 import { videoSource } from "./lib/video"
 import { shareRecipe, recipeShareUrl } from "./lib/share"
+import ReportButton from "./ReportButton"
 import type { IngredientRow, StepRow, Nutrition } from "./recipeTypes"
 import {
   IngredientsSection,
@@ -14,160 +17,317 @@ import RetryState from "./RetryState"
 import { supabase } from "./lib/supabase"
 import { getCurrentUser } from "./lib/auth"
 import RecipeComments from "./RecipeComments"
+import RecipeTaggedPosts from "./RecipeTaggedPosts"
+import RecipeCookedShortcut from "./RecipeCookedShortcut"
+import type { RecipeTagChoice } from "./lib/postRecipeTags"
+import PhotoPostsScreen from "./PhotoPostsScreen"
+import CookingMode from "./CookingMode"
+import { cookingSignature } from "./lib/cooking"
 import RecipeReviews, { ReviewStars } from "./RecipeReviews"
 import { useRecipeReviews } from "./lib/reviews"
+import RecipeAuthorCard from "./RecipeAuthorCard"
+import ViewIcon from "./ViewIcon"
 
 type RecipeDetailScreenProps = {
   recipeId: string
+
+  initialCommentId?: string
+
   onBack: () => void
+
   onSelectRecipe: (id: string) => void
+
   onBrowse: () => void
+
   onRequireLogin: () => void
+
+  onOpenAuthor?: (id: string) => void
+
+  onEditRecipe?: (id: string) => void
+  onCookedRecipe: (recipe: RecipeTagChoice) => void
 }
 
 type Recipe = {
+  author_id: string | null
+
   id: string
+
   title: string
+
   short_description: string | null
+
   description: string | null
+
   difficulty: string | null
+
   total_time_minutes: number | null
+
   servings: number | null
+
   video_url: string | null
+
   cover_image: string | null
+
   ingredients_image: string | null
+
   finished_image: string | null
+
   like_count: number
 }
 
 type Recommendation = {
   id: string
+
   title: string
+
   difficulty: string | null
+
   total_time_minutes: number | null
+
   video_url: string | null
+
   cover_image: string | null
 }
 
 export default function RecipeDetailScreen({
   recipeId,
+
+  initialCommentId,
+
   onBack,
+
   onSelectRecipe,
+
   onBrowse,
+
   onRequireLogin,
+
+  onOpenAuthor,
+
+  onEditRecipe,
+  onCookedRecipe,
 }: RecipeDetailScreenProps) {
   const [videoOpen, setVideoOpen] = useState(false)
+
   const [recipe, setRecipe] = useState<Recipe | null>(null)
+
   const [ingredients, setIngredients] = useState<IngredientRow[]>([])
+
   const [steps, setSteps] = useState<StepRow[]>([])
+
   const [nutrition, setNutrition] = useState<Nutrition | null>(null)
+
   const [recommendations, setRecommendations] = useState<Recommendation[]>([])
+
   const [loading, setLoading] = useState(true)
+
   const [errorMessage, setErrorMessage] = useState("")
+
   const [retryKey, setRetryKey] = useState(0)
+
   const [activeTab, setActiveTab] =
     useState<"Ingredients" | "Steps" | "Nutrition">("Ingredients")
+
   const [userId, setUserId] = useState<string | null>(null)
+
   const [isSaved, setIsSaved] = useState(false)
+  useEffect(() => {
+    if (
+      !userId ||
+      !isSaved ||
+      loading ||
+      errorMessage ||
+      recipe?.id !== recipeId
+    )
+      return
+    // Analytics must never block recipe use. The server validates ownership,
+    // later-day eligibility and deduplicates this action without extra payload.
+    void Promise.resolve(
+      supabase.rpc("record_saved_recipe_return", { p_recipe: recipeId }),
+    ).catch(() => {})
+  }, [userId, isSaved, loading, errorMessage, recipe?.id, recipeId])
+
   const [saving, setSaving] = useState(false)
+
   const [saveMessage, setSaveMessage] = useState("")
+
   const [isLiked, setIsLiked] = useState(false)
+
   const [liking, setLiking] = useState(false)
+
   const [likeMessage, setLikeMessage] = useState("")
+
   const shareRequest = useRef(0)
+
   const [sharing, setSharing] = useState(false)
+
   const [shareMessage, setShareMessage] = useState("")
+
   const [showShareLink, setShowShareLink] = useState(false)
+
   const [commentCount, setCommentCount] = useState(0)
+
+  const [viewCount, setViewCount] = useState<number | null>(null)
+  const [taggedPostView, setTaggedPostView] = useState<{
+    postId?: string
+  } | null>(null)
+  const [cookingOpen, setCookingOpen] = useState(false)
+  useEffect(() => setCookingOpen(false), [recipeId, userId])
+  const taggedPostScroll = useRef(0)
+  function openTaggedPost(postId?: string) {
+    taggedPostScroll.current = window.scrollY
+    setTaggedPostView(postId ? { postId } : {})
+    window.scrollTo({ top: 0 })
+  }
+  function closeTaggedPost() {
+    setTaggedPostView(null)
+    requestAnimationFrame(() =>
+      window.scrollTo({ top: taggedPostScroll.current }),
+    )
+  }
+  useEffect(() => setTaggedPostView(null), [recipeId])
+
   const reviewData = useRecipeReviews(recipeId)
 
   useEffect(() => {
+    const refresh = () => setRetryKey((value) => value + 1)
+
+    window.addEventListener("pickle:safety-refresh", refresh)
+
+    return () => window.removeEventListener("pickle:safety-refresh", refresh)
+  }, [])
+
+  useEffect(() => {
     let ignore = false
+
     setVideoOpen(false)
+
     async function loadRecipe() {
       setLoading(true)
+
+      setViewCount(null)
+
       setErrorMessage("")
 
       const [
         recipeResult,
+
         ingredientResult,
+
         stepResult,
+
         nutritionResult,
+
         recommendationResult,
       ] = await Promise.all([
         supabase
+
           .from("recipes")
+
           .select(
-            "id, title, short_description, description, difficulty, total_time_minutes, servings, cover_image, video_url, ingredients_image, finished_image, like_count",
+            "id, title, short_description, description, difficulty, total_time_minutes, servings, cover_image, video_url, ingredients_image, finished_image, like_count, author_id",
           )
+
           .eq("id", recipeId)
+
           .single(),
+
         supabase
+
           .from("recipe_ingredients")
+
           .select(
             "id, group_name, amount, unit, optional, substitute, display_order, ingredients(name)",
           )
+
           .eq("recipe_id", recipeId)
+
           .order("display_order", { ascending: true }),
+
         supabase
+
           .from("recipe_steps")
+
           .select(
             "id, step_number, title, instruction, step_image, step_time_minutes, is_final",
           )
+
           .eq("recipe_id", recipeId)
+
           .order("step_number", { ascending: true }),
+
         supabase
+
           .from("recipe_nutrition")
+
           .select("calories, protein_g, carbs_g, fat_g, is_estimated")
+
           .eq("recipe_id", recipeId)
+
           .maybeSingle(),
+
         supabase
+
           .from("recipes")
-          .select("id, title, difficulty, total_time_minutes, cover_image, video_url")
+
+          .select(
+            "id, title, difficulty, total_time_minutes, cover_image, video_url",
+          )
+
           .neq("id", recipeId)
+
           .not("cover_image", "is", null)
+
           .order("created_at", { ascending: false })
+
           .limit(8),
       ])
 
       if (ignore) return
 
       if (recipeResult.error || ingredientResult.error || stepResult.error) {
-        if (recipeResult.error)
-          console.error("Failed to load recipe:", recipeResult.error)
-        if (ingredientResult.error)
-          console.error("Failed to load ingredients:", ingredientResult.error)
-        if (stepResult.error)
-          console.error("Failed to load recipe steps:", stepResult.error)
+        if (recipeResult.error) console.error("Failed to load recipe:")
+
+        if (ingredientResult.error) console.error("Failed to load ingredients:")
+
+        if (stepResult.error) console.error("Failed to load recipe steps:")
+
         setRecipe(null)
+
         setIngredients([])
+
         setSteps([])
+
         setErrorMessage("Could not load this recipe.")
+
         setLoading(false)
+
         return
       }
 
       setRecipe(recipeResult.data as Recipe)
+
       setIngredients(
         (ingredientResult.data ?? []).map((row) => ({
           ...row,
+
           ingredients: firstRelation(row.ingredients),
         })),
       )
+
       setSteps((stepResult.data ?? []) as StepRow[])
 
       if (nutritionResult.error) {
-        console.error("Failed to load nutrition:", nutritionResult.error)
+        console.error("Failed to load nutrition:")
+
         setNutrition(null)
       } else {
         setNutrition(nutritionResult.data as Nutrition | null ?? null)
       }
 
       if (recommendationResult.error) {
-        console.error(
-          "Failed to load recipe recommendations:",
-          recommendationResult.error,
-        )
+        console.error("Failed to load recipe recommendations:")
+
         setRecommendations([])
       } else {
         setRecommendations(
@@ -176,17 +336,40 @@ export default function RecipeDetailScreen({
       }
 
       const viewKey = `pickle:viewed:${recipeId}`
+
       if (!sessionStorage.getItem(viewKey)) {
         const { error: viewError } = await supabase
+
           .from("recipe_views")
+
           .insert({ recipe_id: recipeId })
-        if (viewError) console.error("Failed to record recipe view:", viewError)
+
+        if (viewError) console.error("Failed to record recipe view:")
         else sessionStorage.setItem(viewKey, "1")
       }
-      if (!ignore) setLoading(false)
+
+      const viewsResult = await supabase
+
+        .rpc("get_recipe_view_counts")
+
+        .eq("recipe_id", recipeId)
+        .maybeSingle()
+
+      if (!ignore) {
+        if (!viewsResult.error)
+          setViewCount(
+            Number(
+              (viewsResult.data as { view_count?: number } | null)
+                ?.view_count ?? 0,
+            ),
+          )
+
+        setLoading(false)
+      }
     }
 
     loadRecipe()
+
     return () => {
       ignore = true
     }
@@ -197,44 +380,64 @@ export default function RecipeDetailScreen({
 
     async function loadUserState() {
       setSaveMessage("")
+
       setLikeMessage("")
+
       const { data: userData, error: userError } = await getCurrentUser()
+
       if (ignore) return
 
       if (userError || !userData.user) {
         setUserId(null)
+
         setIsSaved(false)
+
         setIsLiked(false)
+
         return
       }
 
       setUserId(userData.user.id)
+
       const [savedResult, likedResult] = await Promise.all([
         supabase
+
           .from("saved_recipes")
+
           .select("recipe_id")
+
           .eq("user_id", userData.user.id)
+
           .eq("recipe_id", recipeId)
+
           .maybeSingle(),
+
         supabase
+
           .from("recipe_likes")
+
           .select("recipe_id")
+
           .eq("user_id", userData.user.id)
+
           .eq("recipe_id", recipeId)
+
           .maybeSingle(),
       ])
 
       if (ignore) return
 
       if (savedResult.error) {
-        console.error("Failed to load saved state:", savedResult.error)
+        console.error("Failed to load saved state:")
+
         setIsSaved(false)
       } else {
         setIsSaved(Boolean(savedResult.data))
       }
 
       if (likedResult.error) {
-        console.error("Failed to load liked state:", likedResult.error)
+        console.error("Failed to load liked state:")
+
         setIsLiked(false)
       } else {
         setIsLiked(Boolean(likedResult.data))
@@ -242,6 +445,7 @@ export default function RecipeDetailScreen({
     }
 
     loadUserState()
+
     return () => {
       ignore = true
     }
@@ -250,30 +454,42 @@ export default function RecipeDetailScreen({
   async function toggleSaved() {
     if (!userId) {
       onRequireLogin()
+
       return
     }
 
     setSaving(true)
+
     setSaveMessage("")
 
     if (isSaved) {
       const { error } = await supabase
+
         .from("saved_recipes")
+
         .delete()
+
         .eq("user_id", userId)
+
         .eq("recipe_id", recipeId)
+
       if (error) {
-        console.error("Failed to remove saved recipe:", error)
+        console.error("Failed to remove saved recipe:")
+
         setSaveMessage("Could not update saved recipes.")
       } else {
         setIsSaved(false)
       }
     } else {
       const { error } = await supabase
+
         .from("saved_recipes")
+
         .insert({ user_id: userId, recipe_id: recipeId })
+
       if (error) {
-        console.error("Failed to save recipe:", error)
+        console.error("Failed to save recipe:")
+
         setSaveMessage("Could not save this recipe.")
       } else {
         setIsSaved(true)
@@ -286,23 +502,32 @@ export default function RecipeDetailScreen({
   async function toggleLike() {
     if (!userId) {
       onRequireLogin()
+
       return
     }
 
     setLiking(true)
+
     setLikeMessage("")
 
     if (isLiked) {
       const { error } = await supabase
+
         .from("recipe_likes")
+
         .delete()
+
         .eq("user_id", userId)
+
         .eq("recipe_id", recipeId)
+
       if (error) {
-        console.error("Failed to unlike recipe:", error)
+        console.error("Failed to unlike recipe:")
+
         setLikeMessage("Could not update your like.")
       } else {
         setIsLiked(false)
+
         setRecipe((current) =>
           current
             ? { ...current, like_count: Math.max(current.like_count - 1, 0) }
@@ -311,13 +536,18 @@ export default function RecipeDetailScreen({
       }
     } else {
       const { error } = await supabase
+
         .from("recipe_likes")
+
         .insert({ user_id: userId, recipe_id: recipeId })
+
       if (error) {
-        console.error("Failed to like recipe:", error)
+        console.error("Failed to like recipe:")
+
         setLikeMessage("Could not like this recipe.")
       } else {
         setIsLiked(true)
+
         setRecipe((current) =>
           current
             ? { ...current, like_count: current.like_count + 1 }
@@ -331,9 +561,13 @@ export default function RecipeDetailScreen({
 
   useEffect(() => {
     shareRequest.current += 1
+
     setShareMessage("")
+
     setShowShareLink(false)
+
     setSharing(false)
+
     return () => {
       shareRequest.current += 1
     }
@@ -341,35 +575,49 @@ export default function RecipeDetailScreen({
 
   async function handleShare() {
     if (!recipe || sharing) return
+
     const request = ++shareRequest.current
+
     setSharing(true)
+
     setShareMessage("")
+
     setShowShareLink(false)
+
     const result = await shareRecipe(recipe)
+
     if (request !== shareRequest.current) return
+
     if (result === "copied") setShareMessage("Recipe link copied!")
+
     if (result === "manual") {
       setShareMessage("Copy this link to share the recipe.")
+
       setShowShareLink(true)
     }
+
     setSharing(false)
   }
 
   const groupedIngredients = useMemo(() => {
     const groups = new Map<string, IngredientRow[]>()
+
     ingredients.forEach((item) => {
       const key = item.group_name || "Ingredients"
+
       const group = groups.get(key)
+
       if (group) group.push(item)
       else groups.set(key, [item])
     })
+
     return Array.from(groups.entries())
   }, [ingredients])
 
   if (loading) {
     return (
       <div className="min-h-screen bg-white max-w-md mx-auto flex items-center justify-center">
-        <p className="text-[17px]" style={{ color: "#6F6F6F" }}>
+        <p className="text-body" style={{ color: "var(--color-gray)" }}>
           Loading recipe…
         </p>
       </div>
@@ -383,10 +631,10 @@ export default function RecipeDetailScreen({
           <button
             onClick={onBack}
             aria-label="Back"
-            className="mb-2 text-[17px] font-medium"
-            style={{ color: "#F26B21" }}
+            className="mb-2 text-body font-medium"
+            style={{ color: "var(--color-primary)" }}
           >
-            ← Back
+            <BackIcon />
           </button>
         </div>
         <RetryState
@@ -405,431 +653,576 @@ export default function RecipeDetailScreen({
   }
 
   return (
-    <div className="recipe-detail relative min-h-screen bg-white max-w-md mx-auto pb-10">
-      {videoOpen && recipe.video_url && <RecipeVideo url={recipe.video_url} title={recipe.title} onClose={() => setVideoOpen(false)} />}
-      <div className="recipe-detail-hero relative h-[300px] bg-gray-100">
-        <img
-          src={recipeImageUrl(recipe.cover_image)}
-          alt={recipe.title}
-          className="w-full h-full object-cover"
-        />
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "linear-gradient(to bottom, rgba(0,0,0,0.28), transparent 38%, rgba(0,0,0,0.18))",
-          }}
-        />
-        {recipe.video_url && videoSource(recipe.video_url) && <button type="button" className="recipe-video-play" aria-label="Play recipe video" onClick={() => setVideoOpen(true)}><PlayIcon /></button>}
-        <button
-          onClick={onBack}
-          aria-label="Back"
-          className="w-10 h-10 rounded-full bg-white/90 flex items-center justify-center"
-          style={{ position: "absolute", top: 20, left: 16, zIndex: 20 }}
-        >
-          <svg
-            width="19"
-            height="19"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#1F1F1F"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
-        </button>
-      </div>
-
-      <div className="recipe-detail-body px-4 pt-5">
-        <div className="recipe-detail-intro">
+    <>
+      <div
+        hidden={!!taggedPostView}
+        className="recipe-detail relative min-h-screen bg-white max-w-md mx-auto pb-10"
+      >
+        {videoOpen && recipe.video_url && (
+          <RecipeVideo
+            url={recipe.video_url}
+            title={recipe.title}
+            onClose={() => setVideoOpen(false)}
+          />
+        )}
+        <div className="recipe-detail-hero relative h-[300px] bg-gray-100">
+          <RecipeImage
+            src={recipeImageUrl(recipe.cover_image)}
+            alt={recipe.title}
+            className="w-full h-full object-cover"
+          />
           <div
-            className="flex justify-between gap-4"
-            style={{ alignItems: "flex-end" }}
-          >
-            <div className="min-w-0">
-              {recipe.short_description && (
-                <p
-                  className="text-[15px] leading-5 mb-1"
-                  style={{ color: "#6F6F6F" }}
-                >
-                  {recipe.short_description}
-                </p>
-              )}
-              <h1
-                className="font-bold text-[31px] leading-tight"
-                style={{ color: "#1F1F1F" }}
-              >
-                {recipe.title}
-              </h1>
-            </div>
-            <div
-              className="flex items-center gap-2 flex-shrink-0"
-              style={{ alignSelf: "flex-end", marginBottom: 4 }}
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(to bottom, rgba(0,0,0,0.28), transparent 38%, rgba(0,0,0,0.18))",
+            }}
+          />
+          {recipe.video_url && videoSource(recipe.video_url) && (
+            <button
+              type="button"
+              className="recipe-video-play"
+              aria-label="Play recipe video"
+              onClick={() => setVideoOpen(true)}
             >
+              <PlayIcon />
+            </button>
+          )}
+          <button
+            onClick={onBack}
+            aria-label="Back"
+            className="recipe-hero-back w-10 h-10 rounded-full bg-white/90 flex items-center justify-center"
+            style={{ position: "absolute", top: 20, left: 16, zIndex: 20 }}
+          >
+            <BackIcon />
+          </button>
+          <div className="recipe-hero-actions">
+            {userId && recipe.author_id === userId && onEditRecipe && (
               <button
                 type="button"
-                onClick={toggleLike}
-                disabled={liking}
-                className="w-10 h-10 rounded-full border flex items-center justify-center disabled:opacity-60"
-                style={
-                  isLiked
-                    ? {
-                        borderColor: "#F26B21",
-                        backgroundColor: "#F26B21",
-                        color: "#FFFFFF",
-                      }
-                    : {
-                        borderColor: "#EAEAEA",
-                        backgroundColor: "#FFFFFF",
-                        color: "#1F1F1F",
-                      }
-                }
-                aria-label={isLiked ? "Unlike recipe" : "Like recipe"}
-              >
-                <svg
-                  width="19"
-                  height="19"
-                  viewBox="0 0 24 24"
-                  fill={isLiked ? "currentColor" : "none"}
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z" />
-                </svg>
-              </button>
-              <button
-                type="button"
-                onClick={toggleSaved}
-                disabled={saving}
-                className="w-10 h-10 rounded-full border flex items-center justify-center disabled:opacity-60"
-                style={
-                  isSaved
-                    ? {
-                        borderColor: "#F26B21",
-                        backgroundColor: "#F26B21",
-                        color: "#FFFFFF",
-                      }
-                    : {
-                        borderColor: "#EAEAEA",
-                        backgroundColor: "#FFFFFF",
-                        color: "#1F1F1F",
-                      }
-                }
-                aria-label={
-                  isSaved ? "Remove recipe from saved recipes" : "Save recipe"
-                }
-              >
-                <svg
-                  width="19"
-                  height="19"
-                  viewBox="0 0 24 24"
-                  fill={isSaved ? "currentColor" : "none"}
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" />
-                </svg>
-              </button>
-              <button
-                type="button"
-                aria-label="Share recipe"
-                onClick={handleShare}
-                disabled={sharing}
-                aria-busy={sharing}
-                className="recipe-share-button w-10 h-10 rounded-full border flex items-center justify-center disabled:opacity-60"
+                aria-label="Edit your recipe"
+                title="Edit recipe"
+                className="recipe-edit-button w-10 h-10 rounded-full border flex items-center justify-center"
+                onClick={() => onEditRecipe(recipe.id)}
               >
                 <svg
                   width="19"
                   height="19"
                   viewBox="0 0 24 24"
                   fill="none"
-                  stroke="#1F1F1F"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="m16 3 5 5M3 21l5-1L21 7a2.1 2.1 0 00-5-5L3 15z" />
+                </svg>
+              </button>
+            )}
+            <button
+              type="button"
+              aria-label="Share recipe"
+              onClick={handleShare}
+              disabled={sharing}
+              aria-busy={sharing}
+              className="recipe-share-button w-10 h-10 rounded-full border flex items-center justify-center disabled:opacity-60"
+            >
+              <svg
+                width="19"
+                height="19"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="var(--color-ink)"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="18" cy="5" r="3" />
+                <circle cx="6" cy="12" r="3" />
+                <circle cx="18" cy="19" r="3" />
+                <line x1="8.59" y1="10.51" x2="15.42" y2="6.49" />
+                <line x1="8.59" y1="13.49" x2="15.42" y2="17.51" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div className="recipe-detail-body px-4 pt-5">
+          <div className="recipe-detail-intro">
+            <div
+              className="flex justify-between gap-4"
+              style={{ alignItems: "flex-end" }}
+            >
+              <div className="min-w-0">
+                {recipe.short_description && (
+                  <p
+                    className="text-body leading-5 mb-1"
+                    style={{ color: "var(--color-gray)" }}
+                  >
+                    {recipe.short_description}
+                  </p>
+                )}
+                <h1
+                  className="font-bold text-hero leading-tight"
+                  style={{ color: "var(--color-ink)" }}
+                >
+                  {recipe.title}
+                </h1>
+              </div>
+              <div
+                className="flex items-center gap-2 flex-shrink-0"
+                style={{ alignSelf: "flex-end", marginBottom: 4 }}
+              >
+                <button
+                  type="button"
+                  onClick={toggleLike}
+                  disabled={liking}
+                  className="w-10 h-10 rounded-full border flex items-center justify-center disabled:opacity-60"
+                  style={
+                    isLiked
+                      ? {
+                          borderColor: "var(--color-primary)",
+
+                          backgroundColor: "var(--color-primary)",
+
+                          color: "var(--color-white)",
+                        }
+                      : {
+                          borderColor: "var(--color-border)",
+
+                          backgroundColor: "var(--color-white)",
+
+                          color: "var(--color-ink)",
+                        }
+                  }
+                  aria-label={isLiked ? "Unlike recipe" : "Like recipe"}
+                >
+                  <svg
+                    width="19"
+                    height="19"
+                    viewBox="0 0 24 24"
+                    fill={isLiked ? "currentColor" : "none"}
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  onClick={toggleSaved}
+                  disabled={saving}
+                  className="w-10 h-10 rounded-full border flex items-center justify-center disabled:opacity-60"
+                  style={
+                    isSaved
+                      ? {
+                          borderColor: "var(--color-primary)",
+
+                          backgroundColor: "var(--color-primary)",
+
+                          color: "var(--color-white)",
+                        }
+                      : {
+                          borderColor: "var(--color-border)",
+
+                          backgroundColor: "var(--color-white)",
+
+                          color: "var(--color-ink)",
+                        }
+                  }
+                  aria-label={
+                    isSaved ? "Remove recipe from saved recipes" : "Save recipe"
+                  }
+                >
+                  <svg
+                    width="19"
+                    height="19"
+                    viewBox="0 0 24 24"
+                    fill={isSaved ? "currentColor" : "none"}
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            {recipe.author_id !== userId && (
+              <ReportButton
+                targetType="recipe"
+                targetId={recipe.id}
+                userId={userId}
+                onRequireLogin={onRequireLogin}
+              />
+            )}
+            {shareMessage && (
+              <div className="mt-2 text-right">
+                <p
+                  role="status"
+                  className="text-label"
+                  style={{ color: "var(--color-gray)" }}
+                >
+                  {shareMessage}
+                </p>
+                {showShareLink && (
+                  <input
+                    aria-label="Recipe share link"
+                    readOnly
+                    value={recipeShareUrl(recipe.id)}
+                    onFocus={(event) => event.currentTarget.select()}
+                    className="mt-2 w-full border rounded-lg p-2 text-body"
+                  />
+                )}
+              </div>
+            )}
+            {(saveMessage || likeMessage) && (
+              <p
+                className="text-label mt-2 text-right"
+                style={{ color: "#C53D2E" }}
+              >
+                {likeMessage || saveMessage}
+              </p>
+            )}
+            <div
+              className="flex items-center gap-3 mt-2.5 text-label"
+              style={{ color: "var(--color-gray)" }}
+            >
+              <div
+                className="flex items-center gap-1.5"
+                aria-label={
+                  viewCount === null
+                    ? "View count unavailable"
+                    : `${viewCount.toLocaleString()} views`
+                }
+              >
+                <ViewIcon size={14} />
+                <span>
+                  {viewCount === null ? "—" : viewCount.toLocaleString()}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill={isLiked ? "var(--color-primary)" : "none"}
+                  stroke={isLiked ? "var(--color-primary)" : "currentColor"}
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 >
-                  <circle cx="18" cy="5" r="3" />
-                  <circle cx="6" cy="12" r="3" />
-                  <circle cx="18" cy="19" r="3" />
-                  <line x1="8.59" y1="10.51" x2="15.42" y2="6.49" />
-                  <line x1="8.59" y1="13.49" x2="15.42" y2="17.51" />
+                  <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z" />
                 </svg>
-              </button>
-            </div>
-          </div>
-          {shareMessage && (
-            <div className="mt-2 text-right">
-              <p
-                role="status"
-                className="text-[14px]"
-                style={{ color: "#6F6F6F" }}
-              >
-                {shareMessage}
-              </p>
-              {showShareLink && (
-                <input
-                  aria-label="Recipe share link"
-                  readOnly
-                  value={recipeShareUrl(recipe.id)}
-                  onFocus={(event) => event.currentTarget.select()}
-                  className="mt-2 w-full border rounded-lg p-2 text-[15px]"
-                />
-              )}
-            </div>
-          )}
-          {(saveMessage || likeMessage) && (
-            <p
-              className="text-[14px] mt-2 text-right"
-              style={{ color: "#C53D2E" }}
-            >
-              {likeMessage || saveMessage}
-            </p>
-          )}
-
-          <div
-            className="flex items-center gap-3 mt-2.5 text-[14px]"
-            style={{ color: "#6F6F6F" }}
-          >
-            <div className="flex items-center gap-1.5">
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill={isLiked ? "#F26B21" : "none"}
-                stroke={isLiked ? "#F26B21" : "currentColor"}
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z" />
-              </svg>
-              <span>{recipe.like_count}</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M21 15a4 4 0 01-4 4H8l-5 3V7a4 4 0 014-4h10a4 4 0 014 4z" />
-              </svg>
-              <span>{commentCount}</span>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            className="recipe-rating-link"
-            onClick={() =>
-              document
-                .getElementById("recipe-reviews")
-                ?.scrollIntoView({ behavior: "smooth", block: "start" })
-            }
-            aria-label="View ratings and reviews"
-          >
-            <ReviewStars value={reviewData.summary.average} size={17} />
-            {reviewData.error ? (
-              <span>Ratings unavailable</span>
-            ) : reviewData.loading && !reviewData.summary.total ? (
-              <span>Loading ratings…</span>
-            ) : reviewData.summary.total ? (
-              <>
-                <strong>{reviewData.summary.average.toFixed(1)}</strong>
-                <span>
-                  · {reviewData.summary.total.toLocaleString()}{" "}
-                  {reviewData.summary.total === 1 ? "rating" : "ratings"}
-                </span>
-              </>
-            ) : (
-              <span>No ratings yet</span>
-            )}
-          </button>
-
-          <div className="grid grid-cols-3 gap-2 mt-5">
-            {[
-              ["Time", formatTime(recipe.total_time_minutes)],
-              ["Difficulty", recipe.difficulty || "—"],
-              ["Servings", recipe.servings ? `${recipe.servings}` : "—"],
-            ].map(([label, value]) => (
-              <div
-                key={label}
-                className="rounded-[12px] p-3 text-center"
-                style={{ backgroundColor: "#F9F9F9" }}
-              >
-                <p className="text-[14px] mb-1" style={{ color: "#6F6F6F" }}>
-                  {label}
-                </p>
-                <p
-                  className="font-semibold text-[16px]"
-                  style={{ color: "#1F1F1F" }}
-                >
-                  {value}
-                </p>
+                <span>{recipe.like_count}</span>
               </div>
+              <div className="flex items-center gap-1.5">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M21 15a4 4 0 01-4 4H8l-5 3V7a4 4 0 014-4h10a4 4 0 014 4z" />
+                </svg>
+                <span>{commentCount}</span>
+              </div>
+            </div>
+            <button
+              type="button"
+              className="recipe-rating-link"
+              onClick={() =>
+                document
+
+                  .getElementById("recipe-reviews")
+
+                  ?.scrollIntoView({ behavior: "smooth", block: "start" })
+              }
+              aria-label="View ratings and reviews"
+            >
+              <ReviewStars value={reviewData.summary.average} size={17} />
+              {reviewData.error ? (
+                <span>Ratings unavailable</span>
+              ) : reviewData.loading && !reviewData.summary.total ? (
+                <span>Loading ratings…</span>
+              ) : reviewData.summary.total ? (
+                <>
+                  <strong>{reviewData.summary.average.toFixed(1)}</strong>
+                  <span>
+                    · {reviewData.summary.total.toLocaleString()}{" "}
+                    {reviewData.summary.total === 1 ? "rating" : "ratings"}
+                  </span>
+                </>
+              ) : (
+                <span>No ratings yet</span>
+              )}
+            </button>
+            {recipe.author_id && (
+              <RecipeAuthorCard
+                key={`${recipe.author_id}:${userId ?? "guest"}`}
+                authorId={recipe.author_id}
+                userId={userId}
+                onOpenAuthor={onOpenAuthor}
+                onRequireLogin={onRequireLogin}
+              />
+            )}
+            <div className="grid grid-cols-3 gap-2 mt-5">
+              {[
+                ["Time", formatTime(recipe.total_time_minutes)],
+
+                ["Difficulty", recipe.difficulty || "—"],
+
+                ["Servings", recipe.servings ? `${recipe.servings}` : "—"],
+              ].map(([label, value]) => (
+                <div
+                  key={label}
+                  className="rounded-[12px] p-3 text-center"
+                  style={{ backgroundColor: "var(--color-surface)" }}
+                >
+                  <p
+                    className="text-label mb-1"
+                    style={{ color: "var(--color-gray)" }}
+                  >
+                    {label}
+                  </p>
+                  <p
+                    className="font-semibold text-body"
+                    style={{ color: "var(--color-ink)" }}
+                  >
+                    {value}
+                  </p>
+                </div>
+              ))}
+            </div>
+            {steps.length > 0 && (
+              <button
+                type="button"
+                className="recipe-cook-button"
+                onClick={() => setCookingOpen(true)}
+              >
+                Cook this recipe
+              </button>
+            )}
+            {recipe.description && (
+              <section className="mt-8">
+                <h2
+                  className="font-semibold text-section mb-3"
+                  style={{ color: "var(--color-ink)" }}
+                >
+                  About
+                </h2>
+                <p
+                  className="text-body leading-6"
+                  style={{ color: "var(--color-gray)" }}
+                >
+                  {recipe.description}
+                </p>
+              </section>
+            )}
+          </div>
+          <div
+            className="recipe-detail-tabs mt-8 p-2.5 flex gap-1"
+            style={{
+              backgroundColor: "var(--color-surface)",
+              borderRadius: 14,
+            }}
+          >
+            {(["Ingredients", "Steps", "Nutrition"] as const).map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setActiveTab(tab)}
+                className="flex-1 h-10 rounded-[9px] text-body font-semibold transition-colors"
+                style={
+                  activeTab === tab
+                    ? {
+                        backgroundColor: "var(--color-white)",
+
+                        color: "var(--color-primary)",
+
+                        boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+                      }
+                    : { color: "var(--color-gray)" }
+                }
+              >
+                {tab}
+              </button>
             ))}
           </div>
-
-          {recipe.description && (
-            <section className="mt-8">
+          <IngredientsSection
+            groupedIngredients={groupedIngredients}
+            recipeTitle={recipe.title}
+            ingredientsImage={recipe.ingredients_image}
+            active={activeTab === "Ingredients"}
+          />
+          <StepsSection steps={steps} active={activeTab === "Steps"} />
+          <NutritionSection
+            nutrition={nutrition}
+            active={activeTab === "Nutrition"}
+          />
+          <RecipeReviews
+            key={recipeId}
+            recipeId={recipeId}
+            onRequireLogin={onRequireLogin}
+            data={reviewData}
+          />
+          <RecipeComments
+            recipeAuthorId={recipe.author_id}
+            initialCommentId={initialCommentId}
+            recipeId={recipeId}
+            onRequireLogin={onRequireLogin}
+            onCountChange={setCommentCount}
+          />
+          <RecipeCookedShortcut
+            recipe={{
+              id: recipe.id,
+              title: recipe.title,
+              cover_image: recipe.cover_image,
+              author_name: "",
+            }}
+            onCreate={onCookedRecipe}
+          />
+          <RecipeTaggedPosts
+            key={recipeId}
+            recipeId={recipeId}
+            userId={userId}
+            onOpen={openTaggedPost}
+          />
+          {recommendations.length > 0 && (
+            <section
+              className="pt-6 border-t"
+              style={{ borderColor: "var(--color-border)", marginTop: 30 }}
+            >
               <h2
-                className="font-semibold text-[22px] mb-3"
-                style={{ color: "#1F1F1F" }}
+                className="font-semibold text-section mb-5"
+                style={{ color: "var(--color-ink)" }}
               >
-                About
+                More recipes
               </h2>
-              <p className="text-[17px] leading-6" style={{ color: "#6F6F6F" }}>
-                {recipe.description}
-              </p>
+              <div
+                className="recipe-recommendations"
+                style={{
+                  display: "grid",
+
+                  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+
+                  justifyContent: "space-between",
+
+                  columnGap: 16,
+
+                  rowGap: 28,
+                }}
+              >
+                {recommendations.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => {
+                      onSelectRecipe(item.id)
+
+                      window.scrollTo({ top: 0, behavior: "smooth" })
+                    }}
+                    className="text-left"
+                    style={{ width: "100%", minWidth: 0 }}
+                  >
+                    <div
+                      className="overflow-hidden bg-gray-100 mb-2"
+                      style={{
+                        position: "relative",
+
+                        width: "100%",
+
+                        aspectRatio: "1",
+
+                        borderRadius: 16,
+                      }}
+                    >
+                      <VideoBadge url={item.video_url} />
+                      <RecipeImage
+                        src={recipeImageUrl(item.cover_image)}
+                        alt={item.title}
+                        style={{
+                          width: "100%",
+
+                          height: "100%",
+
+                          objectFit: "cover",
+
+                          display: "block",
+                        }}
+                      />
+                    </div>
+                    <p
+                      className="font-semibold text-lead leading-[21px] line-clamp-2"
+                      style={{ color: "var(--color-ink)" }}
+                    >
+                      {item.title}
+                    </p>
+                    <p
+                      className="text-body mt-0.5"
+                      style={{ color: "var(--color-gray)" }}
+                    >
+                      {item.difficulty || "—"} ·{" "}
+                      {formatTime(item.total_time_minutes)}
+                    </p>
+                  </button>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={onBrowse}
+                className="w-full h-12 mt-8 rounded-[14px] border text-body font-semibold"
+                style={{
+                  borderColor: "var(--color-primary)",
+
+                  color: "var(--color-primary)",
+
+                  backgroundColor: "var(--color-white)",
+                }}
+              >
+                See more recipes
+              </button>
             </section>
           )}
         </div>
-
-        <div
-          className="recipe-detail-tabs mt-8 p-2.5 flex gap-1"
-          style={{ backgroundColor: "#F5F5F5", borderRadius: 24 }}
-        >
-          {(["Ingredients", "Steps", "Nutrition"] as const).map((tab) => (
-            <button
-              key={tab}
-              type="button"
-              onClick={() => setActiveTab(tab)}
-              className="flex-1 h-10 rounded-[16px] text-[16px] font-semibold transition-colors"
-              style={
-                activeTab === tab
-                  ? {
-                      backgroundColor: "#FFFFFF",
-                      color: "#F26B21",
-                      boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-                    }
-                  : { color: "#6F6F6F" }
-              }
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
-
-        <IngredientsSection
-          groupedIngredients={groupedIngredients}
-          recipeTitle={recipe.title}
-          ingredientsImage={recipe.ingredients_image}
-          active={activeTab === "Ingredients"}
-        />
-        <StepsSection steps={steps} finishedImage={recipe.finished_image} active={activeTab === "Steps"} />
-        <NutritionSection
-          nutrition={nutrition}
-          active={activeTab === "Nutrition"}
-        />
-
-        <RecipeReviews
-          key={recipeId}
-          recipeId={recipeId}
-          onRequireLogin={onRequireLogin}
-          data={reviewData}
-        />
-
-        <RecipeComments
-          recipeId={recipeId}
-          onRequireLogin={onRequireLogin}
-          onCountChange={setCommentCount}
-        />
-
-        {recommendations.length > 0 && (
-          <section
-            className="pt-6 border-t"
-            style={{ borderColor: "#EEEEEE", marginTop: 50 }}
-          >
-            <h2
-              className="font-semibold text-[22px] mb-5"
-              style={{ color: "#1F1F1F" }}
-            >
-              More recipes
-            </h2>
-            <div
-              className="recipe-recommendations"
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-                justifyContent: "space-between",
-                columnGap: 16,
-                rowGap: 28,
-              }}
-            >
-              {recommendations.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => {
-                    onSelectRecipe(item.id)
-                    window.scrollTo({ top: 0, behavior: "smooth" })
-                  }}
-                  className="text-left"
-                  style={{ width: "100%", minWidth: 0 }}
-                >
-                  <div
-                    className="overflow-hidden bg-gray-100 mb-2"
-                    style={{
-                      position: "relative",
-                      width: "100%",
-                      aspectRatio: "1",
-                      borderRadius: 16,
-                    }}
-                  >
-                    <VideoBadge url={item.video_url} />
-                    <img
-                      src={recipeImageUrl(item.cover_image)}
-                      alt={item.title}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                        display: "block",
-                      }}
-                    />
-                  </div>
-                  <p
-                    className="font-semibold text-[18px] leading-[21px] line-clamp-2"
-                    style={{ color: "#1F1F1F" }}
-                  >
-                    {item.title}
-                  </p>
-                  <p
-                    className="text-[15px] mt-0.5"
-                    style={{ color: "#6F6F6F" }}
-                  >
-                    {item.difficulty || "—"} ·{" "}
-                    {formatTime(item.total_time_minutes)}
-                  </p>
-                </button>
-              ))}
-            </div>
-
-            <button
-              type="button"
-              onClick={onBrowse}
-              className="w-full h-12 mt-8 rounded-[14px] border text-[16px] font-semibold"
-              style={{
-                borderColor: "#F26B21",
-                color: "#F26B21",
-                backgroundColor: "#FFFFFF",
-              }}
-            >
-              See more recipes
-            </button>
-          </section>
-        )}
       </div>
-    </div>
+      {cookingOpen && (
+        <CookingMode
+          key={`${recipeId}:${userId ?? "guest"}:${cookingSignature(ingredients, steps, recipe.servings)}`}
+          recipeId={recipeId}
+          title={recipe.title}
+          ingredients={ingredients}
+          steps={steps}
+          servings={recipe.servings}
+          userId={userId}
+          onClose={() => setCookingOpen(false)}
+        />
+      )}
+      {taggedPostView && (
+        <PhotoPostsScreen
+          key={`${recipeId}:${taggedPostView.postId ?? "all"}:${userId ?? "guest"}`}
+          recipeId={recipeId}
+          postId={taggedPostView.postId}
+          userId={userId}
+          onBack={closeTaggedPost}
+          onOpenAuthor={onOpenAuthor}
+          onSelectRecipe={(id) => {
+            if (id === recipeId) closeTaggedPost()
+            else {
+              setTaggedPostView(null)
+              onSelectRecipe(id)
+              window.scrollTo({ top: 0 })
+            }
+          }}
+        />
+      )}
+    </>
   )
 }

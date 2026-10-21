@@ -53,14 +53,14 @@ release signing must be configured separately before submission.
 
 ## Remaining native integration before release
 
-- Google/Apple OAuth and password recovery currently redirect to the website.
-  Add native callback handling and provider/Supabase redirect configuration
-  before enabling these flows for the native release.
-- Connect Android Back to Pickle's internal screens, including unsaved drafts.
+- Native OAuth/recovery callbacks, content links and Android Back are implemented.
+  Complete the Supabase redirect allowlist and signed domain association, then
+  test real Google login/recovery. See [native Android auth and links](native-android-auth-links.md).
 - Verify external video links and sharing on a physical device.
 - Replace generated Android launcher/splash placeholders with Pickle assets.
 - Implement store privacy, account deletion and content moderation requirements.
 - Create and test the iOS project on a Mac as the next platform stage.
 
-No APK or physical-device verification has been completed in the initial
-bootstrap environment: it does not have an Android SDK or JDK 21 installed.
+The initial bootstrap lacked an Android toolchain. Subsequent development uses
+the installed Windows SDK and JDK 21; feature-specific verification is documented
+alongside each feature. Emulator checks do not replace physical-device release tests.

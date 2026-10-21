@@ -1,0 +1,27 @@
+Pickle — Current agreement and deletion copy
+Snapshot date: 2026-10-15
+Source: src/ContentConsent.tsx, src/AuthScreen.tsx, src/ProfileScreen.tsx
+Status: CURRENT SNAPSHOT. Explanatory labels below are not displayed in the app.
+
+CONTENT-SHARING DIALOG
+Heading: Before you share
+Introduction: Read and agree to both policies before sharing recipes, photos, comments, reviews or messages.
+Version label: Policy version: {policy.version}
+Document titles: Terms of Service / Content Policy
+Checkbox 1: I agree to the Terms of Service.
+Checkbox 2: I agree to the Content Policy.
+Buttons: Cancel / Agree and continue
+Pending button: Saving…
+
+Current behaviour:
+Both checkboxes start unchecked. Both must be checked to continue. Server records the signed-in user ID, accepted policy version and acceptance time. Each version contains the full terms and content policy text. The active version on this snapshot date is 2026-10-15. Privacy Policy is not a third document or checkbox in this dialog, and no privacy-notice acknowledgement is currently recorded here.
+
+ACCOUNT REGISTRATION
+The inspected registration component has email/password signup and Google/Apple sign-in buttons. It has no dedicated terms/privacy acceptance checkbox or minimum-age verification. The presence of social sign-in buttons does not prove either provider is activated in the server dashboard. Acceptance before sharing does not establish that agreement was obtained before account creation.
+
+ACCOUNT DELETION DIALOG
+Heading: Delete your account?
+Body: This permanently deletes your profile, saved recipes, likes, comments, and account. This action cannot be undone.
+
+Important audit observation (not user-facing copy):
+The current deletion function removes avatar/chat photos before requesting auth account deletion. Published recipes refer to profiles without an ON DELETE cleanup rule, and the inspected schema has no corresponding deletion trigger. Deleting an account that owns published recipes may fail after some photos were already removed. Do not extend this copy to promise deletion of every file, report or backup before the deletion implementation and retention decisions are aligned.

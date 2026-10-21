@@ -1,0 +1,35 @@
+Pickle — Current agreement and deletion copy
+Snapshot date: 2026-10-15
+Source: src/ContentConsent.tsx, src/AuthScreen.tsx, src/ProfileScreen.tsx
+Status: CURRENT SNAPSHOT. Explanatory labels below are not displayed in the app.
+
+CONTENT-SHARING DIALOG
+Heading: Before you share
+Introduction: Read and agree to both policies before sharing recipes, photos, comments, reviews or messages.
+Version label: Policy version: {policy.version}
+Document titles: Terms of Service / Content Policy
+Checkbox 1: I agree to the Terms of Service.
+Checkbox 2: I agree to the Content Policy.
+Buttons: Cancel / Agree and continue
+Pending button: Saving…
+
+Current behaviour:
+Both checkboxes start unchecked. Both must be checked to continue. Server records the signed-in user ID, accepted policy version and acceptance time. Each version contains the full terms and content policy text. The active version on this snapshot date is 2026-10-15.2. Privacy Policy is not a third document or checkbox in this dialog, and no privacy-notice acknowledgement is currently recorded here.
+
+ACCOUNT REGISTRATION
+Email registration now has a neutral Date of birth field and an 18+ client check, with readable privacy/terms sections. The birthday is not included in Auth signup metadata. Email authentication records can be created before the later server eligibility confirmation. Google is enabled; Apple is planned and its non-working button has been removed. All signed-in accounts, including existing and Google accounts, pass a post-login server eligibility check before ordinary account features are activated. The date is submitted for server evaluation but not stored as a birth-date field; only adult confirmation, rule version 18-plus-v1 and time are recorded. This is self-declaration, not verified identity. Account deletion and privacy/support access remain available. No separate registration terms checkbox or recorded privacy-consent checkbox was added; content-sharing terms agreement remains separate.
+
+ACCOUNT DELETION DIALOG
+Heading: Delete your account?
+Body: This deletes your account, published recipes, drafts, uploaded photos, messages, saved recipes, likes and comments. Some safety records and provider backups may remain as described in the Privacy Policy. Deletion cannot be undone; if a step fails, retry or contact admin@getpickleapp.com.
+
+ACCOUNT ELIGIBILITY SCREEN
+Heading: Account eligibility
+Text: Pickle accounts are for people aged 18 and over. We ask for your date of birth to check eligibility. We do not save your birth date; we save only the adult confirmation, date and rule version. This is a self-declaration, not identity verification.
+Input: Date of birth
+Button: Continue
+Help: For account or privacy help: admin@getpickleapp.com
+Other actions: Sign out / Delete account / readable Privacy Policy and Terms of Service
+
+ACCOUNT DELETION IMPLEMENTATION NOTE
+The deployed deletion function first prepares an account-scoped deletion state, hides its recipes and prevents new ordinary writes. It uses the Storage API to remove paginated avatar/recipe/chat images, then requests Auth account deletion. Published recipes now cascade with account removal. Completion is returned only after Auth deletion; partial failures require explicit retry/support and can leave a restricted account with some files already removed. This is not a transaction that can undo deleted files. No live account was deleted during verification.

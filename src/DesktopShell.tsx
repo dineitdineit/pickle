@@ -1,6 +1,5 @@
 import PickleLogo from "./PickleLogo"
 import { useState, type FormEvent, type ReactNode } from "react"
-
 type DesktopShellProps = {
   children: ReactNode
   activeNav: number
@@ -12,9 +11,8 @@ type DesktopShellProps = {
   onQueryChange: (query: string) => void
   onSearch: () => void
   onNavigate: (index: number) => void
-  onUploadRecipe: () => void
+  onCreate: () => void
 }
-
 export default function DesktopShell({
   children,
   activeNav,
@@ -26,15 +24,18 @@ export default function DesktopShell({
   onQueryChange,
   onSearch,
   onNavigate,
-  onUploadRecipe,
+  onCreate,
 }: DesktopShellProps) {
   const [failedAvatar, setFailedAvatar] = useState<string | null>(null)
-  const showAvatar = loggedIn && avatarUrl && /^https?:\/\//.test(avatarUrl) && failedAvatar !== avatarUrl
+  const showAvatar =
+    loggedIn &&
+    avatarUrl &&
+    /^https?:\/\//.test(avatarUrl) &&
+    failedAvatar !== avatarUrl
   function submit(event: FormEvent) {
     event.preventDefault()
     onSearch()
   }
-
   return (
     <div className="pickle-web">
       <a className="web-skip-link" href="#pickle-content">
@@ -68,30 +69,51 @@ export default function DesktopShell({
               </button>
             ))}
           </nav>
-          <form className="web-header-search" role="search" onSubmit={submit}>
-            <button type="submit" aria-label="Submit recipe search">
-              <svg
-                width="19"
-                height="19"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                aria-hidden="true"
-              >
-                <circle cx="11" cy="11" r="7" />
-                <path d="m16 16 5 5" />
-              </svg>
-            </button>
-            <input
-              aria-label="Search recipes"
-              placeholder="Find a recipe or ingredient"
-              value={query}
-              onChange={(event) => onQueryChange(event.target.value)}
-            />
-          </form>
-          <button type="button" className="web-upload-recipe" aria-label="Add recipe" title="Add recipe" onClick={onUploadRecipe}>
-            <svg width="30" height="30" viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+          <div className="web-header-search-wrap">
+            <form className="web-header-search" role="search" onSubmit={submit}>
+              <button type="submit" aria-label="Submit recipe search">
+                <svg
+                  width="19"
+                  height="19"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  aria-hidden="true"
+                >
+                  <circle cx="11" cy="11" r="7" />
+                  <path d="m16 16 5 5" />
+                </svg>
+              </button>
+              <input
+                enterKeyHint="search"
+                maxLength={80}
+                aria-label="Search recipes"
+                placeholder="Find a recipe or ingredient"
+                value={query}
+                onFocus={() => onQueryChange(query)}
+                onChange={(event) => onQueryChange(event.target.value)}
+              />
+            </form>
+          </div>
+          <button
+            type="button"
+            className="web-upload-recipe"
+            aria-label="Create"
+            title="Create"
+            aria-haspopup="dialog"
+            onClick={onCreate}
+          >
+            <svg
+              width="30"
+              height="30"
+              viewBox="0 0 32 32"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              aria-hidden="true"
+            >
               <circle cx="16" cy="16" r="13" />
               <path d="M16 10v12M10 16h12" />
             </svg>
@@ -103,7 +125,30 @@ export default function DesktopShell({
             onClick={() => onNavigate(4)}
             aria-current={accountView ? "page" : undefined}
           >
-            {loggedIn ? showAvatar ? <img src={avatarUrl!} alt="" onError={() => setFailedAvatar(avatarUrl)} /> : <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4 22v-3a8 8 0 0 1 16 0v3" /></svg> : "Log In"}
+            {loggedIn ? (
+              showAvatar ? (
+                <img
+                  src={avatarUrl!}
+                  alt=""
+                  onError={() => setFailedAvatar(avatarUrl)}
+                />
+              ) : (
+                <svg
+                  width="22"
+                  height="22"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  aria-hidden="true"
+                >
+                  <circle cx="12" cy="8" r="4" />
+                  <path d="M4 22v-3a8 8 0 0 1 16 0v3" />
+                </svg>
+              )
+            ) : (
+              "Log In"
+            )}
           </button>
         </div>
       </header>

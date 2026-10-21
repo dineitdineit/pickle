@@ -1,0 +1,72 @@
+-- Run within BEGIN / ROLLBACK; existing accounts are fixture IDs only.
+select set_config('test.a',(select id::text from public.profiles order by id limit 1),true);
+select set_config('test.b',(select id::text from public.profiles order by id offset 1 limit 1),true);
+delete from public.user_blocks where (blocker_id=current_setting('test.a')::uuid and blocked_id=current_setting('test.b')::uuid) or (blocker_id=current_setting('test.b')::uuid and blocked_id=current_setting('test.a')::uuid);
+select set_config('request.jwt.claims',jsonb_build_object('sub',current_setting('test.a'),'role','authenticated','is_anonymous',false)::text,true);
+set local role authenticated;
+select public.set_user_follow(current_setting('test.b')::uuid,true);
+select public.send_direct_message(current_setting('test.b')::uuid,'Block fixture',gen_random_uuid());
+select set_config('request.jwt.claims',jsonb_build_object('sub',current_setting('test.b'),'role','authenticated','is_anonymous',false)::text,true);
+select public.set_user_follow(current_setting('test.a')::uuid,true);
+select set_config('request.jwt.claims',jsonb_build_object('sub',current_setting('test.a'),'role','authenticated','is_anonymous',false)::text,true);
+do $$ declare state jsonb; blocked boolean; begin
+ state:=public.set_user_block(current_setting('test.b')::uuid,true);
+ if state->>'blocked'<>'true' or state->>'can_contact'<>'false' then raise exception 'Block confirmation failed'; end if;
+ state:=public.set_user_block(current_setting('test.b')::uuid,true);
+ if (select count(*) from public.user_blocks where blocked_id=current_setting('test.b')::uuid)<>1 then raise exception 'Duplicate blocks'; end if;
+ if exists(select 1 from public.user_follows where follower_id in (current_setting('test.a')::uuid,current_setting('test.b')::uuid) and followed_id in (current_setting('test.a')::uuid,current_setting('test.b')::uuid)) then raise exception 'Block did not unfollow both ways'; end if;
+ if exists(select 1 from public.get_message_inbox() where peer_id=current_setting('test.b')::uuid) then raise exception 'Blocked conversation visible'; end if;
+ blocked:=false;
+ begin perform public.send_direct_message(current_setting('test.b')::uuid,'Blocked send',gen_random_uuid()); exception when insufficient_privilege then blocked:=true; end;
+ if not blocked then raise exception 'Blocker sent message'; end if;
+ blocked:=false;
+ begin insert into public.direct_messages(sender_id,recipient_id,client_id,body) values(auth.uid(),current_setting('test.b')::uuid,gen_random_uuid(),'Direct bypass'); exception when insufficient_privilege then blocked:=true; end;
+ if not blocked then raise exception 'Direct message insert bypassed block'; end if;
+ blocked:=false;
+ begin perform public.set_user_follow(current_setting('test.b')::uuid,true); exception when insufficient_privilege then blocked:=true; end;
+ if not blocked then raise exception 'Blocker followed target'; end if;
+ blocked:=false;
+ begin insert into public.user_blocks(blocker_id,blocked_id) values(current_setting('test.b')::uuid,auth.uid()); exception when insufficient_privilege then blocked:=true; end;
+ if not blocked then raise exception 'Client forged block'; end if;
+ blocked:=false;
+ begin perform public.set_user_block(auth.uid(),true); exception when invalid_parameter_value then blocked:=true; end;
+ if not blocked then raise exception 'Self block accepted'; end if;
+end; $$;
+select set_config('request.jwt.claims',jsonb_build_object('sub',current_setting('test.b'),'role','authenticated','is_anonymous',false)::text,true);
+do $$ declare state jsonb; blocked boolean:=false; begin
+ if exists(select 1 from public.user_blocks where blocker_id=current_setting('test.a')::uuid) then raise exception 'Blocked user read blocker list'; end if;
+ state:=public.get_user_block_state(current_setting('test.a')::uuid);
+ if state->>'blocked'<>'false' or state->>'can_contact'<>'false' then raise exception 'Reverse block status incorrect'; end if;
+ begin perform public.send_direct_message(current_setting('test.a')::uuid,'Reverse bypass',gen_random_uuid()); exception when insufficient_privilege then blocked:=true; end;
+ if not blocked then raise exception 'Blocked user messaged blocker'; end if;
+ blocked:=false;
+ begin perform public.set_user_follow(current_setting('test.a')::uuid,true); exception when insufficient_privilege then blocked:=true; end;
+ if not blocked then raise exception 'Blocked user followed blocker'; end if;
+ state:=public.set_user_block(current_setting('test.a')::uuid,false);
+ if state->>'can_contact'<>'false' then raise exception 'Target removed other user block'; end if;
+ perform public.set_user_block(current_setting('test.a')::uuid,true);
+end; $$;
+select set_config('request.jwt.claims',jsonb_build_object('sub',current_setting('test.a'),'role','authenticated','is_anonymous',false)::text,true);
+do $$ declare state jsonb; begin
+ state:=public.set_user_block(current_setting('test.b')::uuid,false);
+ if state->>'blocked'<>'false' or state->>'can_contact'<>'false' then raise exception 'Mutual block lost reverse restriction'; end if;
+end; $$;
+select set_config('request.jwt.claims',jsonb_build_object('sub',current_setting('test.b'),'role','authenticated','is_anonymous',false)::text,true);
+select public.set_user_block(current_setting('test.a')::uuid,false);
+select set_config('request.jwt.claims',jsonb_build_object('sub',current_setting('test.a'),'role','authenticated','is_anonymous',false)::text,true);
+do $$ declare state jsonb; begin
+ state:=public.get_user_block_state(current_setting('test.b')::uuid);
+ if state->>'can_contact'<>'true' then raise exception 'Unblock did not restore contact'; end if;
+ if exists(select 1 from public.user_follows where follower_id=auth.uid() and followed_id=current_setting('test.b')::uuid) then raise exception 'Unblock restored old follow'; end if;
+ if not exists(select 1 from public.get_message_inbox() where peer_id=current_setting('test.b')::uuid) then raise exception 'Unblock lost chat history'; end if;
+ perform public.send_direct_message(current_setting('test.b')::uuid,'Unblocked send',gen_random_uuid());
+ perform public.set_user_follow(current_setting('test.b')::uuid,true);
+end; $$;
+select set_config('request.jwt.claims',jsonb_build_object('sub',current_setting('test.a'),'role','authenticated','is_anonymous',true)::text,true);
+do $$ declare blocked boolean:=false; begin
+ if exists(select 1 from public.user_blocks) then raise exception 'Anonymous read block list'; end if;
+ begin perform public.set_user_block(current_setting('test.b')::uuid,true); exception when insufficient_privilege then blocked:=true; end;
+ if not blocked then raise exception 'Anonymous blocked user'; end if;
+end; $$;
+reset role;
+select 'Block/unblock, private list, bilateral contact and follow restrictions, direct insert denial, mutual blocks, retained history, no restored follows, self/anonymous validation passed' as result;

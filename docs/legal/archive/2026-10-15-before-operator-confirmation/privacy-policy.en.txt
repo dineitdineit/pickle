@@ -1,0 +1,38 @@
+Pickle — Current Privacy Policy
+Snapshot date: 2026-10-15
+Displayed last-updated date: October 6, 2026
+Source: src/profileContent.ts, privacySections; src/ProfileScreen.tsx
+Status: CURRENT SNAPSHOT — wording preserved, not a revised draft.
+
+Introduction shown in the app:
+This Privacy Policy explains how Pickle handles information when you use the app and its related services.
+
+1. Information we collect
+When you use Pickle, we may collect account information such as your email address, username, display name, and profile photo; content you submit such as recipes, comments, replies, and direct messages; and activity such as saved recipes, likes, and recipe views. Our service providers may also process technical information needed to operate, secure, and troubleshoot the service.
+
+2. How we use information
+We use this information to provide and personalize Pickle, keep you signed in, save your preferences and activity, enable community features, improve recipe discovery, prevent abuse, maintain security, and respond to support requests.
+
+3. Service providers
+Pickle uses third-party service providers to operate parts of the service, including hosting, database, authentication, file storage, and related infrastructure. These providers may process information only as needed to provide their services to Pickle.
+
+4. Sharing and sale of information
+We do not sell your personal information. We may share information with service providers that help us operate Pickle, when you direct us to share it, or when disclosure is required to comply with law, protect users, or protect the rights and security of Pickle.
+
+5. Public information
+Your display name, username, profile photo, comments, replies, and other content you choose to post may be visible to other users. Do not post information you do not want to make public. Direct messages are stored to provide conversation history and read status. Within the app, they are visible only to the sender and recipient.
+
+6. Data retention
+We keep information for as long as needed to provide Pickle, maintain legitimate business and security records, resolve disputes, and meet legal obligations. Some information may remain in backups for a limited period after deletion.
+
+7. Your choices
+You can update certain profile information and delete your own comments through the app. You may also contact us through the Contact Us screen to ask questions about your data or request assistance with your account.
+
+8. Children
+Pickle is not intended for children under 13. If we learn that we collected personal information from a child in violation of applicable law, we will take appropriate steps to delete it.
+
+9. Changes to this policy
+We may update this Privacy Policy as Pickle changes. When we make material changes, we will update the date shown on this page and provide additional notice when appropriate.
+
+10. Contact
+For privacy questions or requests, use the Contact Us section in your Pickle profile.

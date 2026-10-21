@@ -1,0 +1,27 @@
+.create-sheet { position: fixed; inset: 0; width: 100vw; max-width: none; height: 100dvh; max-height: none; margin: 0; padding: 0; border: 0; background: transparent; color: var(--color-ink); }
+.create-sheet[open] { display: grid; align-items: end; justify-items: center; }
+.create-sheet::backdrop { background: rgb(0 0 0 / 40%); animation: create-backdrop-in 180ms ease-out; }
+.create-sheet-panel { width: 100%; max-width: 448px; max-height: calc(100dvh - 32px); overflow-y: auto; overscroll-behavior: contain; border-radius: 24px 24px 0 0; padding: 10px 16px max(20px, env(safe-area-inset-bottom)); background: var(--color-white); box-shadow: 0 -8px 32px rgb(0 0 0 / 10%); animation: create-sheet-in 220ms ease-out; }
+.create-sheet-handle { width: 36px; height: 4px; border-radius: 4px; margin: 0 auto 8px; background: var(--color-gray-faint); }
+.create-sheet-heading { display: flex; align-items: center; justify-content: space-between; padding: 0 4px 8px; }
+.create-sheet-heading h2 { font-size: var(--text-section); line-height: var(--text-section--line-height); font-weight: 700; }
+.create-sheet-close { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; }
+.create-sheet-options { display: grid; gap: 4px; }
+.create-sheet-option { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 76px; padding: 12px 8px; border-radius: 14px; text-align: left; }
+.create-sheet-icon { display: grid; place-items: center; width: 44px; height: 44px; flex-shrink: 0; border-radius: 13px; color: var(--color-primary); background: var(--color-primary-soft); }
+.create-sheet-copy { display: grid; gap: 3px; flex: 1; min-width: 0; }
+.create-sheet-copy strong { font-size: var(--text-body); line-height: var(--text-body--line-height); font-weight: 600; }
+.create-sheet-copy > span { color: var(--color-gray); font-size: var(--text-caption); line-height: var(--text-caption--line-height); }
+.create-sheet-soon { font-size: var(--text-tiny); line-height: var(--text-tiny--line-height); color: var(--color-gray); white-space: nowrap; }
+.create-sheet-option:disabled { cursor: default; }
+.create-sheet-option:disabled .create-sheet-icon { color: var(--color-gray); background: var(--color-surface); }
+.create-sheet-close:hover, .create-sheet-option:not(:disabled):hover { background: var(--color-surface); }
+.create-sheet button:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+html[data-theme="dark"] .create-sheet { color: var(--color-white); }
+html[data-theme="dark"] .create-sheet-panel { background: var(--color-charcoal); }
+html[data-theme="dark"] .create-sheet-icon { background: var(--color-primary-dark-surface); }
+html[data-theme="dark"] .create-sheet-copy > span, html[data-theme="dark"] .create-sheet-soon { color: var(--color-gray-faint); }
+html[data-theme="dark"] .create-sheet-option:disabled .create-sheet-icon, html[data-theme="dark"] .create-sheet-close:hover, html[data-theme="dark"] .create-sheet-option:not(:disabled):hover { background: var(--color-ink); }
+@keyframes create-sheet-in { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes create-backdrop-in { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .create-sheet-panel, .create-sheet::backdrop { animation: none; } }

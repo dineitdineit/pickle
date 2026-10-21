@@ -1,0 +1,173 @@
+.photo-post-screen { --post-bg: var(--color-white); --post-text: var(--color-ink); --post-muted: var(--color-gray); --post-surface: var(--color-surface); --post-border: var(--color-border); max-width: 560px; min-width: 0; margin: 0 auto; padding: 0 16px 32px; background: var(--post-bg); color: var(--post-text); font-size: var(--text-label); }
+.photo-post-screen button { cursor: pointer; min-height: 40px; border-radius: 10px; padding: 8px 12px; }
+.photo-post-screen button:disabled { opacity: .45; cursor: default; }
+.photo-post-screen button:focus-visible, .photo-post-screen input:focus-visible, .photo-post-screen textarea:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 3px; }
+.photo-post-screen p { margin: 16px 0; }
+.post-topbar { display: grid; grid-template-columns: 64px minmax(0,1fr) 64px; align-items: center; position: sticky; top: 0; z-index: 10; background: var(--post-bg); min-height: 64px; gap: 8px; }
+.post-topbar h1 { text-align: center; font-size: var(--text-lead); font-weight: 600; margin: 0; }
+.post-topbar > button:first-child { justify-self: start; padding-left: 0; }
+.post-primary { color: var(--color-primary); font-weight: 600; }
+.post-select-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 24px; }
+.post-select-actions button { display: flex; gap: 8px; align-items: center; background: var(--post-surface); }
+.post-hint { color: var(--post-muted); font-size: var(--text-caption); line-height: 1.5; }
+.post-selection-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; margin-top: 24px; }
+.post-selection-grid button { position: relative; padding: 0; aspect-ratio: 1; overflow: hidden; border: 2px solid transparent; }
+.post-selection-grid .is-selected { border-color: var(--color-primary); }
+.post-selection-grid img { width: 100%; height: 100%; object-fit: cover; }
+.post-selection-grid span { position: absolute; top: 4px; right: 4px; background: var(--color-primary); color: var(--color-white); border-radius: 50%; width: 24px; height: 24px; display: grid; place-items: center; font-size: var(--text-caption); }
+.post-canvas-wrap { position: relative; display: flex; align-items: center; justify-content: center; background: var(--post-surface); min-height: 140px; }
+.post-canvas-wrap canvas { display: block; max-width: 100%; max-height: 45dvh; width: auto; height: auto; }
+.post-drag-text canvas { touch-action: none; cursor: move; }
+.post-preview-status { position: absolute; bottom: 8px; right: 8px; padding: 4px 8px; border-radius: 8px; background: var(--post-bg); color: var(--post-muted); font-size: var(--text-caption); pointer-events: none; }
+.post-thumbnail-strip { display: flex; gap: 8px; overflow-x: auto; padding: 12px 2px; }
+.post-thumbnail-strip button { flex: 0 0 52px; height: 52px; padding: 0; border: 2px solid transparent; overflow: hidden; }
+.post-thumbnail-strip button[aria-pressed="true"] { border-color: var(--color-primary); }
+.post-thumbnail-strip img { width: 100%; height: 100%; object-fit: cover; }
+.post-order { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; font-size: var(--text-caption); }
+.post-order button { padding: 4px 8px; }
+.post-order > span { flex: 1; text-align: center; }
+.post-tabs { display: flex; border-bottom: 1px solid var(--post-border); margin: 12px 0; }
+.post-tabs button { flex: 1; border-radius: 0; border-bottom: 2px solid transparent; }
+.post-tabs [aria-selected="true"] { color: var(--color-primary); border-bottom-color: var(--color-primary); }
+.post-tools { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.post-tools button { background: var(--post-surface); text-transform: capitalize; font-size: var(--text-caption); border: 1px solid transparent; }
+.post-tools [aria-pressed="true"] { color: var(--color-primary); border-color: var(--color-primary); }
+.post-slider { display: block; text-transform: capitalize; margin: 16px 0; }
+.post-slider output { float: right; }
+.post-slider input { display: block; width: 100%; margin-top: 12px; accent-color: var(--color-primary); min-height: 28px; }
+.post-text-tools > label { display: block; margin: 12px 0; }
+.post-text-tools input[type="text"], .post-caption-label textarea { display: block; width: 100%; border: 1px solid var(--post-border); border-radius: 12px; padding: 12px; background: var(--post-bg); color: var(--post-text); margin-top: 8px; font-size: var(--text-body); }
+.post-text-tools input[type="color"] { display: block; width: 48px; height: 36px; margin-top: 8px; }
+.post-caption-photos { display: flex; gap: 8px; overflow-x: auto; margin: 16px 0 24px; align-items: center; }
+.post-caption-photos canvas { width: 140px; height: 160px; object-fit: contain; background: var(--post-surface); flex-shrink: 0; border-radius: 8px; }
+.post-caption-label textarea { resize: vertical; }
+.post-error { color: #b42318; background: #fff1ed; border-radius: 12px; padding: 12px; }
+.photo-post-card { margin: 12px -16px 28px; border-bottom: 1px solid var(--post-border); padding-bottom: 20px; }
+.photo-post-card > header { display: flex; gap: 10px; align-items: center; padding: 0 16px 12px; }
+.photo-post-card > header .post-card-author { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; padding: 0; text-align: left; }
+.post-card-author img, .post-card-author > .post-avatar-placeholder { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+.post-card-author > span:last-child { min-width: 0; }
+.post-card-author strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.photo-post-card small { display: block; color: var(--post-muted); font-size: var(--text-caption); }
+.photo-post-card .post-caption { white-space: pre-wrap; overflow-wrap: anywhere; margin: 4px 0 0; line-height: 1.55; }
+.photo-post-card time { display: block; font-size: var(--text-caption); color: var(--post-muted); margin-top: 12px; }
+.post-photo-carousel { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; aspect-ratio: 1; max-height: 65dvh; }
+.post-photo-carousel figure { position: relative; flex: 0 0 100%; min-width: 0; min-height: 0; height: 100%; margin: 0; scroll-snap-align: start; background: var(--post-surface); display: grid; place-items: center; }
+.post-photo-carousel img { display: block; width: 100%; height: 100%; object-fit: contain; }
+html[data-theme="dark"] .photo-post-screen { --post-bg: var(--color-ink); --post-text: var(--color-surface); --post-muted: var(--color-gray-faint); --post-surface: var(--color-charcoal); --post-border: var(--color-gray-strong); }
+html[data-theme="dark"] .post-error { background: #472a22; color: #ffb4a8; }
+.photo-post-screen .photo-crop-dialog { --submission-bg: var(--post-bg); --submission-text: var(--post-text); --submission-muted: var(--post-muted); --submission-border: var(--post-border); }
+.photo-post-screen .photo-crop-dialog h2 { font-size: var(--text-section); font-weight: 600; }
+.photo-post-screen .photo-crop-handle { position: absolute; width: 20px; height: 20px; min-height: 20px; padding: 0; border: 2px solid var(--color-primary); border-radius: 4px; background: var(--color-white); touch-action: none; }
+.home-posts-section, .profile-photo-posts, .profile-content-tabs { --post-bg: var(--color-white); --post-text: var(--color-ink); --post-muted: var(--color-gray); --post-surface: var(--color-surface); --post-border: var(--color-border); color: var(--post-text); }
+.home-posts-section { padding: 0 16px; margin: 0 0 32px; }
+.home-posts-section > header { display: flex; align-items: start; justify-content: space-between; gap: 16px; margin-bottom: 12px; }
+.home-posts-section h2 { font-size: var(--text-section); line-height: var(--text-section--line-height); font-weight: 600; margin: 0; }
+.home-posts-section header p { font-size: var(--text-caption); color: var(--post-muted); margin: 5px 0 0; }
+.home-posts-section header button { font-size: var(--text-label); color: var(--post-muted); flex-shrink: 0; min-height: 28px; }
+.home-posts-strip { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(138px, 42%); gap: 12px; overflow-x: auto; scroll-snap-type: x proximity; padding-bottom: 2px; }
+.post-photo-tile { display: block; min-width: 0; text-align: left; padding: 0; border: 0; background: transparent; color: inherit; scroll-snap-align: start; cursor: pointer; }
+.post-tile-image { position: relative; aspect-ratio: 1; overflow: hidden; border-radius: 12px; background: var(--post-surface); }
+.post-tile-image > img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.post-multiple-badge { position: absolute; top: 8px; right: 8px; display: grid; place-items: center; padding: 4px; background: #0006; border-radius: 6px; color: var(--color-white); }
+.post-tile-author { display: flex; gap: 6px; align-items: center; margin-top: 8px; min-width: 0; font-size: var(--text-caption); }
+.post-tile-author img, .post-tile-author > .post-avatar-placeholder { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+.post-tile-author > span:last-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.post-avatar-placeholder { display: inline-grid; place-items: center; background: var(--post-surface); color: var(--post-muted); font-size: var(--text-caption); }
+.home-posts-empty, .home-posts-loading { padding: 20px; background: var(--post-surface); border-radius: 14px; color: var(--post-muted); font-size: var(--text-label); }
+.home-posts-empty p { margin: 0 0 8px; }
+.home-posts-empty button { color: var(--color-primary); font-size: var(--text-label); font-weight: 500; min-height: 36px; }
+.desktop-home .home-posts-section { padding: 0; margin: 32px 0 40px; }
+.desktop-home .home-posts-strip { grid-auto-flow: initial; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 20px; }
+.profile-content-tabs { display: flex; gap: 0; margin: 20px 0 24px; border-bottom: 1px solid var(--post-border); }
+.profile-content-tabs button { flex: 1; min-height: 44px; font-size: var(--text-label); font-weight: 500; color: var(--post-muted); border-bottom: 2px solid transparent; }
+.profile-content-tabs button[aria-pressed="true"] { color: var(--post-text); border-bottom-color: var(--color-primary); }
+.profile-post-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 4px; }
+.profile-post-grid .post-tile-image { border-radius: 6px; }
+.profile-post-grid .post-multiple-badge { top: 4px; right: 4px; padding: 3px; }
+.post-feed { padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
+.post-feed-empty { padding: 36px 8px; text-align: center; color: var(--post-muted); line-height: 1.6; }
+.post-feed-empty h2 { color: var(--post-text); font-size: var(--text-lead); font-weight: 600; }
+.post-empty-create { color: var(--color-primary); font-weight: 500; }
+.post-feed-more { display: block; margin: 0 auto; background: var(--post-surface); color: var(--post-text); }
+.post-carousel-shell { position: relative; }
+.post-photo-carousel { overscroll-behavior-x: contain; scrollbar-width: none; }
+.post-photo-position { position: absolute; top: 12px; right: 12px; padding: 4px 8px; font-size: var(--text-caption); border-radius: 14px; background: #0009; color: var(--color-white); pointer-events: none; }
+.photo-post-screen .post-carousel-arrow { position: absolute; top: calc(50% - 30px); width: 32px; height: 32px; min-height: 32px; padding: 0; border-radius: 50%; display: grid; place-items: center; background: #0006; color: var(--color-white); font-size: var(--text-title); line-height: 1; }
+.post-carousel-previous { left: 10px; }
+.post-carousel-next { right: 10px; }
+.photo-post-screen .post-carousel-arrow:disabled { visibility: hidden; }
+.post-photo-dots { display: flex; align-items: center; justify-content: center; gap: 0; padding-top: 4px; }
+.photo-post-screen .post-photo-dots button { display: grid; place-items: center; min-height: 28px; width: 22px; padding: 0; }
+.post-photo-dots span { display: block; width: 5px; height: 5px; border-radius: 50%; background: var(--color-gray-faint); }
+.post-photo-dots [aria-current="true"] span { background: var(--color-primary); }
+.post-card-content { padding: 0 16px; }
+.post-card-actions { display: flex; align-items: center; gap: 12px; }
+.photo-post-screen .post-card-actions button { display: inline-flex; align-items: center; gap: 8px; padding: 6px 0; min-height: 40px; font-size: var(--text-caption); }
+.post-caption strong { font-weight: 600; }
+.post-caption-collapsed { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.photo-post-screen .post-caption-toggle { min-height: 28px; color: var(--post-muted); padding: 0; font-size: var(--text-caption); }
+.photo-post-screen .post-share-status { color: var(--post-muted); font-size: var(--text-caption); margin: 8px 0 0; }
+.post-hidden-notice { color: var(--post-muted); padding: 0 16px; font-size: var(--text-caption); }
+.post-manual-link { display: block; font-size: var(--text-caption); margin-top: 12px; }
+.post-manual-link input { width: 100%; padding: 10px; border: 1px solid var(--post-border); border-radius: 8px; margin-top: 6px; font-size: var(--text-caption); background: var(--post-bg); }
+.post-options-dialog { position: fixed; inset: 0; width: 100%; height: 100%; max-width: none; max-height: none; padding: 0; margin: 0; border: 0; background: transparent; color: var(--post-text); }
+.post-options-dialog[open] { display: flex; align-items: end; justify-content: center; }
+.post-options-dialog::backdrop { background: #0006; }
+.post-options-panel { width: 100%; max-width: 448px; border-radius: 20px 20px 0 0; background: var(--post-bg); padding: 24px 20px calc(20px + env(safe-area-inset-bottom)); max-height: 90dvh; overflow-y: auto; }
+.post-options-panel h2 { font-size: var(--text-lead); font-weight: 600; margin: 0 0 12px; }
+.post-options-panel > button { display: block; width: 100%; text-align: left; margin-top: 4px; }
+.post-options-panel > p { color: var(--post-muted); line-height: 1.6; }
+.post-options-panel .post-delete-option { color: #b42318; }
+.post-photo-tile:focus-visible, .home-posts-section button:focus-visible, .profile-content-tabs button:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 3px; }
+html[data-theme="dark"] .home-posts-section, html[data-theme="dark"] .profile-photo-posts, html[data-theme="dark"] .profile-content-tabs { --post-bg: var(--color-ink); --post-text: var(--color-surface); --post-muted: var(--color-gray-faint); --post-surface: var(--color-charcoal); --post-border: var(--color-gray-strong); }
+html[data-theme="dark"] .post-options-panel .post-delete-option { color: #ffb4a8; }
+@media (min-width: 1024px) {
+  .desktop-screen .post-feed > nav.fixed.bottom-0 { display: none; }
+  .pickle-web .post-topbar button[aria-label="Back"] { display: flex !important; }
+  .pickle-web .post-topbar { top: 88px; }
+}
+.post-recipe-picker { margin:20px 0; padding:16px 0; border-top:1px solid var(--post-border); }
+.post-recipe-picker h2 { font-size:var(--text-label); font-weight:600; margin:0 0 6px; }
+.post-tag-button, .post-recipe-pages button { border:1px solid var(--post-border); border-radius:10px; padding:10px 14px; margin-top:10px; font-size:var(--text-label); color:var(--post-text); background:var(--post-surface); }
+.post-recipe-picker label { display:block; font-size:var(--text-label); margin-top:12px; }
+.post-recipe-picker input { width:100%; min-width:0; border:1px solid var(--post-border); border-radius:10px; padding:11px; margin-top:6px; background:var(--post-bg); color:var(--post-text); }
+.post-recipe-results { list-style:none; margin:8px 0; padding:0; }
+.post-recipe-results button, .post-recipe-choice, .post-recipe-link { display:flex; align-items:center; gap:10px; width:100%; text-align:left; padding:10px 0; color:var(--post-text); }
+.post-recipe-results img, .post-recipe-choice img, .post-recipe-link img { width:48px; height:48px; object-fit:cover; border-radius:8px; flex-shrink:0; }
+.post-recipe-results span, .post-recipe-choice span, .post-recipe-link > span:first-of-type { display:grid; gap:2px; min-width:0; flex:1; }
+.post-recipe-results strong, .post-recipe-choice strong, .post-recipe-link strong { font-size:var(--text-label); font-weight:500; overflow-wrap:anywhere; }
+.post-recipe-results small, .post-recipe-choice small, .post-recipe-link small { color:var(--post-muted); font-size:var(--text-caption); }
+.post-recipe-choice > button { padding:12px; color:var(--post-muted); }
+.post-recipe-pages { display:flex; gap:12px; }
+.post-recipe-credit { border:1px solid var(--post-border); border-radius:12px; padding:2px 10px 10px; margin:2px 0 10px; }
+.post-author-reaction { display:flex; align-items:center; gap:6px; font-size:var(--text-caption); color:var(--color-primary); padding:5px 0; }
+.post-author-reaction[aria-pressed="true"], span.post-author-reaction { width:fit-content; border-radius:8px; padding:6px 8px; background:color-mix(in srgb,var(--color-primary) 10%,transparent); }
+.post-tile-recipe-tag { position:absolute; left:8px; bottom:8px; max-width:calc(100% - 16px); display:flex; align-items:center; gap:5px; padding:4px 6px; border-radius:6px; background:rgb(0 0 0 / .65); color:var(--color-white); font-size:var(--text-tiny); line-height:var(--text-tiny--line-height); text-align:left; }
+.post-tile-recipe-tag svg { flex-shrink:0; }
+.post-tile-recipe-tag > span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.recipe-tagged-posts { --post-bg:var(--color-white); --post-text:var(--color-ink); --post-muted:var(--color-gray); --post-surface:var(--color-surface); --post-border:var(--color-border); color:var(--post-text); margin-top:32px; }
+.recipe-tagged-posts > header { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; }
+.recipe-tagged-posts h2 { margin:0; font-size:var(--text-section); line-height:var(--text-section--line-height); font-weight:600; }
+.recipe-tagged-posts header > button { font-size:var(--text-label); color:var(--post-muted); min-height:40px; flex-shrink:0; }
+.recipe-tagged-post-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px 8px; }
+.recipe-tagged-posts .post-tile-author { font-size:var(--text-tiny); gap:4px; }
+.recipe-tagged-posts .post-tile-author img, .recipe-tagged-posts .post-tile-author > .post-avatar-placeholder { width:18px; height:18px; }
+.recipe-tagged-posts-error { display:flex; align-items:center; gap:10px; margin-top:20px; font-size:var(--text-caption); color:var(--color-gray); }
+.recipe-tagged-posts-error button { padding:8px; color:var(--color-primary); }
+.recipe-cooked-shortcut { display:flex; align-items:center; justify-content:center; gap:8px; width:100%; min-height:44px; margin-top:24px; padding:10px 16px; border:1px solid var(--color-primary); border-radius:12px; color:var(--color-primary); background:transparent; font-size:var(--text-label); font-weight:600; }
+.recipe-cooked-shortcut:focus-visible { outline:2px solid var(--color-primary); outline-offset:3px; }
+.post-draft-toolbar { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:12px 0; }
+.post-draft-toolbar > span { color:var(--post-muted); font-size:var(--text-caption); }
+.post-draft-toolbar button { color:var(--color-primary); font-size:var(--text-label); font-weight:600; flex-shrink:0; }
+.post-draft-discard { color:var(--color-error, #C53D2E); font-size:var(--text-label); }
+.post-recovery-panel { padding:24px 0; }
+.post-recovery-panel h2, .post-draft-exit h2 { font-size:var(--text-section); font-weight:600; }
+.post-recovery-panel > button { display:block; width:100%; margin-top:12px; border:1px solid var(--post-border); }
+.post-recovery-photo { display:block; width:104px; height:104px; border-radius:14px; object-fit:cover; margin:16px 0; }
+.post-recovery-caption { white-space:pre-wrap; overflow-wrap:anywhere; }
+.post-draft-exit { position:fixed; inset:0; margin:auto; width:min(360px,calc(100vw - 32px)); border:1px solid var(--post-border); border-radius:16px; padding:24px; color:var(--post-text); background:var(--post-bg); }
+.post-draft-exit::backdrop { background:#0008; }
+.post-draft-exit button { display:block; width:100%; color:var(--color-primary); margin-top:12px; }
+html[data-theme="dark"] .recipe-tagged-posts { --post-bg:var(--color-ink); --post-text:var(--color-surface); --post-muted:var(--color-gray-faint); --post-surface:var(--color-charcoal); --post-border:var(--color-gray-strong); }
+.recipe-detail[hidden] { display:none; }

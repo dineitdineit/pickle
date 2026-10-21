@@ -1,0 +1,58 @@
+RETENTION UPDATE 2026-10-15: confirmed and implemented 30-day detailed evidence/minimal deletion receipts/backups and 90-day minimum enforcement history, with active-case/restriction exceptions. Current text is in ../current/ and scope in ../retention-policy.ko.txt. Earlier provisional retention paragraphs below are superseded; provider-managed copies remain separate.
+
+REVIEW DRAFT UPDATE — 2026-10-15
+Confirmed: operator Taelim Auh, Republic of Korea; admin@getpickleapp.com; Vercel hosting; Supabase backend; Porkbun forwarding to Gmail; Resend email; Google enabled, Apple planned; 18+ accounts; delete published recipes/photos with account.
+Current implemented copy is in ../current/. Historical implementation-gap statements below are background for review, not current guarantees. The 18+ server guard, deletion preparation/freeze and published-recipe cascade have now been implemented and the deletion function redeployed. Retention periods, detailed transfers and external policy/deletion URLs remain unresolved. See retention-recommendations.ko.txt and launch-and-age-plan.ko.txt. No proposed retention duration has been activated.
+
+Pickle Privacy Policy — REVISED WORKING DRAFT
+Prepared: 2026-10-15
+Status: WORKING REVIEW DRAFT. Confirmed operator, provider and 18+ clauses are applied in current app documents; unresolved retention/transfer details below remain proposals. Bracketed items require operator answers. Not an account of a deletion/retention mechanism that has not yet been implemented.
+Proposed effective date: [TO CONFIRM AFTER TEXT AND IMPLEMENTATION ARE ALIGNED]
+
+1. Who operates Pickle and how to contact us
+Pickle is operated by Taelim Auh, based in the Republic of Korea; admin@getpickleapp.com. For privacy questions and requests, contact admin@getpickleapp.com. This policy covers the Pickle app and its related services.
+
+2. Account and profile information
+For email registration, we process your email address, authentication credentials through our authentication provider, account identifier, username and display name. If you use an enabled social login, we also process the identity and profile information provided through that sign-in flow. Google sign-in is currently enabled; Apple sign-in is planned but not offered yet. Confirm actual Google-returned field scope against the provider configuration. You may supply a profile photo and a short biography. Username and display name are currently fixed after selection; other supported profile fields can be managed through the app. Passwords are handled by the authentication service, not published with your profile.
+
+3. Content, community activity and messages
+We process recipes and drafts, ingredients, cooking instructions, tags, linked videos, uploaded images, comments, replies and ratings/reviews that you submit. We also process saved recipes, likes, follow relationships, author-notification preferences, user blocks, and in-app notifications to provide those features.
+Direct messages include the sender, recipient, message text, optional photo, creation time and read status. Messages are stored by our service to deliver them and provide conversation history. They are not public posts: ordinary in-app access is limited to the participants. This does not mean messages are end-to-end encrypted. Each participant can copy or disclose what they receive. Necessary service administration, security handling and valid legal requests may involve access by authorised personnel under the applicable process.
+
+4. Search, recipe views, device storage and technical data
+Submitted general searches are logged with the search text, normalised text, result count, time and account identifier when signed in. Recipe-view records store a recipe identifier and time, rather than an account identifier in the current recipe_views table. We use these records for discovery, popularity counts and service statistics. The current recommendation function can display frequently submitted search terms to other users without identifying the searcher; do not enter personal or sensitive details in search fields. The use of a 30-day recommendation window does not itself delete older search events.
+The app stores a recent-search list, recipe draft data, theme/settings and authentication/session information on the device. Some search history is device-scoped rather than account-scoped. Removing a recent term from the device does not erase server search-event records. Service providers may process network addresses, request/device/browser information and operational logs necessary to deliver and secure the service. [CONFIRM PROVIDER LOG CATEGORIES AND RETENTION; DO NOT CLAIM THAT THE APP COLLECTS PRECISE LOCATION, CONTACTS OR ADVERTISING IDs WITHOUT EVIDENCE.]
+
+5. Reports, enforcement and policy agreement records
+We process reports, reporting and reported account identifiers, reasons, descriptions and snapshots of reported content. We retain moderation cases, assigned staff identifiers, decisions, public reasons, internal notes, timestamps, restrictions and appeals to review abuse, explain actions and handle challenges. Authors are not given reporter identities or internal administrator notes through moderation notices. Reporters receive a limited completion result.
+When you agree before sharing content, we store your account identifier, the accepted terms/content-policy version and the server acceptance time. Current consent records represent agreement to the Terms of Service and Content Policy; they are not a record of optional advertising consent or blanket permission for unrelated processing.
+
+6. Purposes and grounds for processing
+We process information to create and secure accounts, deliver app features and conversations, publish the content you choose to share, maintain your collections and social connections, provide search/discovery and statistics, send requested/service notices, address support requests, prevent abuse and handle policy enforcement and appeals. [CONFIRM APPLICABLE JURISDICTIONS AND THE APPROPRIATE LEGAL BASIS FOR EACH PURPOSE. Distinguish service delivery, legal obligations, legitimate interests where applicable, and any processing that actually requires consent.]
+[CONFIRM WHETHER ADVERTISING, DATA SALES/SHARING FOR ADVERTISING, MARKETING OR EXTERNAL ANALYTICS ARE USED. No dedicated advertising or external analytics SDK was identified in the inspected package list; this alone does not establish all server/vendor practices.]
+
+7. What other users can see
+Published recipes, recipe photos, usernames, display names, profile photos/biographies, comments, reviews and visible social/activity counts may be accessible to other users, including visitors where the service allows it. Drafts and private messages are not intentionally published as public recipes. Public profile/recipe images use public file URLs; hiding a screen or blocking an account cannot recall a URL or a copy already obtained. Users can also share public links and capture content outside the service.
+
+8. Service providers and international processing
+Supabase provides authentication, database, file storage and server functions. The current primary project database region is ap-northeast-2 (Seoul); this is not a guarantee that every supporting service, log or backup remains in Korea.
+Resend is used for service email delivery. Authentication messages are sent through the configured authentication/SMTP flow. Moderation email delivery sends the recipient email address and public notice content, which can include the content type, recipe title, action, reason and restriction duration. Reporter identities and internal moderator notes are excluded from those email payloads.
+Vercel hosts the web service. Porkbun forwards inquiries to admin@getpickleapp.com to the operator’s existing Gmail mailbox. Google login is enabled; Apple login is planned. [CONFIRM PROVIDER PROCESSING COUNTRIES, TRANSFER ARRANGEMENTS AND RETENTION.]
+When you play an embedded third-party video or open an external link, the destination provider can process information such as your network address and playback/request data under its own policies. The player supports external video sources; only enabled/used providers should be listed in the final notice.
+We may disclose information when you direct us to share it or where necessary and lawful to respond to valid requests, protect people or secure the service. [CONFIRM ANY ADDITIONAL BUSINESS DISCLOSURES.]
+
+9. Retention, account deletion and file deletion
+[FINAL TEXT REQUIRED AFTER IMPLEMENTATION AND RETENTION DECISIONS. Do not publish this draft section as the final policy.]
+Specify separately: active account data; published recipes and files; drafts; messages and chat photos; search records and statistics; reports/evidence/decisions/appeals; consent records; email queue/provider records; operational logs and backups. State retention duration or objective criteria, the deletion trigger, the actual purge method, and any documented exception.
+Current implementation observations: the server records adult self-declaration without a birth-date field. Account deletion now prepares a restricted deletion state and hides the author's recipes, removes scoped avatar/recipe/chat files through Storage API, then deletes Auth. Published recipes cascade. Partial file cleanup is irreversible; failures must be retried and do not produce a completed result. Some safety snapshots, decisions and search records can remain with account references detached, and remaining text can still contain personal information. Fixed automatic retention expiry and provider backup lifetimes are not configured/verified. Do not call a null foreign key complete anonymisation.
+Final user-facing text must state delete published recipes and uploaded recipe photos together with the account, [APP DELETION PATH], [EXTERNAL DELETION REQUEST URL], [SPECIFIC EXCEPTIONS AND RETENTION PERIODS], and [WHAT HAPPENS TO RECIPIENT CONVERSATION COPIES].
+
+10. Your controls and privacy requests
+You can manage supported profile fields, collections, follows/notification choices and blocks, and edit/delete your own supported content in the app. You can request account deletion through Settings, subject to the actual process described in the final deletion section. Some identities are intentionally fixed in the UI; contact us for an applicable data-rights request rather than assuming the UI removes statutory rights.
+Depending on where you live, you may have rights to access, correct, erase, obtain a copy of or restrict/object to certain processing, and withdraw consent where consent is the applicable basis. Contact admin@getpickleapp.com; we may verify your identity proportionately. [CONFIRM APPLICABLE RIGHTS, RESPONSE PROCESS, PERIODS AND REGULATOR CONTACTS.]
+
+11. Children
+Accounts are for people aged 18 and over. Initial store distribution is planned for the Philippines. See launch-and-age-plan.ko.txt for staged country expansion, the self-declaration mechanism and its limits. No parental-consent programme is currently offered.
+
+12. Security and changes
+We use access restrictions and other technical/organisational measures appropriate to operating the service. No system can guarantee absolute security. We will publish the effective date of policy revisions and provide additional notice or obtain renewed agreement/consent where required by the nature of the change and applicable rules.

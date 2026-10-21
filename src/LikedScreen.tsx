@@ -3,7 +3,6 @@ import { formatTime } from "./lib/format"
 import { useEffect, useMemo, useState } from "react"
 import { supabase } from "./lib/supabase"
 import { getCurrentUser } from "./lib/auth"
-
 type LikedRecipe = {
   id: string
   title: string
@@ -12,13 +11,11 @@ type LikedRecipe = {
   video_url?: string | null
   image: string
 }
-
 type LikedScreenProps = {
   recipes: LikedRecipe[]
   onSelectRecipe: (id: string) => void
   onBack: () => void
 }
-
 export default function LikedScreen({
   recipes,
   onSelectRecipe,
@@ -27,48 +24,45 @@ export default function LikedScreen({
   const [likedIds, setLikedIds] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState("")
-
+  const [safetyVersion, setSafetyVersion] = useState(0)
+  useEffect(() => {
+    const refresh = () => setSafetyVersion((value) => value + 1)
+    window.addEventListener("pickle:safety-refresh", refresh)
+    return () => window.removeEventListener("pickle:safety-refresh", refresh)
+  }, [])
   useEffect(() => {
     let ignore = false
-
     async function loadLikedRecipes() {
       setLoading(true)
       setErrorMessage("")
-
       const { data: userData, error: userError } = await getCurrentUser()
       const user = userData.user
-
       if (ignore) return
       if (userError || !user) {
         setLikedIds([])
         setLoading(false)
         return
       }
-
       const { data, error } = await supabase
         .from("recipe_likes")
         .select("recipe_id, created_at")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
-
       if (ignore) return
       if (error) {
-        console.error("Failed to load liked recipes:", error)
+        console.error("Failed to load liked recipes:")
         setErrorMessage("Could not load your liked recipes.")
         setLikedIds([])
       } else {
         setLikedIds((data ?? []).map((row) => row.recipe_id))
       }
-
       setLoading(false)
     }
-
     loadLikedRecipes()
     return () => {
       ignore = true
     }
-  }, [])
-
+  }, [safetyVersion])
   const recipeMap = useMemo(
     () => new Map(recipes.map((recipe) => [recipe.id, recipe])),
     [recipes],
@@ -80,27 +74,22 @@ export default function LikedScreen({
         .filter((recipe): recipe is LikedRecipe => Boolean(recipe)),
     [likedIds, recipeMap],
   )
-
   async function removeLike(recipeId: string) {
     const { data: userData } = await getCurrentUser()
     const user = userData.user
     if (!user) return
-
     const { error } = await supabase
       .from("recipe_likes")
       .delete()
       .eq("user_id", user.id)
       .eq("recipe_id", recipeId)
-
     if (error) {
-      console.error("Failed to unlike recipe:", error)
+      console.error("Failed to unlike recipe:")
       setErrorMessage("Could not update this recipe. Please try again.")
       return
     }
-
     setLikedIds((current) => current.filter((id) => id !== recipeId))
   }
-
   return (
     <div className="pb-24">
       <div
@@ -112,14 +101,17 @@ export default function LikedScreen({
           onClick={onBack}
           aria-label="Back"
           className="absolute left-4 top-5 w-9 h-9 flex items-center justify-center rounded-full"
-          style={{ backgroundColor: "#F9F9F9", border: "1.5px solid #EAEAEA" }}
+          style={{
+            backgroundColor: "var(--color-surface)",
+            border: "1.5px solid var(--color-border)",
+          }}
         >
           <svg
             width="18"
             height="18"
             viewBox="0 0 24 24"
             fill="none"
-            stroke="#1F1F1F"
+            stroke="var(--color-ink)"
             strokeWidth="2.2"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -127,22 +119,24 @@ export default function LikedScreen({
             <polyline points="15 18 9 12 15 6" />
           </svg>
         </button>
-        <h1 className="font-bold text-[27px]" style={{ color: "#1F1F1F" }}>
+        <h1
+          className="font-bold text-page"
+          style={{ color: "var(--color-ink)" }}
+        >
           Liked Recipes
         </h1>
       </div>
-
       {loading ? (
         <div
-          className="px-4 py-16 text-center text-[16px]"
-          style={{ color: "#6F6F6F" }}
+          className="px-4 py-16 text-center text-body"
+          style={{ color: "var(--color-gray)" }}
         >
           Loading liked recipes…
         </div>
       ) : visibleRecipes.length > 0 ? (
         <div className="web-saved-grid px-4 flex flex-col">
           {errorMessage && (
-            <p className="text-[14px] mb-2" style={{ color: "#C53D2E" }}>
+            <p className="text-label mb-2" style={{ color: "#C53D2E" }}>
               {errorMessage}
             </p>
           )}
@@ -153,7 +147,7 @@ export default function LikedScreen({
               style={{
                 borderBottom:
                   index < visibleRecipes.length - 1
-                    ? "1px solid #EAEAEA"
+                    ? "1px solid var(--color-border)"
                     : undefined,
               }}
             >
@@ -167,49 +161,56 @@ export default function LikedScreen({
                   style={{ width: 64, height: 64, position: "relative" }}
                 >
                   <VideoBadge url={recipe.video_url} />
-              <img
+                  <img
                     src={recipe.image}
                     alt={recipe.title}
                     className="w-full h-full object-cover"
                   />
                 </div>
-
                 <div className="flex-1 min-w-0">
                   <p
-                    className="font-semibold text-[18px] leading-snug truncate"
-                    style={{ color: "#1F1F1F" }}
+                    className="font-semibold text-lead leading-snug truncate"
+                    style={{ color: "var(--color-ink)" }}
                   >
                     {recipe.title}
                   </p>
                   <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                     <span
-                      className="text-[15px] px-2 py-0.5 rounded-full"
-                      style={{ backgroundColor: "#F5F5F5", color: "#6F6F6F" }}
+                      className="text-body px-2 py-0.5 rounded-full"
+                      style={{
+                        backgroundColor: "var(--color-surface)",
+                        color: "var(--color-gray)",
+                      }}
                     >
                       Filipino
                     </span>
                     <span
-                      className="text-[15px] px-2 py-0.5 rounded-full"
-                      style={{ backgroundColor: "#F5F5F5", color: "#6F6F6F" }}
+                      className="text-body px-2 py-0.5 rounded-full"
+                      style={{
+                        backgroundColor: "var(--color-surface)",
+                        color: "var(--color-gray)",
+                      }}
                     >
                       {recipe.difficulty}
                     </span>
-                    <span className="text-[15px]" style={{ color: "#6F6F6F" }}>
+                    <span
+                      className="text-body"
+                      style={{ color: "var(--color-gray)" }}
+                    >
                       {formatTime(recipe.total_time_minutes)}
                     </span>
                   </div>
                 </div>
               </button>
-
               <button
                 type="button"
                 onClick={() => removeLike(recipe.id)}
                 aria-label={`Unlike ${recipe.title}`}
                 className="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center"
                 style={{
-                  backgroundColor: "#F26B21",
-                  color: "#FFFFFF",
-                  border: "1.5px solid #F26B21",
+                  backgroundColor: "var(--color-primary)",
+                  color: "var(--color-white)",
+                  border: "1.5px solid var(--color-primary)",
                 }}
               >
                 <svg
@@ -232,7 +233,10 @@ export default function LikedScreen({
         <div className="flex flex-col items-center justify-center px-6 py-20 text-center">
           <div
             className="w-12 h-12 rounded-full flex items-center justify-center mb-4"
-            style={{ backgroundColor: "#FFF0E6", color: "#F26B21" }}
+            style={{
+              backgroundColor: "var(--color-primary-soft)",
+              color: "var(--color-primary)",
+            }}
           >
             <svg
               width="22"
@@ -248,16 +252,19 @@ export default function LikedScreen({
             </svg>
           </div>
           <p
-            className="font-semibold text-[19px] mb-1"
-            style={{ color: "#1F1F1F" }}
+            className="font-semibold text-lead mb-1"
+            style={{ color: "var(--color-ink)" }}
           >
             No liked recipes yet
           </p>
-          <p className="text-[16px] leading-5" style={{ color: "#6F6F6F" }}>
+          <p
+            className="text-body leading-5"
+            style={{ color: "var(--color-gray)" }}
+          >
             Recipes you like will appear here.
           </p>
           {errorMessage && (
-            <p className="text-[14px] mt-3" style={{ color: "#C53D2E" }}>
+            <p className="text-label mt-3" style={{ color: "#C53D2E" }}>
               {errorMessage}
             </p>
           )}

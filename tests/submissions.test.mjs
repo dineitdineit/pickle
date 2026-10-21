@@ -9,7 +9,7 @@ const videoModule={exports:{}}
 new Function('module','exports',ts.transpileModule(readFileSync(new URL('../src/lib/video.ts',import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText)(videoModule,videoModule.exports)
 new Function('require','module','exports',js)(() => videoModule.exports,module,module.exports)
 const {newRecipeInput,recipeSubmissionPayload,restoreRecipeInput,validateRecipeInput,assignStepPhotos,newStep}=module.exports
-function complete(){const i=newRecipeInput();i.title='  Soup  ';i.description='A simple soup.';i.servings='2';i.cover_image='community:user/draft/cover.jpg';i.difficulty='Easy';i.total_time_minutes='20';i.ingredients[0].name='Water';i.ingredients[0].amount='500';i.ingredients[0].unit='ml';i.steps[0].instruction='Boil.';return i}
+function complete(){const i=newRecipeInput();i.title='  Soup  ';i.short_description='A simple soup.';i.servings='2';i.cover_image='community:user/draft/cover.jpg';i.difficulty='Easy';i.total_time_minutes='20';i.ingredients[0].name='Water';i.ingredients[0].amount='500';i.ingredients[0].unit='ml';i.steps[0].instruction='Boil.';return i}
 test('incomplete recipes save as drafts but cannot publish',()=>{const i=newRecipeInput();assert.deepEqual(validateRecipeInput(i,false),[]);assert.equal(validateRecipeInput(i,true).length,10)})
 test('complete recipe publishes without optional ingredients/step photos or nutrition',()=>{assert.deepEqual(validateRecipeInput(complete(),true),[]);const p=recipeSubmissionPayload(complete());assert.equal(p.title,'Soup');assert.equal(p.servings,2);assert.equal(p.ingredients[0].amount,500);assert.equal(p.ingredients_image,'');assert.equal(p.steps[0].step_image,'');assert.equal(p.steps[0].step_time_minutes,null);assert.equal(p.nutrition,null);assert.equal(p.ingredients[0].key,undefined)})
 test('enabled nutrition requires all four values and permits zero',()=>{const i=complete();i.nutrition={calories:'0',protein_g:'',carbs_g:'',fat_g:'',is_estimated:true};assert.equal(validateRecipeInput(i,true).length,3);i.nutrition.protein_g=i.nutrition.carbs_g=i.nutrition.fat_g='0';assert.deepEqual(validateRecipeInput(i,true),[]);assert.equal(recipeSubmissionPayload(i).nutrition.fat_g,0)})
@@ -17,12 +17,22 @@ test('invalid quantities and fractional cooking times cannot save',()=>{const i=
 test('server drafts restore numeric values to editable strings',()=>{const i=complete();i.ingredients[0].amount='0.5';const p=recipeSubmissionPayload(i);const restored=restoreRecipeInput(p);assert.equal(restored.total_time_minutes,'20');assert.equal(restored.servings,'2');assert.equal(restored.ingredients[0].amount,'0.5');assert.deepEqual(validateRecipeInput(restored,true),[])})
 const screen=readFileSync(new URL('../src/RecipeUploadScreen.tsx',import.meta.url),'utf8')
 function saveAction(context){const ast=ts.createSourceFile('upload.tsx',screen,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);let fn;function visit(n){if(ts.isFunctionDeclaration(n)&&n.name?.text==='save')fn=n.getText(ast);ts.forEachChild(n,visit)}visit(ast);const js=ts.transpileModule(fn,{compilerOptions:{target:ts.ScriptTarget.ES2020}}).outputText;return new Function(...Object.keys(context),`${js};return save`)(...Object.values(context))}
-function saveSetup(response){const state={},calls=[];const context={guard:{current:false},editable:true,input:complete(),initial:{id:'draft'},version:'version',cacheKey:'cache',tagText:'',userId:'user',window:{scrollTo(){}},validateRecipeInput,recipeSubmissionPayload,errorPanel:{current:null},requestAnimationFrame(fn){fn()},localStorage:{removeItem(){}},console:{error(){}},supabase:{async rpc(name,args){calls.push({name,args});return response}},onSaved(id){state.saved=id},...Object.fromEntries(['Errors','Message','Busy','Version','PublishedId','Preview'].map(n=>[`set${n}`,v=>{state[n]=v}]))};return {state,calls,context}}
+function saveSetup(response){const state={},calls=[];const context={guard:{current:false},editable:true,editingPublished:false,input:complete(),initial:{id:'draft'},version:'version',cacheKey:'cache',tagText:'',userId:'user',requireContentConsent:async()=>true,window:{scrollTo(){}},validateRecipeInput,recipeSubmissionPayload,errorPanel:{current:null},focusValidation(){},requestAnimationFrame(fn){fn()},localStorage:{removeItem(){}},console:{error(){}},supabase:{async rpc(name,args){calls.push({name,args});return response}},onSaved(id){state.saved=id},...Object.fromEntries(['Errors','Message','Busy','Version','PublishedId','Preview','CheckedPages'].map(n=>[`set${n}`,v=>{state[n]=v}]))};return {state,calls,context}}
 test('publish confirms a persisted recipe id and sends optimistic draft version',async()=>{const {state,calls,context}=saveSetup({data:{id:'draft',status:'published',recipe_id:'recipe',updated_at:'new'},error:null});await saveAction(context)(true);assert.equal(state.PublishedId,'recipe');assert.equal(state.Message,'업로드 되었습니다.');assert.equal(state.saved,undefined);assert.equal(calls[0].args.p_submit,true);assert.equal(calls[0].args.p_expected_updated_at,'version');assert.equal(state.Version,'new')})
 test('failed saves or missing published ids keep the form without success',async()=>{for(const response of [{data:null,error:{code:'40001'}},{data:{id:'draft',status:'published'},error:null}]){const {state,context}=saveSetup(response);await saveAction(context)(true);assert.equal(state.saved,undefined);assert.equal(state.Errors.length,1);assert.equal(context.guard.current,false)}})
+
+test('published edits use the owner update RPC and retain the existing recipe id',async()=>{
+  const {state,calls,context}=saveSetup({data:{id:'draft',status:'published',recipe_id:'existing-recipe',updated_at:'new'},error:null})
+  context.editingPublished=true
+  await saveAction(context)(true)
+  assert.equal(calls[0].name,'update_recipe_submission')
+  assert.equal(calls[0].args.p_expected_updated_at,'version')
+  assert.equal(calls[0].args.p_submit,undefined)
+  assert.equal(state.PublishedId,'existing-recipe');assert.equal(state.Message,'Recipe updated.')
+})
 test('busy or invalid publish attempts do not send a write',async()=>{for(const busy of [true,false]){const {calls,context}=saveSetup({});context.guard.current=busy;if(!busy)context.input=newRecipeInput();await saveAction(context)(true);assert.equal(calls.length,0)}})
 
-test('new publishing requirements reject blank and whitespace-only fields but allow drafts',()=>{for(const field of ['cover_image','description','servings']){const i=complete();i[field]='  ';assert.equal(validateRecipeInput(i,true).length,1);assert.deepEqual(validateRecipeInput(i,false),[])}for(const field of ['amount','unit']){const i=complete();i.ingredients[0][field]='  ';assert.equal(validateRecipeInput(i,true).length,1);assert.deepEqual(validateRecipeInput(i,false),[])}})
+test('new publishing requirements reject blank and whitespace-only fields but allow drafts',()=>{for(const field of ['cover_image','short_description','servings']){const i=complete();i[field]='  ';assert.equal(validateRecipeInput(i,true).length,1);assert.deepEqual(validateRecipeInput(i,false),[])}for(const field of ['amount','unit']){const i=complete();i.ingredients[0][field]='  ';assert.equal(validateRecipeInput(i,true).length,1);assert.deepEqual(validateRecipeInput(i,false),[])}})
 
 test('bulk photos fill empty steps without overwriting existing photos and append new steps',()=>{const steps=[{...newStep(),instruction:'Keep this',step_image:'existing'},newStep()];const next=assignStepPhotos(steps,['one','two']);assert.equal(next[0].step_image,'existing');assert.equal(next[0].instruction,'Keep this');assert.equal(next[1].step_image,'one');assert.equal(next[2].step_image,'two');assert.equal(steps.length,2);assert.equal(steps[1].step_image,'')})
 test('bulk photos enforce the 30-step limit without changing original steps',()=>{const steps=Array.from({length:30},()=>({...newStep(),step_image:'existing'}));assert.throws(()=>assignStepPhotos(steps,['extra']));assert.equal(steps.length,30)})
@@ -35,13 +45,13 @@ function navigationSetup(input, page) {
   let fn
   function visit(n) { if (ts.isFunctionDeclaration(n) && n.name?.text === 'goTo') fn = n.getText(ast); ts.forEachChild(n, visit) }
   visit(ast)
-  const context = { input, page, editable: true, guard: { current: false }, busy: false, uploading: null, tagText: '', validateRecipeInput, setErrors(v) { state.errors = v }, setMessage() {}, setPreview() {}, setPage(v) { state.page = v }, window: { scrollTo() {} }, requestAnimationFrame(fn) { fn() }, errorPanel: { current: { focus() { state.focused = true } } }, pageHeading: { current: null } }
+  const context = { setCheckedPages(v) { state.checkedPages = v(state.checkedPages ?? []) }, focusValidation() { state.focused = true }, input, page, editable: true, guard: { current: false }, busy: false, uploading: null, tagText: '', validateRecipeInput, setErrors(v) { state.errors = v }, setMessage() {}, setPreview() {}, setPage(v) { state.page = v }, window: { scrollTo() {} }, requestAnimationFrame(fn) { fn() }, errorPanel: { current: { focus() { state.focused = true } } }, pageHeading: { current: null } }
   const js = ts.transpileModule(fn, { compilerOptions: { target: ts.ScriptTarget.ES2020 } }).outputText
   return { state, goTo: new Function(...Object.keys(context), `${js};return goTo`)(...Object.values(context)) }
 }
 test('wizard validates only the relevant page fields', () => {
   const input = newRecipeInput()
-  input.title = 'Soup'; input.description = 'Boil water'; input.cover_image = 'photo'
+  input.title = 'Soup'; input.short_description = 'Boil water'; input.cover_image = 'photo'
   assert.deepEqual(validateRecipeInput(input, true, 0), [])
   assert.ok(validateRecipeInput(input, true, 1).length > 0)
   assert.ok(validateRecipeInput(input, true, 2).length > 0)
@@ -87,3 +97,7 @@ test('upload accepts only YouTube and Instagram video links', () => {
   for (const url of ['', 'https://youtu.be/abcdefghijk?si=abc', 'https://www.youtube.com/watch?v=abcdefghijk', 'https://youtube.com/shorts/abcdefghijk', 'https://www.instagram.com/reel/ABC_123/?igsh=abc', 'https://instagram.com/p/ABC-123/']) assert.equal(validVideoUrl(url), true, url)
   for (const url of ['https://vimeo.com/123456','https://example.com/video.mp4','https://tiktok.com/video/123','https://youtube.com.evil.com/watch?v=abcdefghijk','https://instagram.com.evil.com/reel/123/','https://www.instagram.com/profile/','https://youtube.com/','https://youtu.be/invalid']) assert.equal(validVideoUrl(url), false, url)
 })
+
+test('declining publication consent preserves the draft and does not publish',async()=>{const {state,calls,context}=saveSetup({});context.requireContentConsent=async()=>false;await saveAction(context)(true);assert.equal(calls.length,0);assert.equal(state.PublishedId,undefined);assert.equal(context.input.title.trim(),'Soup');assert.equal(context.guard.current,false)})
+
+test('short description is mandatory, About this recipe is optional, and raw text survives drafts',()=>{const i=complete();assert.equal(i.description,'');i.ingredient_text='1 egg\nsalt';i.step_text='Fry\nServe';assert.deepEqual(validateRecipeInput(i,true),[]);const restored=restoreRecipeInput(recipeSubmissionPayload(i));assert.equal(restored.ingredient_text,i.ingredient_text);assert.equal(restored.step_text,i.step_text);i.short_description=' ';assert.ok(validateRecipeInput(i,true).includes('Short description is required.'));assert.deepEqual(validateRecipeInput(i,false),[])})

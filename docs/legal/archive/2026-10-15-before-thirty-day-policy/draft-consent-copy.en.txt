@@ -1,0 +1,44 @@
+RETENTION UPDATE 2026-10-15: confirmed and implemented 30-day detailed evidence/minimal deletion receipts/backups and 90-day minimum enforcement history, with active-case/restriction exceptions. Current text is in ../current/ and scope in ../retention-policy.ko.txt. Earlier provisional retention paragraphs below are superseded; provider-managed copies remain separate.
+
+REVIEW DRAFT UPDATE — 2026-10-15
+Confirmed: operator Taelim Auh, Republic of Korea; admin@getpickleapp.com; Vercel hosting; Supabase backend; Porkbun forwarding to Gmail; Resend email; Google enabled, Apple planned; 18+ accounts; delete published recipes/photos with account.
+Current implemented copy is in ../current/. Historical implementation-gap statements below are background for review, not current guarantees. The 18+ server guard, deletion preparation/freeze and published-recipe cascade have now been implemented and the deletion function redeployed. Retention periods, detailed transfers and external policy/deletion URLs remain unresolved. See retention-recommendations.ko.txt and launch-and-age-plan.ko.txt. No proposed retention duration has been activated.
+
+Pickle agreement copy — WORKING DRAFT, NOT IMPLEMENTED
+Prepared: 2026-10-15
+Status: Decide jurisdictions, legal grounds and deletion behaviour before publishing or adding acceptance records. Do not treat these proposed UI strings as current functionality.
+
+1. Registration notice proposal
+Heading: Before you create an account
+Text: Read our Terms of Service and Privacy Policy to understand your account and how Pickle handles your information.
+Links: Terms of Service / Privacy Policy
+Proposed terms checkbox, initially unchecked: I agree to the Terms of Service.
+Button: Create account
+
+Decision note:
+Providing a privacy notice, acknowledging receipt, agreeing to service terms and consenting to a particular use of personal information are different actions. Do not use a blanket 'I consent to all data processing' checkbox. Which processing requires a separate consent and its items must be determined from the actual purposes and applicable law. Registration acceptance recording is not implemented merely by writing this file. Social sign-in users require the same applicable notice/agreement flow; provider login alone is not a Pickle terms agreement record.
+
+2. Content-sharing agreement proposal
+Heading: Before you share
+Text: Please read and agree to the Terms of Service and Content Policy before sharing recipes, photos, comments, reviews or messages. Our Privacy Policy explains how we use and retain your information.
+Document links/sections: Terms of Service / Content Policy / Privacy Policy
+Version: Agreement version: {version}
+Checkbox 1, initially unchecked: I agree to the Terms of Service.
+Checkbox 2, initially unchecked: I agree to the Content Policy.
+Buttons: Cancel / Agree and continue
+Saving state: Saving…
+
+Preserve the existing account/version/server-time record and confirm it on the server. A Privacy Policy link alone is not a separate privacy-consent record. Add separate purpose-specific consent records only if required and actually implemented; optional consent must not be bundled with necessary service agreement. Never mark existing users as having agreed to a new version merely because the text was edited.
+
+3. Account-deletion copy proposal
+Heading: Delete your account?
+Text: This will delete your account and [CONFIRMED ASSOCIATED DATA]. [EXPLAIN WHETHER PUBLISHED RECIPES ARE DELETED OR RETAINED WITH IDENTIFYING INFORMATION REMOVED]. [STATE ANY SPECIFIC RETENTION EXCEPTION AND LINK TO THE FINAL PRIVACY POLICY]. You will lose access to your account. This action cannot be undone.
+Links: What happens to my data? / Privacy Policy
+Buttons: Cancel / Delete account
+Pending state: Deleting…
+Failure: We couldn't complete account deletion. Please retry or contact admin@getpickleapp.com.
+
+Do not show a successful deletion message unless account removal and the defined associated-data/file treatment are confirmed. The published-recipe foreign key has been fixed and deletion is now prepared/frozen before cleanup. Partial photo cleanup can still occur on failure; this limitation must remain disclosed and retryable.
+
+4. Marketing and age controls
+No marketing checkbox is proposed for the current feature set. If marketing is added, determine a genuinely separate, optional opt-in and withdrawal path. Initial account age is now 18+ with server-checked self-declaration, not an identity/parental verification programme. Any future teen access requires a separate policy and matching protections.

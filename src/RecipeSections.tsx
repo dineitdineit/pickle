@@ -1,45 +1,73 @@
+import RecipeImage from "./RecipeImage"
+
 import { formatTime } from "./lib/format"
+
 import { recipeImageUrl } from "./lib/recipe"
+
 import type { IngredientRow, StepRow, Nutrition } from "./recipeTypes"
 
-function formatAmount(amount: number | null) {
-  if (amount === null) return ""
-  const fractions: Record<number, string> = {
-    0.25: "¼",
-    0.5: "½",
-    0.75: "¾",
-    0.33: "⅓",
-    0.67: "⅔",
-  }
-  return fractions[amount] ?? String(amount)
-}
+import { useState } from "react"
+
+import {
+  formatIngredientQuantity,
+  type UnitSystem,
+} from "./lib/ingredientUnits"
+
+import "./ingredient-units.css"
 
 export function IngredientsSection({
   groupedIngredients,
+
   recipeTitle,
+
   ingredientsImage,
+
   active,
 }: {
   groupedIngredients: [string, IngredientRow[]][]
+
   recipeTitle: string
+
   ingredientsImage: string | null
+
   active: boolean
 }) {
+  const [unitSystem, setUnitSystem] = useState<UnitSystem>("US")
+
   return (
     <section
       className={`recipe-content-section recipe-ingredients mt-6${
-        !active ? " is-inactive" : ""
-      }`}
+        !ingredientsImage ? " no-ingredients-photo" : ""
+      }${!active ? " is-inactive" : ""}`}
     >
-      <h2
-        className="font-semibold text-[22px] mb-4"
-        style={{ color: "#1F1F1F" }}
-      >
-        Ingredients
-      </h2>
+      <div className="recipe-ingredients-header">
+        <h2
+          className="font-semibold text-section mb-4"
+          style={{ color: "var(--color-ink)" }}
+        >
+          Ingredients
+        </h2>
+        <div
+          className="ingredient-unit-switch"
+          role="group"
+          aria-label="Ingredient units"
+          title="1 oz = 28.349523125 g; 1 lb = 453.59237 g; 1 cup = 200 ml; 1 tbsp = 15 ml; 1 tsp = 5 ml"
+        >
+          {(["US", "Metric"] as const).map((system) => (
+            <button
+              key={system}
+              type="button"
+              aria-pressed={unitSystem === system}
+              onClick={() => setUnitSystem(system)}
+            >
+              {system}
+            </button>
+          ))}
+        </div>
+      </div>
       {ingredientsImage && (
         <div className="recipe-ingredients-image rounded-[16px] overflow-hidden mb-5 bg-gray-100">
-          <img
+          <RecipeImage
             src={recipeImageUrl(ingredientsImage)}
             alt={`${recipeTitle} ingredients`}
             className="w-full aspect-[4/3] object-cover"
@@ -51,26 +79,32 @@ export function IngredientsSection({
           <div key={group}>
             {group !== "Main" && (
               <h3
-                className="font-semibold text-[17px] mb-2"
-                style={{ color: "#1F1F1F" }}
+                className="font-semibold text-body mb-2"
+                style={{ color: "var(--color-ink)" }}
               >
                 {group}
               </h3>
             )}
-            <div className="divide-y" style={{ borderColor: "#EAEAEA" }}>
+            <div
+              className="divide-y"
+              style={{ borderColor: "var(--color-border)" }}
+            >
               {items.map((item) => (
                 <div
                   key={item.id}
                   className="flex justify-between gap-4 py-3"
-                  style={{ borderColor: "#EAEAEA" }}
+                  style={{ borderColor: "var(--color-border)" }}
                 >
                   <div className="min-w-0">
-                    <p className="text-[17px]" style={{ color: "#1F1F1F" }}>
+                    <p
+                      className="text-body"
+                      style={{ color: "var(--color-ink)" }}
+                    >
                       {item.ingredients?.name || "Ingredient"}
                       {item.optional ? (
                         <span
-                          className="text-[14px] ml-1"
-                          style={{ color: "#6F6F6F" }}
+                          className="text-label ml-1"
+                          style={{ color: "var(--color-gray)" }}
                         >
                           (optional)
                         </span>
@@ -78,18 +112,24 @@ export function IngredientsSection({
                     </p>
                     {item.substitute && (
                       <p
-                        className="text-[14px] mt-0.5"
-                        style={{ color: "#6F6F6F" }}
+                        className="text-label mt-0.5"
+                        style={{ color: "var(--color-gray)" }}
                       >
                         Sub: {item.substitute}
                       </p>
                     )}
                   </div>
                   <p
-                    className="text-[16px] whitespace-nowrap font-medium"
-                    style={{ color: "#1F1F1F" }}
+                    className="text-body whitespace-nowrap font-medium"
+                    style={{ color: "var(--color-ink)" }}
                   >
-                    {formatAmount(item.amount)} {item.unit || ""}
+                    {formatIngredientQuantity(
+                      item.amount,
+
+                      item.unit,
+
+                      unitSystem,
+                    )}
                   </p>
                 </div>
               ))}
@@ -103,11 +143,11 @@ export function IngredientsSection({
 
 export function StepsSection({
   steps,
-  finishedImage,
+
   active,
 }: {
   steps: StepRow[]
-  finishedImage?: string | null
+
   active: boolean
 }) {
   return (
@@ -115,8 +155,8 @@ export function StepsSection({
       className={`recipe-content-section mt-6${!active ? " is-inactive" : ""}`}
     >
       <h2
-        className="font-semibold text-[22px] mb-4"
-        style={{ color: "#1F1F1F" }}
+        className="font-semibold text-section mb-4"
+        style={{ color: "var(--color-ink)" }}
       >
         Steps
       </h2>
@@ -125,7 +165,7 @@ export function StepsSection({
           <article key={step.id}>
             {step.step_image && (
               <div className="rounded-[16px] overflow-hidden bg-gray-100 mb-3">
-                <img
+                <RecipeImage
                   src={recipeImageUrl(step.step_image)}
                   alt={step.title || `Step ${step.step_number}`}
                   className="w-full aspect-[4/3] object-cover"
@@ -134,31 +174,35 @@ export function StepsSection({
             )}
             <div className="flex gap-3">
               <div
-                className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-white text-[16px] font-semibold"
-                style={{ backgroundColor: "#F26B21" }}
+                className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-white text-body font-semibold"
+                style={{ backgroundColor: "var(--color-primary)" }}
               >
                 {step.step_number}
               </div>
               <div className="pt-0.5">
                 <div className="flex items-center gap-2 flex-wrap">
                   <h3
-                    className="font-semibold text-[19px]"
-                    style={{ color: "#1F1F1F" }}
+                    className="font-semibold text-lead"
+                    style={{ color: "var(--color-ink)" }}
                   >
                     {step.title || `Step ${step.step_number}`}
                   </h3>
                   {step.step_time_minutes ? (
                     <span
-                      className="text-[14px] px-2 py-0.5 rounded-full"
-                      style={{ backgroundColor: "#FFF0E6", color: "#F26B21" }}
+                      className="text-label px-2 py-0.5 rounded-full"
+                      style={{
+                        backgroundColor: "var(--color-primary-soft)",
+
+                        color: "var(--color-primary)",
+                      }}
                     >
                       {formatTime(step.step_time_minutes)}
                     </span>
                   ) : null}
                 </div>
                 <p
-                  className="text-[17px] leading-6 mt-1.5"
-                  style={{ color: "#6F6F6F" }}
+                  className="text-body leading-6 mt-1.5"
+                  style={{ color: "var(--color-ink)" }}
                 >
                   {step.instruction}
                 </p>
@@ -167,16 +211,17 @@ export function StepsSection({
           </article>
         ))}
       </div>
-      {finishedImage && <div className="mt-8"><h3 className="font-semibold text-[19px] mb-3">The finished dish</h3><img src={recipeImageUrl(finishedImage)} alt="Finished dish" className="w-full rounded-[16px]" /></div>}
     </section>
   )
 }
 
 export function NutritionSection({
   nutrition,
+
   active,
 }: {
   nutrition: Nutrition | null
+
   active: boolean
 }) {
   return (
@@ -188,12 +233,15 @@ export function NutritionSection({
         style={{ alignItems: "baseline" }}
       >
         <h2
-          className="font-semibold text-[22px] leading-none"
-          style={{ color: "#1F1F1F" }}
+          className="font-semibold text-section leading-none"
+          style={{ color: "var(--color-ink)" }}
         >
           Nutrition
         </h2>
-        <span className="text-[14px] leading-none" style={{ color: "#8A8A8A" }}>
+        <span
+          className="text-label leading-none"
+          style={{ color: "var(--color-gray-soft)" }}
+        >
           Per serving
         </span>
       </div>
@@ -202,31 +250,38 @@ export function NutritionSection({
           <div className="grid grid-cols-2 gap-3">
             {[
               ["Calories", nutrition.calories, "kcal"],
+
               ["Protein", nutrition.protein_g, "g"],
+
               ["Carbs", nutrition.carbs_g, "g"],
+
               ["Fat", nutrition.fat_g, "g"],
             ].map(([label, value, unit]) => (
               <div
                 key={label}
                 className="rounded-[14px] p-4"
                 style={{
-                  backgroundColor: "#F9F9F9",
-                  border: "1px solid #EEEEEE",
+                  backgroundColor: "var(--color-surface)",
+
+                  border: "1px solid var(--color-border)",
                 }}
               >
-                <p className="text-[15px] mb-2" style={{ color: "#6F6F6F" }}>
+                <p
+                  className="text-body mb-2"
+                  style={{ color: "var(--color-gray)" }}
+                >
                   {label}
                 </p>
                 <div className="flex" style={{ alignItems: "baseline" }}>
                   <span
-                    className="font-semibold text-[24px] leading-none"
-                    style={{ color: "#1F1F1F" }}
+                    className="font-semibold text-title leading-none"
+                    style={{ color: "var(--color-ink)" }}
                   >
                     {value}
                   </span>
                   <span
-                    className="text-[14px] leading-none ml-1"
-                    style={{ color: "#8A8A8A" }}
+                    className="text-label leading-none ml-1"
+                    style={{ color: "var(--color-gray-soft)" }}
                   >
                     {unit}
                   </span>
@@ -236,8 +291,8 @@ export function NutritionSection({
           </div>
           {nutrition.is_estimated && (
             <p
-              className="mt-3 text-[12px] leading-[16px]"
-              style={{ color: "#A0A0A0" }}
+              className="mt-3 text-caption leading-[16px]"
+              style={{ color: "var(--color-gray-soft)" }}
             >
               *Nutrition values are estimates and may not be accurate.
             </p>
@@ -246,9 +301,12 @@ export function NutritionSection({
       ) : (
         <div
           className="rounded-[14px] px-4 py-4"
-          style={{ backgroundColor: "#FFF8F3" }}
+          style={{ backgroundColor: "var(--color-primary-faint)" }}
         >
-          <p className="text-[15px] leading-5" style={{ color: "#6F6F6F" }}>
+          <p
+            className="text-body leading-5"
+            style={{ color: "var(--color-gray)" }}
+          >
             Nutrition information is not available for this recipe yet.
           </p>
         </div>

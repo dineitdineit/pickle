@@ -1,0 +1,78 @@
+.cooking-mode { position:fixed; inset:0; margin:0; width:100%; max-width:none; height:100%; height:100dvh; max-height:none; border:0; padding:0; background:var(--color-white); color:var(--color-ink); overflow:hidden; }
+.cooking-mode::backdrop { background:var(--color-white); }
+.cooking-shell { max-width:680px; height:100%; min-height:0; margin:auto; display:flex; flex-direction:column; }
+.cooking-header { display:flex; align-items:center; gap:12px; flex-shrink:0; z-index:2; padding:calc(12px + env(safe-area-inset-top,0px)) 16px 12px; background:var(--color-white); border-bottom:1px solid var(--color-border); }
+.cooking-header > button { min-width:44px; min-height:44px; display:grid; place-items:center; flex-shrink:0; }
+.cooking-header > div { flex:1; min-width:0; }
+.cooking-header small { color:var(--color-primary); font-size:var(--text-tiny); letter-spacing:.1em; font-weight:600; }
+.cooking-header h1 { font-size:var(--text-label); font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.cooking-header .cooking-reset { font-size:var(--text-caption); color:var(--color-gray); }
+.cooking-content { flex:1; min-height:0; overflow-y:auto; overscroll-behavior:contain; padding:20px 20px 28px; }
+.cooking-content section { margin-top:24px; }
+.cooking-content button, .cooking-footer button, .cooking-header button { cursor:pointer; }
+.cooking-mode button:disabled { opacity:.4; cursor:default; }
+.cooking-progress span { font-size:var(--text-caption); color:var(--color-gray); }
+.cooking-progress progress { display:block; width:100%; height:7px; margin:8px 0 20px; appearance:none; border:0; border-radius:8px; overflow:hidden; background:var(--color-surface); }
+.cooking-progress progress::-webkit-progress-bar { background:var(--color-surface); }
+.cooking-progress progress::-webkit-progress-value { background:var(--color-primary); }
+.cooking-progress progress::-moz-progress-bar { background:var(--color-primary); }
+.cooking-awake { display:flex; justify-content:space-between; align-items:center; min-height:44px; font-size:var(--text-label); }
+.cooking-mode input[type="checkbox"] { width:20px; height:20px; flex-shrink:0; accent-color:var(--color-primary); }
+.cooking-note { color:var(--color-gray); font-size:var(--text-caption); line-height:1.5; margin-top:6px; }
+.cooking-section-title { display:flex; align-items:baseline; gap:10px; justify-content:space-between; margin-bottom:12px; }
+.cooking-section-title h2, .cooking-timers h2 { font-size:var(--text-section); font-weight:600; }
+.cooking-section-title > span { font-size:var(--text-caption); color:var(--color-gray); }
+.cooking-quantity-controls { display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px; align-items:center; }
+.cooking-quantity-controls form, .cooking-step-timer { display:flex; gap:10px; align-items:center; flex-wrap:wrap; font-size:var(--text-caption); }
+.cooking-quantity-controls label, .cooking-step-timer label { display:flex; gap:8px; align-items:center; }
+.cooking-mode input[type="number"] { width:74px; min-height:40px; background:var(--color-surface); color:var(--color-ink); border:1px solid var(--color-border); border-radius:8px; padding:7px; font:inherit; }
+.cooking-quantity-controls button, .cooking-step-timer button { min-height:40px; padding:8px; color:var(--color-primary); font-weight:600; }
+.cooking-unit-switch { display:flex; border:1px solid var(--color-border); border-radius:10px; overflow:hidden; }
+.cooking-unit-switch button { min-width:50px; }
+.cooking-unit-switch button[aria-pressed="true"] { background:var(--color-primary); color:var(--color-white); }
+.cooking-ingredients { padding:0; margin:14px 0 0; list-style:none; }
+.cooking-ingredients li { border-bottom:1px solid var(--color-border); }
+.cooking-group-name { font-size:var(--text-label); font-weight:600; padding-top:16px; }
+.cooking-ingredients label { display:flex; align-items:center; gap:12px; padding:14px 0; cursor:pointer; }
+.cooking-ingredients label > span:first-of-type { flex:1; min-width:0; overflow-wrap:anywhere; }
+.cooking-ingredients strong { font-weight:500; font-size:var(--text-label); }
+.cooking-ingredients small { display:block; color:var(--color-gray); font-size:var(--text-caption); margin-top:3px; }
+.cooking-ingredients .is-checked strong { color:var(--color-gray); text-decoration:line-through; }
+.cooking-amount { font-size:var(--text-label); font-weight:600; text-align:right; overflow-wrap:anywhere; max-width:40%; }
+.cooking-step-picker { display:flex; flex-wrap:wrap; gap:8px; margin:12px 0 18px; }
+.cooking-step-picker button { width:40px; height:40px; border:1px solid var(--color-border); border-radius:50%; font-size:var(--text-label); }
+.cooking-step-picker button[aria-pressed="true"] { border-color:var(--color-primary); background:var(--color-primary); color:var(--color-white); }
+.cooking-step-card { border:1px solid var(--color-border); border-radius:16px; padding:18px; scroll-margin-top:12px; }
+.cooking-step-card img { display:block; width:100%; height:auto; max-height:300px; object-fit:contain; border-radius:12px; margin-bottom:16px; }
+.cooking-step-card h3 { font-size:var(--text-lead); font-weight:600; }
+.cooking-instruction { font-size:var(--text-lead); line-height:1.6; white-space:pre-wrap; overflow-wrap:anywhere; margin:12px 0 20px; }
+.cooking-timers > div { display:flex; gap:10px; align-items:center; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--color-border); font-size:var(--text-caption); }
+.cooking-timers > div > button:first-child { text-align:left; max-width:45%; overflow-wrap:anywhere; }
+.cooking-timer-clock { font-size:var(--text-title); font-variant-numeric:tabular-nums; font-weight:600; }
+.cooking-timers .cooking-timer-finished { color:var(--color-primary); font-weight:600; }
+.cooking-warning { font-size:var(--text-caption); color:var(--color-ink); background:var(--color-surface); border-radius:10px; padding:12px; margin-top:12px; }
+.cooking-complete, .cooking-reset-confirm { margin:20px 0; padding:18px; background:var(--color-primary-soft); border-radius:12px; font-size:var(--text-label); }
+.cooking-complete p { margin:8px 0; }
+.cooking-complete button, .cooking-reset-confirm button { min-height:44px; color:var(--color-primary); font-weight:600; }
+.cooking-reset-confirm > div { display:flex; justify-content:space-between; gap:12px; margin-top:10px; }
+.cooking-footer { flex-shrink:0; z-index:2; display:grid; grid-template-columns:1fr 1.8fr 1fr; align-items:center; gap:8px; padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px)); background:var(--color-white); border-top:1px solid var(--color-border); }
+.cooking-footer button { min-height:48px; font-size:var(--text-caption); border-radius:12px; padding:8px 4px; }
+.cooking-footer .cooking-primary { background:var(--color-primary); color:var(--color-white); font-weight:600; }
+.recipe-cook-button { width:100%; min-height:48px; border-radius:14px; background:var(--color-primary); color:var(--color-white); font-size:var(--text-label); font-weight:600; margin-top:20px; }
+html[data-theme="dark"] .cooking-mode,
+html[data-theme="dark"] .cooking-mode::backdrop,
+html[data-theme="dark"] .cooking-header,
+html[data-theme="dark"] .cooking-footer { background:var(--color-ink); color:var(--color-surface); }
+html[data-theme="dark"] .cooking-mode { --color-border:var(--color-gray-strong); }
+html[data-theme="dark"] .cooking-note,
+html[data-theme="dark"] .cooking-header .cooking-reset,
+html[data-theme="dark"] .cooking-progress span,
+html[data-theme="dark"] .cooking-section-title > span,
+html[data-theme="dark"] .cooking-ingredients small,
+html[data-theme="dark"] .cooking-ingredients .is-checked strong { color:var(--color-gray-faint); }
+html[data-theme="dark"] .cooking-mode input[type="number"],
+html[data-theme="dark"] .cooking-warning,
+html[data-theme="dark"] .cooking-progress progress,
+html[data-theme="dark"] .cooking-progress progress::-webkit-progress-bar { background:var(--color-charcoal); color:var(--color-surface); }
+html[data-theme="dark"] .cooking-complete,
+html[data-theme="dark"] .cooking-reset-confirm { background:var(--color-primary-dark-surface); }

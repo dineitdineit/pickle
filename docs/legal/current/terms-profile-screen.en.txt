@@ -1,0 +1,37 @@
+Pickle — Terms of Service — profile screen
+Snapshot: 2026-10-16
+Displayed update: October 16, 2026
+Server agreement version: 2026-10-16.1
+
+1. Using Pickle
+Pickle is operated by Taelim Auh, an individual based in the Republic of Korea. You must be at least 13 years old to activate or use a Pickle account. At age 13, activation requires explicit consent from an adult parent or legal guardian, reviewed by Pickle before account features are available. Guardian consent is tied to the displayed policy version; material updates can require renewed review. A guardian may withdraw consent or request deletion through admin@getpickleapp.com. A self-declaration is not proof of age or guardian authority. Follow any additional local consent requirements that apply to you. Public recipe browsing is separate from account activation and does not waive this account-age rule. Use Pickle in compliance with applicable law, these terms and the Content Policy. The Privacy Policy explains our data practices.
+
+2. Accounts
+Some features require an account. You are responsible for the accuracy of your account information and for keeping your login credentials secure. You are also responsible for activity that occurs through your account.
+
+3. Recipes and nutrition information
+Recipes, cooking times, substitutions, serving sizes, and nutrition values are provided for general informational purposes. Results can vary based on ingredients, equipment, brands, preparation methods, and individual circumstances. Use appropriate food-safety practices and your own judgment when cooking.
+
+4. User content
+You retain rights you hold in recipes, images, comments, reviews, profile information and messages you submit. You give Pickle a non-exclusive, worldwide, royalty-free permission to store, host, technically format, reproduce and display or deliver that content as needed to operate and secure the features you use. Public posts may be displayed/shared through public features. Private messages and drafts are processed for their private features and the limited safety/legal operations described in the Privacy Policy, rather than unrestricted public distribution. You must have the rights and permissions needed to share your content.
+
+5. Acceptable use
+Do not use Pickle to harass others, post illegal or harmful content, impersonate others, infringe intellectual-property rights, distribute malware, interfere with the service, scrape the service in an abusive manner, or attempt to access accounts or systems without authorization.
+
+6. Pickle content and intellectual property
+The Pickle name, branding, app design, software, and original content are protected by applicable intellectual-property laws. These terms do not transfer ownership of Pickle or its content to you.
+
+7. Suspension and termination
+We may apply warnings, content hiding/public removal, account restrictions or suspension according to the Content Policy and safety needs. That policy explains provisional actions, repeat incidents, approval of long/permanent suspensions, public reasons and appeals within 14 days. You may request account deletion, including deletion of your published recipes and uploaded photos. Deletion is attempted immediately; failed steps continue through a restricted background retry process. An accepted request is distinguished from completed deletion. Minimal deletion receipts and encrypted application backups expire after 30 days; detailed evidence and minimum enforcement history follow the 30/90-day rules and active-case/restriction exceptions in the Privacy Policy. Staff accounts require operator-assisted deletion. Provider copies have separate lifecycles.
+
+8. Service availability
+We work to keep Pickle available and reliable, but we do not guarantee uninterrupted or error-free operation. Features may change, be added, or be removed as the service develops.
+
+9. Disclaimer and limitation
+To the extent permitted by applicable law, Pickle is provided on an “as is” and “as available” basis. Pickle is not responsible for losses caused by reliance on recipe or nutrition information, service interruptions, or user-submitted content except where liability cannot legally be excluded.
+
+10. Changes to these terms
+We may update these terms as Pickle changes. When renewed agreement is required, you must accept the updated terms and Content Policy before sharing recipes, photos, comments, reviews or messages. The server records the accepted policy version and time. This agreement is not consent to unrelated marketing or all possible processing. Privacy notices and any separate purpose-specific consents must be handled according to their actual purpose and applicable rules.
+
+11. Contact
+For questions about these terms, contact Taelim Auh, the Pickle operator in the Republic of Korea, at admin@getpickleapp.com. Mandatory rights under applicable law are not excluded by these terms.

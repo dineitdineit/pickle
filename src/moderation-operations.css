@@ -1,0 +1,21 @@
+.account-status-screen, .moderation-operations { padding: 20px 16px 100px; color: var(--color-ink); }
+.account-status-screen header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
+.account-status-screen h1, .moderation-operations h2 { font-size: var(--text-title); font-weight: 600; }
+.account-status-screen h2 { font-size: var(--text-lead); font-weight: 600; margin: 24px 0 12px; }
+.account-status-screen article, .moderation-operations article { border: 1px solid var(--color-border); border-radius: 14px; padding: 16px; margin: 12px 0; overflow-wrap: anywhere; }
+.account-status-screen p, .moderation-operations p { font-size: var(--text-label); line-height: 1.5; margin: 8px 0; }
+.account-status-screen small, .moderation-operations small { color: var(--color-gray); font-size: var(--text-caption); }
+.account-status-screen form, .moderation-operations form { display: grid; gap: 12px; margin-top: 14px; }
+.account-status-screen label, .moderation-operations label { display: grid; gap: 6px; font-size: var(--text-label); }
+.account-status-screen textarea, .moderation-operations textarea, .moderation-operations select { width: 100%; padding: 10px; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-white); color: var(--color-ink); }
+.account-status-screen textarea, .moderation-operations textarea { min-height: 90px; }
+.account-status-screen form button, .moderation-operations button { background: var(--color-surface); padding: 10px 14px; border-radius: 10px; font-size: var(--text-label); }
+.account-status-screen form button, .moderation-operations .primary { background: var(--color-primary); color: var(--color-white); }
+.moderation-operations .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.account-status-screen button:disabled, .moderation-operations button:disabled { opacity: .5; }
+.moderation-operations pre { white-space: pre-wrap; font: inherit; font-size: var(--text-label); }
+.moderation-operations [role="alert"], .moderation-operations .overdue { color: #B83939; }
+.account-restriction-banner { display: block; width: 100%; padding: 12px 16px; background: var(--color-primary-soft); color: var(--color-ink); font-size: var(--text-label); text-align: center; }
+html[data-theme="dark"] .account-status-screen, html[data-theme="dark"] .moderation-operations { color: var(--color-white); }
+html[data-theme="dark"] .account-status-screen textarea, html[data-theme="dark"] .moderation-operations textarea, html[data-theme="dark"] .moderation-operations select { background: var(--color-charcoal); color: var(--color-white); }
+html[data-theme="dark"] .account-restriction-banner { background: var(--color-primary-dark-surface); color: var(--color-white); }

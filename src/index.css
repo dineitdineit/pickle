@@ -1,24 +1,90 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-@import 'tailwindcss';
+@import 'tailwindcss' source(none);
+@source './';
 
-@theme {
-  --color-primary: #F26B21;
-  --color-accent: #FFC83D;
-  --color-primary-text: #1F1F1F;
-  --color-secondary-text: #6F6F6F;
+@theme static {
+  --font-sans: 'Inter', 'Noto Sans', 'Noto Sans KR', system-ui, sans-serif;
+  --color-black: #000000;
+  --color-ink: #1F1F1F;
+  --color-charcoal: #2A2A2A;
+  --color-gray-strong: #444444;
+  --color-gray: #6F6F6F;
+  --color-gray-soft: #A0A0A0;
+  --color-gray-faint: #C7C7C7;
   --color-border: #EAEAEA;
+  --color-surface: #F5F5F5;
+  --color-white: #FFFFFF;
+  --color-gray-50: var(--color-surface);
+  --color-gray-100: var(--color-surface);
+  --text-micro: 8px;
+  --text-micro--line-height: 10px;
+  --text-tiny: 10px;
+  --text-tiny--line-height: 14px;
+  --text-caption: 12px;
+  --text-caption--line-height: 16px;
+  --text-label: 14px;
+  --text-label--line-height: 20px;
+  --text-body: 16px;
+  --text-body--line-height: 24px;
+  --text-lead: 18px;
+  --text-lead--line-height: 26px;
+  --text-section: 20px;
+  --text-section--line-height: 28px;
+  --text-title: 24px;
+  --text-title--line-height: 32px;
+  --text-page: 28px;
+  --text-page--line-height: 36px;
+  --text-hero: 32px;
+  --text-hero--line-height: 40px;
+  --text-display: 40px;
+  --text-display--line-height: 48px;
+  --text-display-xl: 48px;
+  --text-display-xl--line-height: 56px;
+  --color-primary: #F26B21;
+  --color-primary-soft: color-mix(in srgb, var(--color-primary) 10%, white);
+  --color-primary-faint: color-mix(in srgb, var(--color-primary) 5%, white);
+  --color-primary-border: color-mix(in srgb, var(--color-primary) 30%, white);
+  --color-primary-dark-surface: color-mix(in srgb, var(--color-primary) 15%, var(--color-ink));
+  --color-accent: #FFC83D;
+  --color-primary-text: var(--color-ink);
+  --color-secondary-text: var(--color-gray);
+
 }
 
 * {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-sans);
 }
 
 html {
-  background-color: #ffffff;
-  color: #1F1F1F;
+  background-color: var(--color-white);
+  color: var(--color-ink);
 }
 
-/* Hide scrollbars by default, show on hover */
+:where(button, a, input, textarea, select):focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+}
+
+.app-link-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  max-width: 680px;
+  margin: 12px auto;
+  padding: 12px 12px 12px 16px;
+  border: 1px solid var(--color-primary-border);
+  border-radius: 12px;
+  background: var(--color-primary-soft);
+  color: var(--color-ink);
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+}
+.app-link-notice p { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.app-link-notice button { display: grid; place-items: center; width: 40px; height: 40px; flex-shrink: 0; margin: -6px; font-size: var(--text-section); }
+.app-open-link { padding: 12px 16px; text-align: center; }
+.app-open-link a { display: inline-flex; align-items: center; min-height: 40px; padding: 8px 18px; border-radius: 20px; background: var(--color-primary); color: var(--color-white); font-size: var(--text-label); font-weight: 600; }
+html[data-theme="dark"] .app-link-notice { background: var(--color-primary-dark-surface); color: var(--color-white); }
+
+/* Keep scrolling available without a visible scrollbar. */
 ::-webkit-scrollbar {
   width: 0;
   height: 0;
@@ -49,7 +115,7 @@ button[aria-label="Back to profile"] {
   border: 0 !important;
   border-radius: 0 !important;
   box-shadow: none !important;
-  color: #1F1F1F !important;
+  color: var(--color-ink) !important;
 }
 
 button[aria-label="Back"] svg,
@@ -61,32 +127,12 @@ button[aria-label="Back to profile"] svg {
   stroke-width: 2.2 !important;
 }
 
-/* Recipe detail tab bar: keep the same style with less rounded corners. */
-div.mt-8.p-2\.5.flex.gap-1[style*="border-radius: 24px"] {
-  border-radius: 14px !important;
-}
-
-div.mt-8.p-2\.5.flex.gap-1[style*="border-radius: 24px"] > button {
-  border-radius: 9px !important;
-}
-
-/* Recipe detail: tighten the space between Comments and More recipes. */
-section.pt-6.border-t[style*="margin-top: 50px"] {
-  margin-top: 30px !important;
-}
-
-/* Comments: make timestamps and the action row easier to read. */
-section.border-t .text-\[9px\] {
-  font-size: 14px !important;
-}
-
-
 /* App-wide appearance theme. */
 html,
 body,
 #root {
   min-height: 100%;
-  background-color: #ffffff;
+  background-color: var(--color-white);
 }
 
 html,
@@ -94,131 +140,116 @@ body,
 #root,
 .bg-white,
 [style*="background-color: rgb(255, 255, 255)"],
-[style*="background-color: #FFFFFF"] {
+[style*="background-color: var(--color-white)"] {
   transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
 }
 
 html[data-theme="dark"],
 html[data-theme="dark"] body,
 html[data-theme="dark"] #root {
-  background-color: #121212 !important;
-  color: #F5F5F5 !important;
+  background-color: var(--color-ink) !important;
+  color: var(--color-surface) !important;
 }
 
 html[data-theme="dark"] .bg-white,
 html[data-theme="dark"] [style*="background-color: rgb(255, 255, 255)"],
-html[data-theme="dark"] [style*="background-color: #FFFFFF"] {
-  background-color: #181818 !important;
+html[data-theme="dark"] [style*="background-color: var(--color-white)"] {
+  background-color: var(--color-ink) !important;
 }
 
 html[data-theme="dark"] [style*="background-color: rgb(249, 249, 249)"],
-html[data-theme="dark"] [style*="background-color: #F9F9F9"],
+html[data-theme="dark"] [style*="background-color: var(--color-surface)"],
 html[data-theme="dark"] .bg-gray-50 {
-  background-color: #202020 !important;
+  background-color: var(--color-ink) !important;
 }
 
 html[data-theme="dark"] [style*="background-color: rgb(245, 245, 245)"],
-html[data-theme="dark"] [style*="background-color: #F5F5F5"],
+html[data-theme="dark"] [style*="background-color: var(--color-surface)"],
 html[data-theme="dark"] .bg-gray-100 {
-  background-color: #242424 !important;
+  background-color: var(--color-ink) !important;
 }
 
 html[data-theme="dark"] [style*="background-color: rgb(255, 240, 230)"],
-html[data-theme="dark"] [style*="background-color: #FFF0E6"] {
-  background-color: #352216 !important;
+html[data-theme="dark"] [style*="background-color: var(--color-primary-soft)"] {
+  background-color: var(--color-primary-dark-surface) !important;
 }
 
 html[data-theme="dark"] [style*="color: rgb(31, 31, 31)"],
-html[data-theme="dark"] [style*="color: #1F1F1F"] {
-  color: #F5F5F5 !important;
+html[data-theme="dark"] [style*="color: var(--color-ink)"] {
+  color: var(--color-surface) !important;
 }
 
 html[data-theme="dark"] [style*="color: rgb(111, 111, 111)"],
-html[data-theme="dark"] [style*="color: #6F6F6F"] {
-  color: #B8B8B8 !important;
+html[data-theme="dark"] [style*="color: var(--color-gray)"] {
+  color: var(--color-gray-faint) !important;
 }
 
 html[data-theme="dark"] [style*="color: rgb(138, 138, 138)"],
-html[data-theme="dark"] [style*="color: #8A8A8A"],
-html[data-theme="dark"] [style*="color: rgb(160, 160, 160)"],
-html[data-theme="dark"] [style*="color: #A0A0A0"] {
-  color: #A7A7A7 !important;
+html[data-theme="dark"] [style*="color: var(--color-gray-soft)"],
+html[data-theme="dark"] [style*="color: rgb(160, 160, 160)"] {
+  color: var(--color-gray-soft) !important;
 }
 
 html[data-theme="dark"] [style*="border-color: rgb(234, 234, 234)"],
-html[data-theme="dark"] [style*="border-color: #EAEAEA"] {
-  border-color: #333333 !important;
+html[data-theme="dark"] [style*="border-color: var(--color-border)"] {
+  border-color: var(--color-charcoal) !important;
 }
 
 html[data-theme="dark"] [style*="border-bottom: 1px solid rgb(234, 234, 234)"],
-html[data-theme="dark"] [style*="border-bottom: 1px solid #EAEAEA"] {
-  border-bottom-color: #333333 !important;
+html[data-theme="dark"] [style*="border-bottom: 1px solid var(--color-border)"] {
+  border-bottom-color: var(--color-charcoal) !important;
 }
 
 html[data-theme="dark"] nav.fixed.bottom-0 {
-  background-color: #181818 !important;
-  border-color: #333333 !important;
+  background-color: var(--color-ink) !important;
+  border-color: var(--color-charcoal) !important;
 }
 
 html[data-theme="dark"] input,
 html[data-theme="dark"] textarea,
 html[data-theme="dark"] select {
-  color: #F5F5F5 !important;
-  caret-color: #F26B21;
+  color: var(--color-surface) !important;
+  caret-color: var(--color-primary);
 }
 
 html[data-theme="dark"] input::placeholder,
 html[data-theme="dark"] textarea::placeholder {
-  color: #858585 !important;
+  color: var(--color-gray) !important;
 }
 
 html[data-theme="dark"] button[aria-label="Back"],
 html[data-theme="dark"] button[aria-label="Back to log in"],
 html[data-theme="dark"] button[aria-label="Back to profile"] {
-  color: #F5F5F5 !important;
+  color: var(--color-surface) !important;
 }
 
-html[data-theme="dark"] svg[stroke="#6F6F6F"],
-html[data-theme="dark"] svg[stroke="#8A8A8A"],
-html[data-theme="dark"] svg[stroke="#A0A0A0"],
-html[data-theme="dark"] svg[stroke="#B0B0B0"],
-html[data-theme="dark"] svg[stroke="#C7C7C7"],
-html[data-theme="dark"] svg[stroke="#CFCFCF"] {
-  stroke: #AFAFAF !important;
+html[data-theme="dark"] svg[stroke="var(--color-gray)"],
+html[data-theme="dark"] svg[stroke="var(--color-gray-soft)"],
+html[data-theme="dark"] svg[stroke="var(--color-gray-faint)"] {
+  stroke: var(--color-gray-soft) !important;
 }
 
 html[data-theme="dark"] .active\:bg-gray-50:active {
-  background-color: #242424 !important;
-}
-
-/* Home Featured: align the carousel card edges with the Featured heading. */
-div.mb-8 > div.px-4.mb-4 + div.relative.select-none {
-  margin-left: 16px;
-  margin-right: 16px;
-}
-
-/* Admin analytics: keep summary metrics focused; raw recent activity stays stored for future use. */
-main.max-w-7xl div[class*="xl:grid-cols-[1.4fr_1fr]"] + section {
-  display: none !important;
+  background-color: var(--color-ink) !important;
 }
 
 /* Recipe detail hero: make the back control match the share button. */
-div.relative.h-\[300px\] > button[aria-label="Back"] {
+.recipe-detail .recipe-hero-back[aria-label="Back"] {
   width: 40px !important;
   height: 40px !important;
   min-width: 40px !important;
   min-height: 40px !important;
-  background: #FFFFFF !important;
+  background: var(--color-white) !important;
   border: 0 !important;
   border-radius: 9999px !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14) !important;
-  color: #1F1F1F !important;
+  color: var(--color-ink) !important;
 }
 
-div.relative.h-\[300px\] > button[aria-label="Back"] svg {
+.recipe-detail .recipe-hero-back[aria-label="Back"] svg {
   width: 19px !important;
   height: 19px !important;
-  stroke: #1F1F1F !important;
+  stroke: var(--color-ink) !important;
 }
 
 /* Connect each reply to the parent avatar without covering the controls. */
@@ -228,7 +259,7 @@ div.relative.h-\[300px\] > button[aria-label="Back"] svg {
   content: "";
   position: absolute;
   pointer-events: none;
-  border-color: #dedede;
+  border-color: var(--color-gray-faint);
 }
 .comment-with-replies::before {
   left: 18px;
@@ -252,66 +283,68 @@ div.relative.h-\[300px\] > button[aria-label="Back"] svg {
 }
 html[data-theme="dark"] .comment-with-replies::before,
 html[data-theme="dark"] .comment-reply-node::before,
-html[data-theme="dark"] .comment-reply-node::after { border-color: #606060; }
+html[data-theme="dark"] .comment-reply-node::after { border-color: var(--color-gray-strong); }
 
 @media (max-width: 1023px) {
   html[data-theme="dark"] .auth-field-label {
-    color: #FFFFFF !important;
+    color: var(--color-white) !important;
   }
 }
 
 @media (max-width: 1023px) {
   html[data-theme="dark"] .auth-field-input {
-    background-color: #29313E !important;
-    border-color: #D1D5DB !important;
-    color: #F5F5F5 !important;
+    background-color: var(--color-charcoal) !important;
+    border-color: var(--color-gray-faint) !important;
+    color: var(--color-surface) !important;
     color-scheme: dark;
   }
 
   html[data-theme="dark"] .auth-field-input:autofill,
   html[data-theme="dark"] .auth-field-input:-webkit-autofill {
-    -webkit-text-fill-color: #F5F5F5;
-    box-shadow: 0 0 0 1000px #29313E inset !important;
+    -webkit-text-fill-color: var(--color-surface);
+    box-shadow: 0 0 0 1000px var(--color-charcoal) inset !important;
   }
 }
 
 html[data-theme="dark"] .comment-author-name {
-  color: #B8B8B8 !important;
+  color: var(--color-gray-faint) !important;
 }
 
 html[data-theme="dark"] .comment-content {
-  color: #FFFFFF !important;
+  color: var(--color-white) !important;
 }
 
 html[data-theme="dark"] .comment-textarea {
-  background-color: #2A2A2A !important;
-  border-color: #444444 !important;
-  color: #FFFFFF !important;
+  background-color: var(--color-charcoal) !important;
+  border-color: var(--color-gray-strong) !important;
+  color: var(--color-white) !important;
   color-scheme: dark;
 }
 
 html[data-theme="dark"] .comment-textarea::placeholder {
-  color: #B8B8B8 !important;
+  color: var(--color-gray-faint) !important;
 }
 
 @media (max-width: 1023px) {
-  html[data-theme="dark"] .recipe-detail div.relative.h-\[300px\] > button[aria-label="Back"],
-  html[data-theme="dark"] .recipe-detail .recipe-share-button {
+  html[data-theme="dark"] .recipe-detail .recipe-hero-back[aria-label="Back"],
+  html[data-theme="dark"] .recipe-detail .recipe-share-button,
+  html[data-theme="dark"] .recipe-detail .recipe-edit-button {
     background: transparent !important;
     border: 0 !important;
     box-shadow: none !important;
-    color: #FFFFFF !important;
+    color: var(--color-white) !important;
   }
 
-  html[data-theme="dark"] .recipe-detail div.relative.h-\[300px\] > button[aria-label="Back"] svg,
-  html[data-theme="dark"] .recipe-detail .recipe-share-button svg {
-    stroke: #FFFFFF !important;
+  html[data-theme="dark"] .recipe-detail .recipe-hero-back[aria-label="Back"] svg,
+  html[data-theme="dark"] .recipe-detail .recipe-share-button svg,
+  html[data-theme="dark"] .recipe-detail .recipe-edit-button svg {
+    stroke: var(--color-white) !important;
   }
 }
 
 .comment-options-menu {
-  background-color: #FFFFFF;
-  color: #1F1F1F;
+  background-color: var(--color-white);
+  color: var(--color-ink);
 }
 
 .comment-options-menu button:hover {
@@ -319,16 +352,16 @@ html[data-theme="dark"] .comment-textarea::placeholder {
 }
 
 html[data-theme="dark"] .comment-options-menu {
-  background-color: #2A2A2A;
-  color: #FFFFFF;
+  background-color: var(--color-charcoal);
+  color: var(--color-white);
 }
 
 html[data-theme="dark"] .comment-options-menu button:hover {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
-/* Raise inherited text without scaling spacing or control dimensions. */
-body { font-size: 18px; }
+/* Default body copy uses the shared type scale. */
+body { font-size: var(--text-body); line-height: var(--text-body--line-height); }
 
 .comment-delete-dialog::backdrop {
   background-color: rgba(0, 0, 0, 0.5);
