@@ -25,10 +25,15 @@ Repository instructions for coding agents live in [AGENTS.md](AGENTS.md).
 
 - `npm run typecheck` — strict TypeScript checks, including unused code.
 - `npm test` — time formatting, relationship/image helpers, and auth state handling.
+- `npm run test:e2e` — Playwright desktop/mobile browser smoke tests with a simulated backend. Install the browser once with `npx playwright install chromium`.
 - `npm run format:check` — source formatting.
 - `npm run build` — type check and production build.
 
 Use `npm run format -- src vite.config.ts tests` to format source files.
+
+Use `npm run test:e2e:ui` to explore browser tests visually, or
+`npm run test:e2e:report` to open the report from the last run. These smoke tests
+need no Supabase credentials and do not modify live data.
 
 ## Code structure
 

@@ -14,3 +14,8 @@ dist
 /android/.idea/
 /supabase/.temp/
 /output/
+
+# Playwright reports and browser artifacts
+/playwright-report/
+/test-results/
+/blob-report/

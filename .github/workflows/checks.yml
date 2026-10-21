@@ -36,6 +36,10 @@ jobs:
         run: npm test
       - name: Typecheck and build
         run: npm run build
+      - name: Install Chromium for browser tests
+        run: npx playwright install --with-deps chromium
+      - name: Run desktop and mobile browser smoke tests
+        run: npm run test:e2e
 
-# Compilation only: no Supabase credentials, database tests, browser tests,
-# Android builds, deploys, or build artifacts are included in this job.
+# Browser smoke tests use a fake backend. No Supabase credentials, live database
+# tests, Android builds, deploys, or published build artifacts are included.

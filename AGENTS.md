@@ -20,7 +20,8 @@
 - Use Node.js 24 for consistency with CI. Install locked dependencies with `npm ci` on a new checkout.
 - Browser development: `npm run dev -- --host 127.0.0.1`. Use the local URL Vite prints.
 - `npm test` runs the Node test suite in `tests/*.test.mjs`; it does not execute the SQL integration scripts or browser/device tests.
-- `npm run format:check` checks `src` and `vite.config.ts`. Format only changed files with `npm run format -- <paths>`.
+- `npm run test:e2e` runs Playwright smoke tests at desktop and mobile sizes with a simulated backend. Install Chromium once with `npx playwright install chromium`. These tests do not verify the live database or native Android behavior.
+- `npm run format:check` checks `src`, Vite/Playwright configuration, and `tests/e2e`. Format only changed files with `npm run format -- <paths>`.
 - `npm run build` runs TypeScript checking and builds the web app. `npm run typecheck` is available for faster iteration.
 - Before handing off application changes, run relevant tests and the full checks above as appropriate. Report existing failures separately from new failures.
 - For UI changes, exercise the affected flow in the browser at mobile and desktop sizes. Use the built-in browser or an available Playwright integration. A successful build does not verify runtime behavior.

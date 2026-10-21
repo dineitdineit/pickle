@@ -51,6 +51,7 @@ of building a parallel implementation.
 | Formatting | `npm run format:check` | Source formatting matches the formatter |
 | TypeScript and bundle | `npm run build` | Types and web compilation pass |
 | Browser | Built-in browser; mobile/desktop and affected themes | Actual navigation, layout, errors, and runtime behavior |
+| Browser regression suite | `npm run test:e2e` | Repeatable desktop/mobile smoke tests against simulated backend responses |
 | Database | Relevant `tests/*.integration.sql` on a migrated development database | Real RPC, permissions, ownership, and persistence behavior |
 | Android | Capacitor sync, native build, emulator/device checks | Native integration behavior |
 
@@ -86,11 +87,10 @@ keyboard, OAuth links, permissions, push, sharing, or cooking wake locks separat
 
 ## Review and GitHub checks
 
-The added `Pickle checks` workflow runs formatting, Node tests, and the production
-build for pull requests, main-branch pushes, and manual runs. It has read-only
+The `Pickle checks` workflow runs formatting, Node tests, the production
+build, and Playwright desktop/mobile smoke tests for pull requests, main-branch pushes, and manual runs. It has read-only
 repository permissions and requires no database secrets. It does not deploy or
-publish its compiled bundle. GitHub execution still needs to be verified after
-the workflow and its source dependencies are committed and pushed.
+publish its compiled bundle.
 
 After a successful first run, configure the default branch's ruleset to require
 the `Web checks` check before merging, if supported by the repository's plan and
@@ -120,14 +120,36 @@ For review, ask a fresh chat or an optional second agent:
 - Start browser verification with Codex's built-in browser. If a CLI workflow needs
   another integration, Microsoft provides Playwright CLI plus skills. Browser
   automation and Playwright Test regression suites serve different purposes.
-- Playwright Test is not installed in this repository yet. Introduce it with a
-  first isolated, repeatable flow and development fixtures; only then add it to CI.
+- Playwright Test is installed; see the browser-test commands below.
   Authenticated tests need development accounts and a defined cleanup strategy.
 - Superpowers, OpenSpec, and a second paid coding agent are optional. Start with
   the repository instructions and feature brief before introducing more process.
 
 No account connections, global MCP configuration, paid subscriptions, production
 changes, or branch protection settings are installed by these repository files.
+
+## Run browser tests
+
+After `npm ci`, install the test browser once:
+
+```powershell
+npx playwright install chromium
+npm run test:e2e
+```
+
+The suite starts its own Vite server on port 4174 with a fake Supabase URL and key.
+It intercepts backend requests and blocks other external requests. No real accounts
+or database credentials are needed. Leave port 4174 available before running it.
+
+Three journeys run at both desktop and mobile sizes: guest recipe loading, returning
+Home from an unavailable shared post and reloading, and recovering from a recipe
+loading error with Try again. These do not cover real authentication, database
+persistence, native Android behavior, or all app screens.
+
+Use `npm run test:e2e:ui` for the interactive runner and
+`npm run test:e2e:report` for the last HTML report. Failed tests save screenshots
+and traces in ignored `test-results/`; the report is in ignored `playwright-report/`.
+GitHub Actions installs Chromium and runs the same suite automatically.
 
 ## Reference documentation
 
