@@ -59,6 +59,12 @@ layers when the change affects them, and state when access or prerequisites are
 missing. Passing compilation or mocked tests does not establish that the live
 backend, Google login, push delivery, or Android integrations work.
 
+Account-cache regression checks include both new-recipe drafts
+(`pickle:recipe-new:<account>`) and existing recipe drafts. Deletion cleanup must
+remove both for the selected account, preserve other accounts' keys, and report
+storage failures so the UI can show its existing cleanup warning. See
+`tests/account-cache.test.mjs`.
+
 Useful end-to-end journeys to verify on development accounts:
 
 - Discover a recipe -> open it -> save it -> reload -> find it in Saved.

@@ -376,10 +376,15 @@ export default function App() {
   useEffect(() => {
     const url = new URL(window.location.href)
 
-    if (selectedRecipeId) url.searchParams.set("recipe", selectedRecipeId)
+    // A post can overlay a recipe; only the visible content owns the URL.
+    if (postFeed?.postId) url.searchParams.set("post", postFeed.postId)
+    else url.searchParams.delete("post")
+
+    if (selectedRecipeId && !postFeed?.postId)
+      url.searchParams.set("recipe", selectedRecipeId)
     else url.searchParams.delete("recipe")
 
-    if (showMyRecipes)
+    if (showMyRecipes && !postFeed?.postId && !selectedRecipeId)
       url.searchParams.set("upload", startNewRecipe ? "new" : "my")
     else url.searchParams.delete("upload")
 
@@ -390,7 +395,7 @@ export default function App() {
 
       `${url.pathname}${url.search}${url.hash}`,
     )
-  }, [selectedRecipeId, showMyRecipes, startNewRecipe])
+  }, [selectedRecipeId, postFeed?.postId, showMyRecipes, startNewRecipe])
 
   useEffect(() => {
     let mounted = true
@@ -1171,15 +1176,6 @@ export default function App() {
           )}
           onBack={() => {
             setPostFeed(null)
-            const url = new URL(window.location.href)
-            if (url.searchParams.has("post")) {
-              url.searchParams.delete("post")
-              window.history.replaceState(
-                null,
-                "",
-                `${url.pathname}${url.search}${url.hash}`,
-              )
-            }
             requestAnimationFrame(() =>
               window.scrollTo({ top: postFeedScroll.current }),
             )

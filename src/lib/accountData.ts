@@ -13,6 +13,7 @@ export async function clearDeletedAccountCache(userId: string) {
       if (
         key === prefix ||
         key?.startsWith(`${prefix}:`) ||
+        key === `pickle:recipe-new:${userId}` ||
         key?.startsWith(`pickle:cooking:${userId}:`) ||
         key === `pickle:settings:${userId}`
       )
