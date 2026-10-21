@@ -8,7 +8,6 @@ export type IngredientRow = {
   display_order: number | null
   ingredients: { name: string } | null
 }
-
 export type StepRow = {
   id: string
   step_number: number
@@ -18,7 +17,6 @@ export type StepRow = {
   step_time_minutes: number | null
   is_final: boolean | null
 }
-
 export type Nutrition = {
   calories: number
   protein_g: number

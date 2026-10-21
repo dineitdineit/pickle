@@ -1,0 +1,12 @@
+.recipe-author-badge {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 2px 5px;
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  color: var(--color-primary);
+  font-size: var(--text-tiny);
+  line-height: 1.3;
+  font-weight: 600;
+}

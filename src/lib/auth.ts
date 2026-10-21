@@ -1,6 +1,5 @@
 import type { AuthError, User } from "@supabase/supabase-js"
 import { supabase } from "./supabase"
-
 // A missing session is a normal signed-out state; preserve every other error.
 export async function getCurrentUser(
   jwt?: string,

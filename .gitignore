@@ -1,6 +1,21 @@
 node_modules
 dist
+/tmp/
 .env
 .env.local
 .env.*.local
 .DS_Store
+*.jks
+*.keystore
+/android/app/google-services.json
+**/*firebase-adminsdk*.json
+
+# Local IDE state, CLI caches, and generated content-review exports
+/android/.idea/
+/supabase/.temp/
+/output/
+
+# Playwright reports and browser artifacts
+/playwright-report/
+/test-results/
+/blob-report/

@@ -3,7 +3,8 @@ import { createPortal } from "react-dom"
 import { supabase } from "./lib/supabase"
 import { type Review, type useRecipeReviews } from "./lib/reviews"
 import "./reviews.css"
-
+import ReportButton from "./ReportButton"
+import { requireContentConsent } from "./ContentConsent"
 export function ReviewStars({
   value,
   size = 18,
@@ -27,10 +28,11 @@ export function ReviewStars({
     </span>
   )
 }
-function Star({ fill, size = 32 }: {
+interface StarProps {
   fill: number
   size?: number
-}) {
+}
+function Star({ fill, size = 32 }: StarProps) {
   return (
     <span
       className="review-star"
@@ -57,7 +59,6 @@ function Star({ fill, size = 32 }: {
     </span>
   )
 }
-
 type Props = {
   recipeId: string
   onRequireLogin: () => void
@@ -89,7 +90,6 @@ export default function RecipeReviews({
     setMessage("")
     setSuccess("")
   }, [recipeId, userId])
-
   function begin(value?: number) {
     if (!userId) {
       onRequireLogin()
@@ -111,6 +111,7 @@ export default function RecipeReviews({
     setBusy(true)
     setMessage("")
     try {
+      if (!(await requireContentConsent(userId))) return
       const values = { rating, content: text.trim() }
       const result = ownReview
         ? await supabase
@@ -136,7 +137,7 @@ export default function RecipeReviews({
       reload()
       writeButton.current?.focus()
     } catch (err: any) {
-      console.error("Failed to save review", err)
+      console.error("Failed to save review")
       if (err?.code === "23505") {
         reload()
         setMessage(
@@ -168,7 +169,7 @@ export default function RecipeReviews({
       setSuccess("Your rating has been deleted.")
       reload()
     } catch (err) {
-      console.error("Failed to delete review", err)
+      console.error("Failed to delete review")
       setMessage("Could not delete your rating. Please try again.")
     } finally {
       mutation.current = false
@@ -205,6 +206,19 @@ export default function RecipeReviews({
           </time>
         </div>
         {review.content && <p className="review-content">{review.content}</p>}
+        {own && review.moderation_status === "hidden" && (
+          <p className="review-muted">
+            This review is hidden after moderation.
+          </p>
+        )}
+        {!own && review.user_id !== userId && (
+          <ReportButton
+            targetType="review"
+            targetId={review.id}
+            userId={userId}
+            onRequireLogin={onRequireLogin}
+          />
+        )}
         {own && (
           <div className="review-own-actions">
             <button
@@ -223,7 +237,6 @@ export default function RecipeReviews({
       </article>
     )
   }
-
   return (
     <section
       id="recipe-reviews"
@@ -437,7 +450,7 @@ export default function RecipeReviews({
               .filter((review) => review.id !== ownReview?.id)
               .map((review) => card(review))}
           </div>
-          {summary.written > reviews.length && (
+          {data.hasMore && (
             <button
               className="review-outline"
               disabled={loading}

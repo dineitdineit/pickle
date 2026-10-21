@@ -21,7 +21,7 @@ function loadHelper(path, mocks = {}) {
   })
   const module = { exports: {} }
   new Function("require", "module", "exports", outputText)(
-    (name) => mocks[name] ?? require(name),
+    (name) => name === "./RecipeImage" ? {default:"img"} : name === "./lib/imagePrivacy" ? {privateImage: async file => file} : mocks[name] ?? (name === "./RecipeImage" ? {default:"img"} : require(name)),
     module,
     module.exports,
   )
@@ -76,8 +76,8 @@ test("recipe image URLs use the correct buckets and supply a placeholder for opt
     recipeImageUrl("adobo.webp"),
     "https://images.example/adobo.webp",
   )
-  assert.equal(recipeImageUrl("community:user/draft/photo.jpg"), "https://images.example/user/draft/photo.jpg")
-  assert.deepEqual(calls, [{ bucket: "recipe_images", path: "adobo.webp" }, { bucket: "community_recipe_images", path: "user/draft/photo.jpg" }])
+  assert.equal(recipeImageUrl("community:user/draft/photo.jpg"), "community:user/draft/photo.jpg")
+  assert.deepEqual(calls, [{ bucket: "recipe_images", path: "adobo.webp" }])
 })
 
 test("auth normalizes only a missing session and leaves the SDK unchanged", async () => {
@@ -220,7 +220,7 @@ test("recipe strips leave finger scrolling to the browser while retaining mouse 
         ? mockReact
         : name === "./lib/format"
           ? { formatTime }
-          : name === "./RecipeVideo" ? { VideoBadge: () => null } : require(name),
+          : name === "./RecipeViewOverlay" ? { default: () => null } : name === "./RecipeVideo" ? { VideoBadge: () => null } : (name === "./RecipeImage" ? {default:"img"} : require(name)),
     module,
     module.exports,
   )

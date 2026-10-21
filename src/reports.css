@@ -1,0 +1,22 @@
+.report-button { color: var(--color-gray); font-size: var(--text-caption); line-height: var(--text-caption--line-height); padding: 8px 0; }
+.report-dialog { width: min(440px, calc(100vw - 32px)); max-height: calc(100dvh - 48px); overflow-y: auto; margin: auto; padding: 24px; border: 1px solid var(--color-border); border-radius: 16px; color: var(--color-ink); background: var(--color-white); }
+.report-dialog::backdrop { background: rgba(0,0,0,.4); }
+.report-dialog h2 { font-size: var(--text-section); font-weight: 600; margin-bottom: 16px; }
+.report-dialog p { font-size: var(--text-label); margin: 12px 0; }
+.report-dialog label { display: grid; gap: 8px; font-size: var(--text-label); margin-top: 14px; }
+.report-dialog select, .report-dialog textarea, .admin-content-reports textarea, .comment-admin-note { width: 100%; border: 1px solid var(--color-border); border-radius: 8px; padding: 10px; color: var(--color-ink); background: var(--color-white); font-size: var(--text-label); }
+.report-dialog small { color: var(--color-gray); font-size: var(--text-caption); }
+.report-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; }
+.report-actions button, .report-primary, .admin-content-reports button, .admin-content-reports select { padding: 9px 12px; border-radius: 8px; font-size: var(--text-label); border: 1px solid var(--color-border); }
+.report-primary { background: var(--color-primary); color: var(--color-white); }
+.report-dialog button:disabled, .admin-content-reports button:disabled { opacity: .5; }
+.report-error { color: #B83939; }
+.admin-content-reports { display: grid; gap: 16px; }
+.admin-report-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.admin-report-card { border: 1px solid var(--color-border); border-radius: 12px; padding: 20px; display: grid; gap: 12px; overflow-wrap: anywhere; }
+.admin-report-card h3 { font-size: var(--text-body); font-weight: 600; }
+.admin-report-card p, .admin-report-card label, .admin-report-card summary { font-size: var(--text-label); }
+.admin-report-card blockquote { padding: 12px; border-radius: 8px; background: var(--color-surface); white-space: pre-wrap; }
+.admin-report-card small { font-size: var(--text-caption); color: var(--color-gray); }
+.admin-report-card ul { display: grid; gap: 8px; margin-top: 10px; }
+.admin-report-card .report-actions { justify-content: flex-start; flex-wrap: wrap; margin-top: 0; }

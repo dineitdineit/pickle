@@ -1,0 +1,15 @@
+Pickle — Optional AI recipe organization
+Notice version: recipe-ai-2026-10-16.1
+Updated: October 16, 2026
+
+Optional AI organization sends the ingredients and cooking-step text boxes through Vercel AI Gateway to Google Vertex AI (Gemini 2.5 Flash Lite). Processing may occur outside your country, including Google inference in the United States or the European Union. Do not include personal or sensitive information. AI can make mistakes; review quantities and instructions before publishing. You can decline and enter the recipe manually.
+
+Checkbox (unchecked by default):
+I agree to send these ingredients and steps to Vercel and Google for AI organization.
+
+Action: Organize with AI
+
+Expanded AI data use:
+We restrict requests to Google Vertex AI and request no prompt training. Provider technical, billing and security records follow their own retention terms; Pickle's 30-day deletion policy does not control those records. We do not promise enforced zero retention on the current Hobby plan. Your original text stays in your private draft; applied suggestions become editable recipe content. Accounts requiring guardian consent can use manual entry while separate AI guardian approval is unavailable.
+
+The server requires consent=true and the matching notice version for each AI request. This is separate from general publishing-policy acceptance; no previous agreement is treated as AI acceptance. The function does not create a separate permanent consent ledger or prompt/output archive. Usage counters have the retention described in Privacy Policy section 13.

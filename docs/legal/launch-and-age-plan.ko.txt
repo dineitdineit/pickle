@@ -1,0 +1,40 @@
+Pickle 단계별 출시·연령 운영안
+작성일: 2026-10-15
+운영자: Taelim Auh, 대한민국 거주 개인 운영자
+공식 문의: admin@getpickleapp.com
+
+Account-age decision (2026-10-16)
+Minimum account age: 13. Declared age 13 requires explicit consent from an adult parent/legal guardian and administrator review before activation. At 14+, the ordinary eligibility check applies; additional local legal requirements still apply. Under-13 activation is rejected. Birth dates are evaluated, not stored. Existing 18+ confirmations remain valid. See ../guardian-consent.md for the complete workflow and limits.
+Ordinary writes remain restricted before eligibility; safety reporting, deletion and support remain available. Pending/withdrawn guardian accounts are hidden from public profile/content reads. A minimum Auth record can exist before this check. Age entry is self-declaration, not verified identity. Guardian authority must actually be checked by the operator, not inferred from a child's checkbox. This does not certify global compliance or replace teen safety/release review.
+
+단계 1: 필리핀만 최초 스토어 배포
+필리핀 대상 내부/비공개 테스트 → 제어된 초기 배포 → 운영 검증 순서.
+현재 영어 UI·필리핀 요리 중심 콘텐츠로 첫 사용자 경험을 검증하기 위한 선택입니다. 운영자 소재지가 대한민국이므로 대한민국 의무와 필리핀 이용자 관련 요건을 함께 점검합니다.
+출시 전: 삭제/사진 정리 실기기 테스트, 이메일 수신, 공개 정책·앱 밖 탈퇴 요청 URL, 공급자 국외 처리/보관 확인, 보관 기간과 파기 작업 확정, Data safety, 신고/아동 안전 담당자/절차, 스토어 대상 연령과 IARC 등급을 확인.
+Play Console에서 배포 국가를 Philippines로 선택하는 것은 아직 실행하지 않았습니다. 웹 서비스 접속 국가를 자동 차단하는 지오펜스도 구현한 것이 아닙니다.
+
+단계 2: 싱가포르·말레이시아
+영어 서비스 경험을 재사용하면서 국가를 소수씩 추가하는 운영 제안입니다. 각 국가의 개인정보·국외 처리·연령·이용자 권리와 필요한 언어를 확인한 후, 현지 테스트 사용자로 신고/문의 대응과 화면을 검증합니다. 국가별 법적 준비를 완료했다는 뜻은 아닙니다.
+
+단계 3: 태국·인도네시아·베트남
+언어·검색·단위 표시/음식 명칭·현지 신고 대응을 준비한 뒤 국가별로 별도 진행합니다. 지역별 가입/개인정보/국외 처리/서비스 등록 등 확인할 사항을 법률 검토 체크리스트로 만들고, 확인 없이 일괄 공개하지 않습니다.
+
+단계 4: 대한민국·일본·대만
+정식 현지어 약관·방침·문의, 동의/이전 고지, 신고 운영, 레시피 검색 현지화를 검토합니다. 운영자가 한국에 있다는 이유만으로 한국 이용자용 요구사항이 모두 충족된 것은 아닙니다.
+
+단계 5: 기타 국가/전세계 확대
+미국·캐나다·영국·유럽·호주 등은 각각의 아동/개인정보/온라인 서비스 규칙을 점검해 별도 그룹으로 확장합니다. 13+ 설정만으로 국제 법규/국외 이전 문제가 해결된다고 간주하지 않습니다. 아직 지원 준비가 안 된 국가를 '전세계'로 일괄 선택하지 않는 방식을 권합니다.
+
+단계 전환 기준
+특정 날짜가 지나서 자동 전환하지 않고, 삭제·신고·이메일·복구 실패가 해소되고 문의 목표시간을 지키며, 새 국가의 문구/공급자/권리 처리와 스토어 선언이 준비되었을 때 전환합니다. 운영 목표는 초기 4주 관찰을 참고하되, 통과를 보장하는 기간/법적 기준으로 사용하지 않습니다.
+
+스토어 설정 메모
+- Target audience: 실제 13+ 서비스에 맞춰 13–15, 16–17, 18 and over를 검토하는 방향. 이는 콘텐츠 등급/IARC 응답과 별개의 설정입니다.
+- 앱 내용/UGC/사용자 상호작용은 사실대로 신고하고 콘텐츠 등급을 임의로 '전체 이용가'나 '성인물'로 확정하지 않습니다.
+- 미성년자 접근 제한 옵션은 실제 앱 설계·해당 Play 정책에 맞춰 검토/설정합니다. 이번 코드 변경으로 Play Console 옵션이 바뀐 것은 아닙니다.
+
+공식 근거
+https://support.google.com/googleplay/android-developer/answer/9867159
+https://support.google.com/googleplay/android-developer/answer/18258653
+https://privacy.gov.ph/public-advisory-npc-calls-on-digital-platforms-to-ensure-compliance/
+https://www.law.go.kr/lsLinkCommonInfo.do?chrClsCd=010202&lsJoLnkSeq=1029331673

@@ -1,0 +1,43 @@
+Pickle 데이터 사용 보완 적용 결과
+적용일: 2026-10-15 / capacitor-android-bootstrap
+
+적용한 기능
+1. 초안·게시 사진: community_recipe_images 버킷을 비공개로 변경했습니다. 작성자·권한 있는 관리자 또는 현재 공개된 레시피를 볼 수 있는 요청만 사진을 읽을 수 있습니다. 앱의 레시피 카드·상세·초안·편집·관리자 미디어는 300초 서명 URL을 사용하고 240초마다 갱신합니다. 로그아웃/로그인 시 재검사합니다. 프로필 사진 및 기존 catalogue recipe_images는 공개 이미지입니다.
+2. 파일 정리: 레시피/초안/단계의 삭제·교체는 이전 사진 경로를 서버의 비공개 disposal 큐에 등록합니다. 작업자는 사용 중인 사진과 보관 중인 신고 증거를 검사하고, 불필요한 사진만 Storage API로 삭제합니다. Storage 제거가 확인되기 전에는 완료 처리하지 않습니다. 실패는 최대 약 1시간 간격으로 재시도합니다. 삭제 임대 중인 사진은 새 초안/레시피/신고가 참조하지 못하게 잠금·검사를 적용했습니다.
+3. 업로드 취소: 명시적 Discard changes는 해당 계정/초안 폴더의 미참조 사진 정리를 요청합니다. 앱 종료·실패 등으로 명시적 취소하지 못한 미저장 사진은 업로드 7일 후 정리 대상입니다. 저장된 초안·게시물·보관 증거에서 참조한 사진은 이 고아 파일 정리에서 제외합니다. 기기에만 남긴 미저장 편집 사진은 7일 경과 후 다시 업로드해야 할 수 있습니다.
+4. 관리 화면: Moderation → Data deletion, retention & backups에 사진 정리 대기/재시도/5회 이상 실패 수와 예약 실행 여부를 추가했습니다. 사진 경로·사용자 ID·서버 키를 이 화면에 추가로 공개하지 않습니다.
+5. 새 사진 메타데이터: 프로필·레시피(원본 유지/자르기 포함)·채팅의 정상 업로드 경로가 원본 파일을 그대로 전송하지 않습니다. 기기에서 픽셀을 디코딩하고 새 WebP(미지원 시 PNG)로 인코딩해 원본 EXIF/GPS/XMP/IPTC를 전달하지 않도록 했습니다. 방향·비율을 유지하고 긴 변 최대 2400px/입력 최대 5MiB·40MP 제한을 적용합니다. 이 기능은 기존 업로드 파일을 일괄 재작성한 것이 아니며, 예전 APK나 API 직접 호출의 원본 업로드까지 서버에서 재인코딩한다는 의미는 아닙니다.
+6. Android 백업: allowBackup=false, Android 11 이하 fullBackupContent 제외 규칙과 Android 12+ cloud-backup/device-transfer 제외 규칙을 추가했습니다. 앱 로컬 인증 세션·초안·검색 등을 OS 백업/기기 이전에 포함하지 않도록 설정했습니다. 기존 백업 사본의 삭제나 모든 제조사의 실제 복원 동작까지 검증한 것은 아닙니다.
+7. 최근 검색: 같은 계정에서는 유지하고, 로그아웃 또는 다른 계정/게스트 전환 시 공용 최근 검색 목록을 지웁니다. 다른 탭에서 발생한 인증 변경도 같은 이벤트 경로를 사용합니다. 초기 소유자 표식 없는 예전 공용 목록은 한 번 정리합니다.
+8. 검색 추천: 최근 30일/검색 결과 있음 조건에 더해, 서로 다른 로그인 계정 5명 이상·공개 재료/태그 이름과 일치·허용 문자 조건을 요구합니다. 이메일/전화번호 등 임의 검색 문구가 두 번만 등장해 추천되는 기존 경로를 제거했습니다. 임의 민감 문구를 완벽히 판별하는 시스템이라는 뜻은 아닙니다.
+9. 알림 선택: user_follows.notify_new_recipes 직접 SELECT/UPDATE 권한을 제거했습니다. 당사자 관계 조회에는 ID/생성 시각만 허용하고, 현재 본인의 알림 설정만 검사·수정하는 기존 RPC를 권한 검사된 private helper로 연결했습니다. Follow/Unfollow 및 벨 기능은 유지합니다.
+10. 조회 기록: 일반 클라이언트의 recipe_views SELECT를 제거했습니다. 레시피별 전체/최근 30일 집계 RPC와 computed view_count로 카드·프로필·검색·상세 조회수를 공급합니다. 개별 조회 시각은 일반 API로 반환하지 않습니다. 서버 원시 조회 행의 저장 기간을 새로 30일로 바꾼 것은 아닙니다.
+11. 오류 로그: 프런트엔드 console.error에 SDK 오류 객체/임의 Error 원문을 넘기는 경로를 고정된 작업명으로 바꿨습니다. 이메일/파일 정리 작업자는 고정 오류·집계 위주이며 원문 제공자 응답을 보관하지 않습니다. 제공자 자체 로그 설정을 변경한 것은 아닙니다.
+12. 고지: src/profileContent.ts와 current/privacy-policy.en.txt에 SDK 역할·기술 로그·비공개 사진·정리/7일 고아 파일·메타데이터 처리·OS 백업·검색/조회 최소 공개를 명시했습니다. 기존 방침 사본은 archive/2026-10-15-before-data-use-hardening/에 있습니다. 약관/콘텐츠 정책의 서버 동의 버전은 2026-10-15.3 그대로이며, 사용자 동의를 임의로 새로 기록하지 않았습니다.
+
+서버 적용
+20261015043638_data_use_hardening.sql 및 20261015044429_activate_private_recipe_media.sql 적용.
+recipe-asset-worker 배포: Vault의 전용 내부 요청 비밀값을 service-only RPC로 검사합니다. JWT 게이트웨이 대신 이 내부 인증을 사용하며 앱 클라이언트는 호출 권한이 없습니다. 비밀값을 조회/문서화하지 않았습니다.
+pickle-recipe-media-cleanup: 매분 실행. 실제 HTTP 200 응답 및 cron succeeded 확인. 확인 시 사진 정리 대기 0건.
+
+검증
+- npm test: 157개 통과.
+- data-use-hardening.integration.sql: 합성 Auth 계정/Storage 메타데이터만 BEGIN/ROLLBACK으로 생성. 초안 소유자/외부 접근, 공개/숨김 사진, Storage 삭제 전 ack 거부, 동시 재참조 거부, 서비스 전용 작업자, 비공개 알림 선택, 집계 조회, 서로 다른 검색자 임계값 통과. 테스트 계정 잔여 0건.
+- 새 단위 테스트: 픽셀 재인코딩 시 원본 바이트 미전달/디코더 정리, 서명 URL 성공/거부, 계정 간 검색 격리, 실제 Storage API 형태의 제거·실패·ack/재시도 경로, 로그아웃 후 늦게 도착한 이미지 응답 무시. 새 권한/기능 테스트에는 SDK/Storage API의 테스트 더블이 포함되며, 실제 고객 사진을 삭제한 종단간 테스트는 아닙니다.
+- TypeScript/Vite 빌드와 Capacitor Android 동기화 통과.
+- Gradle assembleDebug --offline: BUILD SUCCESSFUL. 최종 병합 manifest에서 INTERNET과 앱 내부 DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION만 확인. 후자는 내부 수신자 보호용 자체 권한이며 위치/연락처/마이크/광고 ID 권한이 아닙니다. 백업 false 및 두 제외 규칙 포함 확인.
+- APK: android/app/build/outputs/apk/debug/app-debug.apk.
+- 보안 어드바이저는 기존 3개 항목 그대로: 기본 차단 visibility_epoch 정보, 관리자 분석 SECURITY DEFINER 경고, 유출 비밀번호 보호 비활성 경고. 새 경고 없음.
+
+확인·적용이 남은 외부 항목
+- Vercel Web Analytics/Speed Insights 활성 여부: get_project 도구 응답에 해당 설정이 없어 확인 불가. 해당 프로젝트의 Drains 목록은 비어 있음. 기본 플랫폼 로그가 없다는 의미는 아닙니다.
+- Supabase/Vercel/Resend 로그·인프라 백업, Porkbun/Gmail 사본의 실제 수명/삭제 설정: 공급자 관리 화면/플랜 확인 필요. 앱의 30일 작업으로 이를 바꿨다고 주장하지 않습니다.
+- Supabase Auth 유출 비밀번호 보호: 이번 연결 도구에는 Auth 설정 수정 API가 없어 변경하지 못했습니다. 출시 전 Auth 보안 설정에서 활성 여부/플랜을 확인해야 합니다.
+- 기존 사진 사본/오래된 공개 CDN 캐시와 이전 기기 백업은 이번 변경으로 일괄 회수하거나 메타데이터를 재작성하지 않았습니다. 실제 기기 백업 복원 및 실제 최종 출시 AAB의 네트워크 검증은 별도입니다.
+- 공개 웹의 기존 배포/예전 APK는 새 비공개 사진·집계 API에 맞춘 클라이언트로 갱신해야 합니다. Android Studio Run으로 새 앱을 실행하세요. Vercel 운영 배포·Git 커밋·운영 브랜치 반영·Play 출시를 실행하지 않았습니다.
+
+기술 근거
+https://supabase.com/docs/guides/storage/security/access-control
+https://supabase.com/docs/guides/storage/serving/downloads
+https://developer.android.com/identity/data/autobackup
+https://support.google.com/googleplay/android-developer/answer/10787469

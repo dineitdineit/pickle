@@ -1,0 +1,53 @@
+RETENTION UPDATE 2026-10-15: confirmed and implemented 30-day detailed evidence/minimal deletion receipts/backups and 90-day minimum enforcement history, with active-case/restriction exceptions. Current text is in ../current/ and scope in ../retention-policy.ko.txt. Earlier provisional retention paragraphs below are superseded; provider-managed copies remain separate.
+
+REVIEW DRAFT UPDATE — 2026-10-15
+Confirmed: operator Taelim Auh, Republic of Korea; admin@getpickleapp.com; Vercel hosting; Supabase backend; Porkbun forwarding to Gmail; Resend email; Google enabled, Apple planned; 18+ accounts; delete published recipes/photos with account.
+Current implemented copy is in ../current/. Historical implementation-gap statements below are background for review, not current guarantees. The 18+ server guard, deletion preparation/freeze and published-recipe cascade have now been implemented and the deletion function redeployed. Retention periods, detailed transfers and external policy/deletion URLs remain unresolved. See retention-recommendations.ko.txt and launch-and-age-plan.ko.txt. No proposed retention duration has been activated.
+
+Pickle Terms of Service — REVISED WORKING DRAFT
+Prepared: 2026-10-15
+Status: WORKING REVIEW DRAFT. Confirmed operator, provider and 18+ clauses are applied in current app documents; unresolved retention/transfer details below remain proposals. Complete bracketed decisions before changing the live agreement version.
+Proposed effective date: [TO CONFIRM]
+
+1. Operator, scope and eligibility
+These terms govern use of Pickle, operated by Taelim Auh, an individual based in the Republic of Korea. Contact admin@getpickleapp.com. You must meet the minimum account age of 18 and comply with applicable law. The Privacy Policy explains how information is handled. The Content Policy describes community rules and the moderation process.
+
+2. Accounts and identity
+Some features require an account. Provide accurate account information, keep credentials secure and promptly report suspected unauthorised access. Email/password and any actually enabled social-sign-in options are provided through our authentication services. Username and display name are currently fixed after selection. This UI rule does not remove rights you may have under applicable law or the ability to request help with a legitimate correction or safety concern. You may manage supported profile information, content and account settings through the app.
+
+3. Recipes, units and food safety
+Recipes, cooking times, serving sizes, substitutions, unit conversions and nutrition information are general information and can be incomplete or inaccurate. Our US/Metric display uses the app's stated conversion conventions, including a 200 ml cup, 15 ml tablespoon and 5 ml teaspoon where applicable; these conventions do not match every country's customary measures. Check ingredient quantities, allergens and safe handling/cooking practices. Recipe information is not personal medical advice or a promise to cure disease.
+
+4. Your content and the permission needed to operate Pickle
+You retain any rights you hold in recipes, images, comments, reviews, profile information and messages you submit. You must have permission to share them and respect others' intellectual property and privacy.
+You grant Pickle a non-exclusive, worldwide, royalty-free permission to store, host, reproduce, technically format and display/deliver your content only as needed to provide, secure and operate the service and the features you choose to use. Public posts may be displayed and shared through public service features. Private messages and private drafts are not licensed for unrestricted public distribution: they are processed to provide the relevant private features and legitimate safety/legal operations described in the Privacy Policy.
+Deletion and any limited retention are governed by the actual deletion/retention rules in the Privacy Policy. [CONFIRM ANY BUSINESS USE BEYOND THESE PURPOSES BEFORE ADDING IT; DO NOT SILENTLY ADD ADVERTISING OR AI-TRAINING RIGHTS.]
+
+5. Community rules and reporting
+The Content Policy applies to recipes, photos, comments, ratings/reviews, profiles and messages. Do not submit threats, harassment/hate, sexual exploitation or illegal explicit material, private information without permission, scams/spam, infringements/impersonation, harmful instructions, manipulated ratings or content intended to evade enforcement. Honest criticism, low ratings and differences in taste are allowed.
+Report a recipe, review, comment or user through the relevant in-app report control. You may block users and manage the block list. Customer support supplements those report controls. Do not deliberately fabricate evidence or abuse the reporting process.
+
+6. Content review and account restrictions
+Designated administrators review reports and context. Possible outcomes include no violation, a request for changes/information, provisional hiding, hiding, public removal and restoration. Public removal does not mean immediate destruction of every file or evidence record.
+A first minor confirmed incident normally leads to a warning and proportionate content action. Repeated confirmed incidents can lead to a three-day publishing/photo/message restriction or a seven-/30-day read-only suspension. Critical cases may receive provisional hiding and a 24-hour provisional suspension while a long/permanent proposal is considered. Severe violations or proven enforcement evasion can justify permanent suspension. Long/permanent suspensions require a separate final approval step.
+Confirmed incidents in the preceding 90 days inform repeat-violation assessment; duplicate reports are not separate violations. Provisional, dismissed and overturned findings are excluded. Proven malicious false reporting may receive a temporary reporting restriction. Reporting volume alone does not establish a violation.
+
+7. Notice and appeal
+We provide public reasons, policy clauses, affected content/account actions and any restriction end date through account status and service notices. Reporter identity and internal administrator notes are not shared with the author through these notices. You may appeal a notified decision within 14 days through Profile > Account status & appeals. We aim to review appeals within seven business days and use another uninvolved reviewer when available. These review targets are goals rather than guaranteed deadlines.
+When a finding is overturned, its strike and restriction are cancelled and eligible content is restored unless another standing decision requires it to remain hidden. Suspended accounts may continue to view status, submit appeals and safety reports, and use the available own-content/account deletion procedures. A specific false-reporting restriction may separately limit new reports.
+
+8. Privacy, communications and third-party services
+The Privacy Policy describes collected information, public/private visibility, service providers, retention, deletion and rights requests. The app sends authentication/security/service notices; a service notice is not an opt-in to unrelated marketing. External sign-in, video and linked services can also be subject to those providers' terms and policies.
+[CONFIRM WHETHER MARKETING OR PAID SERVICES WILL BE OFFERED. Do not describe currently absent subscription, refund or advertising features as active.]
+
+9. Your deletion choices and ending use
+You can stop using Pickle and request account deletion through the available app and external request routes. Account deletion also deletes the author’s published recipes and uploaded recipe photos. Explain any retained safety/legal records, backup periods and limits on recalling copies others obtained in the Privacy Policy. Administrative/official accounts currently require an operator-managed deletion process instead of the ordinary app deletion button.
+
+10. Pickle intellectual property and availability
+The Pickle branding, software, design and original content remain protected by applicable rights. These terms do not transfer ownership of the service. Features can change and service interruptions can occur; we do not promise uninterrupted or error-free operation.
+
+11. Responsibility and mandatory rights
+To the extent permitted by applicable law, the service and user recipes are provided as available without guarantees of cooking outcomes or complete accuracy. These terms do not exclude responsibilities or consumer rights that cannot lawfully be excluded. [REVIEW JURISDICTION-SPECIFIC LIABILITY TERMS AFTER OPERATOR AND LAUNCH COUNTRIES ARE CONFIRMED.]
+
+12. Changes, governing law and contact
+We will identify revised terms by an effective date and provide notice or renewed agreement where required. Current server agreement records cover a terms/content-policy version and acceptance time; publishing revised text requires a new version and matching app text. [CONFIRM GOVERNING LAW AND DISPUTE PROCEDURE WITHOUT OVERRIDING NON-WAIVABLE LOCAL RIGHTS.] Contact admin@getpickleapp.com.

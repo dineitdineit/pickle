@@ -1,15 +1,28 @@
 import PickleLogo from "./PickleLogo"
+import BackIcon from "./BackIcon"
+import { isEligibleBirthday } from "./lib/age"
+import { privacySections, termsSections } from "./profileContent"
 import { FormEvent, useEffect, useState } from "react"
 import { supabase } from "./lib/supabase"
+import {
+  authRedirect,
+  beginNativeAuth,
+  isAndroidApp,
+  signInNative,
+} from "./lib/nativeAuth"
+import { Browser } from "@capacitor/browser"
+import { useAndroidBack } from "./lib/nativeNavigation"
 
 type Mode = "signin" | "signup" | "forgot" | "update"
-type SocialProvider = "google" | "apple"
 
-const APP_URL = "https://getpickleapp.com"
+type SocialProvider = "google" | "apple"
 
 type AuthScreenProps = {
   onBack: () => void
+
   recoveryMode?: boolean
+  verifiedNativeRecovery?: boolean
+
   onRecoveryComplete?: () => void
 }
 
@@ -36,20 +49,6 @@ function GoogleIcon() {
   )
 }
 
-function AppleIcon() {
-  return (
-    <svg
-      width="19"
-      height="19"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      aria-hidden="true"
-    >
-      <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.79 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.53 4.1v-.01ZM12.03 7.25C11.88 5.02 13.69 3.18 15.77 3c.29 2.58-2.34 4.5-3.74 4.25Z" />
-    </svg>
-  )
-}
-
 function BackButton({ onClick }: { onClick: () => void }) {
   return (
     <button
@@ -57,59 +56,82 @@ function BackButton({ onClick }: { onClick: () => void }) {
       onClick={onClick}
       aria-label="Back to log in"
       className="w-9 h-9 flex items-center justify-center mb-8"
-      style={{ color: "#1F1F1F" }}
+      style={{ color: "var(--color-ink)" }}
     >
-      <svg
-        width="20"
-        height="20"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <polyline points="15 18 9 12 15 6" />
-      </svg>
+      <BackIcon />
     </button>
   )
 }
 
 export default function AuthScreen({
   onBack,
+
   recoveryMode = false,
+  verifiedNativeRecovery = false,
+
   onRecoveryComplete,
 }: AuthScreenProps) {
   const [mode, setMode] = useState<Mode>(recoveryMode ? "update" : "signin")
+
   const [email, setEmail] = useState("")
+
   const [password, setPassword] = useState("")
+
   const [confirmPassword, setConfirmPassword] = useState("")
+
   const [username, setUsername] = useState("")
+
   const [displayName, setDisplayName] = useState("")
+
+  const [birthday, setBirthday] = useState("")
+
   const [loading, setLoading] = useState(false)
+
   const [socialLoading, setSocialLoading] = useState<SocialProvider | null>(
     null,
   )
+
   const [message, setMessage] = useState("")
+
   const [errorMessage, setErrorMessage] = useState("")
+
   const [recoveryReady, setRecoveryReady] = useState(!recoveryMode)
+
   const [confirmationSent, setConfirmationSent] = useState(false)
+
   const [resendLoading, setResendLoading] = useState(false)
+
   const [resendCooldown, setResendCooldown] = useState(0)
+
+  useAndroidBack(() => {
+    if (loading || resendLoading) return true
+    if (mode === "update") onBack()
+    else if (mode !== "signin") changeMode("signin")
+    else onBack()
+    return true
+  }, 100)
 
   useEffect(() => {
     if (resendCooldown <= 0) return
+
     const timer = window.setInterval(() => {
       setResendCooldown((current) => Math.max(0, current - 1))
     }, 1000)
+
     return () => window.clearInterval(timer)
   }, [resendCooldown])
 
   useEffect(() => {
     if (!recoveryMode) return
+
     setMode("update")
+    if (isAndroidApp) {
+      setRecoveryReady(verifiedNativeRecovery)
+      return
+    }
 
     let mounted = true
+
     supabase.auth.getSession().then(({ data }) => {
       if (mounted && data.session) setRecoveryReady(true)
     })
@@ -124,46 +146,85 @@ export default function AuthScreen({
 
     return () => {
       mounted = false
+
       subscription.unsubscribe()
     }
-  }, [recoveryMode])
+  }, [recoveryMode, verifiedNativeRecovery])
+
+  useEffect(() => {
+    if (!isAndroidApp) return
+    let disposed = false
+    const listener = Browser.addListener("browserFinished", () =>
+      setSocialLoading(null),
+    )
+    void listener
+      .then((handle) => {
+        if (disposed) void handle.remove()
+      })
+      .catch(() => {})
+    return () => {
+      disposed = true
+      void listener.then((handle) => handle.remove()).catch(() => {})
+    }
+  }, [])
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
+
     setLoading(true)
+
     setMessage("")
+
     setErrorMessage("")
 
     if (mode === "signin") {
       const { error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
+
         password,
       })
+
       if (error) setErrorMessage(error.message)
+
       setLoading(false)
+
       return
     }
 
     if (mode === "forgot") {
       if (!email.trim()) {
         setErrorMessage("Please enter your email address.")
+
         setLoading(false)
+
         return
       }
 
+      if (!beginNativeAuth("recovery")) {
+        setErrorMessage(
+          "App storage is unavailable. Restart Pickle and try again.",
+        )
+        setLoading(false)
+        return
+      }
       const { error } = await supabase.auth.resetPasswordForEmail(
         email.trim(),
+
         {
-          redirectTo: `${APP_URL}/?reset=1`,
+          redirectTo: authRedirect(true),
         },
       )
 
       if (error) setErrorMessage(error.message)
       else
         setMessage(
-          "Password reset email sent. Check your inbox and open the reset link.",
+          isAndroidApp
+            ? "Password reset email sent. Open the link on this device to return to Pickle."
+            : "Password reset email sent. Check your inbox and open the reset link.",
         )
+
       setLoading(false)
+
       return
     }
 
@@ -172,46 +233,81 @@ export default function AuthScreen({
         setErrorMessage(
           "This reset link is still being verified. Please wait a moment and try again.",
         )
+
         setLoading(false)
+
         return
       }
+
       if (password.length < 6) {
         setErrorMessage("Password must be at least 6 characters.")
+
         setLoading(false)
+
         return
       }
+
       if (password !== confirmPassword) {
         setErrorMessage("Passwords do not match.")
+
         setLoading(false)
+
         return
       }
 
       const { error } = await supabase.auth.updateUser({ password })
+
       if (error) {
         setErrorMessage(error.message)
       } else {
         setMessage("Password updated successfully.")
+
         window.setTimeout(() => onRecoveryComplete?.(), 700)
       }
+
       setLoading(false)
+
+      return
+    }
+
+    if (!isEligibleBirthday(birthday)) {
+      setErrorMessage("Pickle accounts are for people aged 13 and over.")
+
+      setLoading(false)
+
       return
     }
 
     const cleanUsername = username.trim()
+
     const cleanDisplayName = displayName.trim()
+
     if (!cleanUsername || !cleanDisplayName) {
       setErrorMessage("Please enter a username and display name.")
+
       setLoading(false)
+
       return
     }
 
+    if (!beginNativeAuth("confirmation")) {
+      setErrorMessage(
+        "App storage is unavailable. Restart Pickle and try again.",
+      )
+      setLoading(false)
+      return
+    }
     const { data, error } = await supabase.auth.signUp({
       email: email.trim(),
+
       password,
+
       options: {
-        emailRedirectTo: `${APP_URL}/`,
+        emailRedirectTo: authRedirect(),
+
         data: {
           username: cleanUsername,
+
           display_name: cleanDisplayName,
         },
       },
@@ -221,32 +317,48 @@ export default function AuthScreen({
       setErrorMessage(error.message)
     } else if (!data.session) {
       setConfirmationSent(true)
+
       setResendCooldown(60)
+
       setMessage(
         "Account created. Check your email to confirm your account, then sign in.",
       )
     }
+
     setLoading(false)
   }
 
   async function handleResendConfirmation() {
     const cleanEmail = email.trim()
+
     if (!cleanEmail || resendLoading || resendCooldown > 0) return
 
     setResendLoading(true)
+
     setMessage("")
+
     setErrorMessage("")
 
+    if (!beginNativeAuth("confirmation")) {
+      setErrorMessage(
+        "App storage is unavailable. Restart Pickle and try again.",
+      )
+      setResendLoading(false)
+      return
+    }
     const { error } = await supabase.auth.resend({
       type: "signup",
+
       email: cleanEmail,
+
       options: {
-        emailRedirectTo: `${APP_URL}/`,
+        emailRedirectTo: authRedirect(),
       },
     })
 
     if (error) {
       const rateLimited = error.message.toLowerCase().includes("rate limit")
+
       setErrorMessage(
         rateLimited
           ? "Too many confirmation emails were requested. Please wait a while before trying again."
@@ -256,6 +368,7 @@ export default function AuthScreen({
       setMessage(
         "Confirmation email sent again. Check your inbox and spam folder.",
       )
+
       setResendCooldown(60)
     }
 
@@ -264,63 +377,90 @@ export default function AuthScreen({
 
   async function handleSocialAuth(provider: SocialProvider) {
     setSocialLoading(provider)
+
     setMessage("")
+
     setErrorMessage("")
+
+    if (isAndroidApp) {
+      try {
+        await signInNative(provider)
+      } catch {
+        setErrorMessage("Unable to start sign in. Please try again.")
+      } finally {
+        setSocialLoading(null)
+      }
+      return
+    }
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
-      options: { redirectTo: `${APP_URL}/` },
+
+      options: { redirectTo: authRedirect() },
     })
 
     if (error) {
       setErrorMessage(error.message)
+
       setSocialLoading(null)
     }
   }
 
   function changeMode(nextMode: Mode) {
     setMode(nextMode)
+
     setPassword("")
+
     setConfirmPassword("")
+
+    setBirthday("")
+
     setMessage("")
+
     setErrorMessage("")
+
     setConfirmationSent(false)
+
     setResendCooldown(0)
   }
 
   const socialButtons = (
     <div className="space-y-3">
       <div className="flex items-center gap-3 py-1">
-        <div className="h-px flex-1" style={{ backgroundColor: "#E8E8E8" }} />
-        <span className="text-[14px]" style={{ color: "#A0A0A0" }}>
+        <div
+          className="h-px flex-1"
+          style={{ backgroundColor: "var(--color-border)" }}
+        />
+        <span
+          className="text-label"
+          style={{ color: "var(--color-gray-soft)" }}
+        >
           or continue with
         </span>
-        <div className="h-px flex-1" style={{ backgroundColor: "#E8E8E8" }} />
+        <div
+          className="h-px flex-1"
+          style={{ backgroundColor: "var(--color-border)" }}
+        />
       </div>
       <button
         type="button"
         onClick={() => handleSocialAuth("google")}
         disabled={Boolean(socialLoading)}
-        className="w-full h-12 rounded-[8px] border flex items-center justify-center gap-3 text-[16px] font-semibold disabled:opacity-60"
+        className="w-full h-12 rounded-[8px] border flex items-center justify-center gap-3 text-body font-semibold disabled:opacity-60"
         style={{
-          borderColor: "#E5E5E5",
-          backgroundColor: "#FFFFFF",
-          color: "#1F1F1F",
+          borderColor: "var(--color-border)",
+
+          backgroundColor: "var(--color-white)",
+
+          color: "var(--color-ink)",
         }}
       >
         <GoogleIcon />
         {socialLoading === "google" ? "Connecting…" : "Continue with Google"}
       </button>
-      <button
-        type="button"
-        onClick={() => handleSocialAuth("apple")}
-        disabled={Boolean(socialLoading)}
-        className="w-full h-12 rounded-[8px] flex items-center justify-center gap-3 text-[16px] font-semibold disabled:opacity-60"
-        style={{ backgroundColor: "#000000", color: "#FFFFFF" }}
-      >
-        <AppleIcon />
-        {socialLoading === "apple" ? "Connecting…" : "Continue with Apple"}
-      </button>
+      <p className="text-label">
+        Apple sign-in is coming later. Pickle accounts are for ages 13 and over.
+      </p>
     </div>
   )
 
@@ -333,18 +473,24 @@ export default function AuthScreen({
             <PickleLogo size={28} iconSize={88} stacked />
           </div>
           <div className="text-center mb-7">
-            <h1 className="font-bold text-[27px]" style={{ color: "#1F1F1F" }}>
+            <h1
+              className="font-bold text-page"
+              style={{ color: "var(--color-ink)" }}
+            >
               Reset your password
             </h1>
-            <p className="text-[16px] mt-2" style={{ color: "#777777" }}>
+            <p
+              className="text-body mt-2"
+              style={{ color: "var(--color-gray)" }}
+            >
               Enter your email and we'll send you a reset link.
             </p>
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label
-                className="block text-[15px] font-semibold mb-2"
-                style={{ color: "#444444" }}
+                className="block text-body font-semibold mb-2"
+                style={{ color: "var(--color-gray-strong)" }}
               >
                 Email
               </label>
@@ -353,11 +499,13 @@ export default function AuthScreen({
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full h-12 px-4 rounded-[12px] border outline-none text-[17px]"
+                className="w-full h-12 px-4 rounded-[12px] border outline-none text-body"
                 style={{
-                  borderColor: "#E5E5E5",
-                  backgroundColor: "#FAFAFA",
-                  color: "#1F1F1F",
+                  borderColor: "var(--color-border)",
+
+                  backgroundColor: "var(--color-surface)",
+
+                  color: "var(--color-ink)",
                 }}
                 placeholder="you@example.com"
                 autoCapitalize="none"
@@ -365,20 +513,20 @@ export default function AuthScreen({
               />
             </div>
             {errorMessage && (
-              <p className="text-[15px] leading-5" style={{ color: "#C53D2E" }}>
+              <p className="text-body leading-5" style={{ color: "#C53D2E" }}>
                 {errorMessage}
               </p>
             )}
             {message && (
-              <p className="text-[15px] leading-5" style={{ color: "#5F6F52" }}>
+              <p className="text-body leading-5" style={{ color: "#5F6F52" }}>
                 {message}
               </p>
             )}
             <button
               type="submit"
               disabled={loading}
-              className="w-full h-12 rounded-[8px] text-white text-[17px] font-semibold disabled:opacity-60"
-              style={{ backgroundColor: "#F26B21" }}
+              className="w-full h-12 rounded-[8px] text-white text-body font-semibold disabled:opacity-60"
+              style={{ backgroundColor: "var(--color-primary)" }}
             >
               {loading ? "Sending…" : "Send reset link"}
             </button>
@@ -392,14 +540,25 @@ export default function AuthScreen({
     return (
       <div className="pb-28">
         <div className="px-6 pt-[72px]">
+          <BackButton
+            onClick={() => {
+              if (!loading) onBack()
+            }}
+          />
           <div className="flex justify-center mb-6">
             <PickleLogo size={28} iconSize={88} stacked />
           </div>
           <div className="text-center mb-7">
-            <h1 className="font-bold text-[27px]" style={{ color: "#1F1F1F" }}>
+            <h1
+              className="font-bold text-page"
+              style={{ color: "var(--color-ink)" }}
+            >
               Choose a new password
             </h1>
-            <p className="text-[16px] mt-2" style={{ color: "#777777" }}>
+            <p
+              className="text-body mt-2"
+              style={{ color: "var(--color-gray)" }}
+            >
               {recoveryReady
                 ? "Enter and confirm your new password."
                 : "Verifying your reset link…"}
@@ -408,8 +567,8 @@ export default function AuthScreen({
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label
-                className="block text-[15px] font-semibold mb-2"
-                style={{ color: "#444444" }}
+                className="block text-body font-semibold mb-2"
+                style={{ color: "var(--color-gray-strong)" }}
               >
                 New password
               </label>
@@ -419,11 +578,13 @@ export default function AuthScreen({
                 minLength={6}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full h-12 px-4 rounded-[12px] border outline-none text-[17px]"
+                className="w-full h-12 px-4 rounded-[12px] border outline-none text-body"
                 style={{
-                  borderColor: "#E5E5E5",
-                  backgroundColor: "#FAFAFA",
-                  color: "#1F1F1F",
+                  borderColor: "var(--color-border)",
+
+                  backgroundColor: "var(--color-surface)",
+
+                  color: "var(--color-ink)",
                 }}
                 placeholder="At least 6 characters"
                 autoComplete="new-password"
@@ -431,8 +592,8 @@ export default function AuthScreen({
             </div>
             <div>
               <label
-                className="block text-[15px] font-semibold mb-2"
-                style={{ color: "#444444" }}
+                className="block text-body font-semibold mb-2"
+                style={{ color: "var(--color-gray-strong)" }}
               >
                 Confirm new password
               </label>
@@ -442,31 +603,33 @@ export default function AuthScreen({
                 minLength={6}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full h-12 px-4 rounded-[12px] border outline-none text-[17px]"
+                className="w-full h-12 px-4 rounded-[12px] border outline-none text-body"
                 style={{
-                  borderColor: "#E5E5E5",
-                  backgroundColor: "#FAFAFA",
-                  color: "#1F1F1F",
+                  borderColor: "var(--color-border)",
+
+                  backgroundColor: "var(--color-surface)",
+
+                  color: "var(--color-ink)",
                 }}
                 placeholder="Enter it again"
                 autoComplete="new-password"
               />
             </div>
             {errorMessage && (
-              <p className="text-[15px] leading-5" style={{ color: "#C53D2E" }}>
+              <p className="text-body leading-5" style={{ color: "#C53D2E" }}>
                 {errorMessage}
               </p>
             )}
             {message && (
-              <p className="text-[15px] leading-5" style={{ color: "#5F6F52" }}>
+              <p className="text-body leading-5" style={{ color: "#5F6F52" }}>
                 {message}
               </p>
             )}
             <button
               type="submit"
               disabled={loading || !recoveryReady}
-              className="w-full h-12 rounded-[8px] text-white text-[17px] font-semibold disabled:opacity-50"
-              style={{ backgroundColor: "#F26B21" }}
+              className="w-full h-12 rounded-[8px] text-white text-body font-semibold disabled:opacity-50"
+              style={{ backgroundColor: "var(--color-primary)" }}
             >
               {loading ? "Updating…" : "Update password"}
             </button>
@@ -485,29 +648,72 @@ export default function AuthScreen({
             <PickleLogo size={28} iconSize={88} stacked />
           </div>
           <div className="text-center mb-7">
-            <h1 className="font-bold text-[27px]" style={{ color: "#1F1F1F" }}>
+            <h1
+              className="font-bold text-page"
+              style={{ color: "var(--color-ink)" }}
+            >
               Create your account
             </h1>
-            <p className="text-[16px] mt-2" style={{ color: "#777777" }}>
+            <p
+              className="text-body mt-2"
+              style={{ color: "var(--color-gray)" }}
+            >
               Save recipes and build your own Pickle profile.
             </p>
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">
+            <label className="block text-body font-semibold">
+              Date of birth
+              <input
+                type="date"
+                required
+                value={birthday}
+                onChange={(event) => setBirthday(event.target.value)}
+                className="block w-full border rounded-lg p-3 mt-2"
+              />
+            </label>
+            <p className="text-label">
+              Accounts are for ages 13 and over. At age 13, a parent or legal
+              guardian must complete a consent review before account activation.
+              We do not store your birth date. After signing in, confirm your
+              eligibility to activate account features.
+            </p>
+            <details>
+              <summary>Privacy Policy</summary>
+              {privacySections.map((section) => (
+                <section key={section.title}>
+                  <h3>{section.title}</h3>
+                  <p>{section.body}</p>
+                </section>
+              ))}
+            </details>
+            <details>
+              <summary>Terms of Service</summary>
+              {termsSections.map((section) => (
+                <section key={section.title}>
+                  <h3>{section.title}</h3>
+                  <p>{section.body}</p>
+                </section>
+              ))}
+            </details>
+
             <div>
               <label
-                className="block text-[15px] font-semibold mb-2"
-                style={{ color: "#444444" }}
+                className="block text-body font-semibold mb-2"
+                style={{ color: "var(--color-gray-strong)" }}
               >
                 Display name
               </label>
               <input
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                className="w-full h-12 px-4 rounded-[12px] border outline-none text-[17px]"
+                className="w-full h-12 px-4 rounded-[12px] border outline-none text-body"
                 style={{
-                  borderColor: "#E5E5E5",
-                  backgroundColor: "#FAFAFA",
-                  color: "#1F1F1F",
+                  borderColor: "var(--color-border)",
+
+                  backgroundColor: "var(--color-surface)",
+
+                  color: "var(--color-ink)",
                 }}
                 placeholder="Your name"
                 autoComplete="name"
@@ -515,19 +721,21 @@ export default function AuthScreen({
             </div>
             <div>
               <label
-                className="block text-[15px] font-semibold mb-2"
-                style={{ color: "#444444" }}
+                className="block text-body font-semibold mb-2"
+                style={{ color: "var(--color-gray-strong)" }}
               >
                 Username
               </label>
               <input
                 value={username}
                 onChange={(e) => setUsername(e.target.value.replace(/\s/g, ""))}
-                className="w-full h-12 px-4 rounded-[12px] border outline-none text-[17px]"
+                className="w-full h-12 px-4 rounded-[12px] border outline-none text-body"
                 style={{
-                  borderColor: "#E5E5E5",
-                  backgroundColor: "#FAFAFA",
-                  color: "#1F1F1F",
+                  borderColor: "var(--color-border)",
+
+                  backgroundColor: "var(--color-surface)",
+
+                  color: "var(--color-ink)",
                 }}
                 placeholder="picklefan"
                 autoCapitalize="none"
@@ -536,8 +744,8 @@ export default function AuthScreen({
             </div>
             <div>
               <label
-                className="block text-[15px] font-semibold mb-2"
-                style={{ color: "#444444" }}
+                className="block text-body font-semibold mb-2"
+                style={{ color: "var(--color-gray-strong)" }}
               >
                 Email
               </label>
@@ -546,11 +754,13 @@ export default function AuthScreen({
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full h-12 px-4 rounded-[12px] border outline-none text-[17px]"
+                className="w-full h-12 px-4 rounded-[12px] border outline-none text-body"
                 style={{
-                  borderColor: "#E5E5E5",
-                  backgroundColor: "#FAFAFA",
-                  color: "#1F1F1F",
+                  borderColor: "var(--color-border)",
+
+                  backgroundColor: "var(--color-surface)",
+
+                  color: "var(--color-ink)",
                 }}
                 placeholder="you@example.com"
                 autoCapitalize="none"
@@ -559,8 +769,8 @@ export default function AuthScreen({
             </div>
             <div>
               <label
-                className="block text-[15px] font-semibold mb-2"
-                style={{ color: "#444444" }}
+                className="block text-body font-semibold mb-2"
+                style={{ color: "var(--color-gray-strong)" }}
               >
                 Password
               </label>
@@ -570,39 +780,44 @@ export default function AuthScreen({
                 minLength={6}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full h-12 px-4 rounded-[12px] border outline-none text-[17px]"
+                className="w-full h-12 px-4 rounded-[12px] border outline-none text-body"
                 style={{
-                  borderColor: "#E5E5E5",
-                  backgroundColor: "#FAFAFA",
-                  color: "#1F1F1F",
+                  borderColor: "var(--color-border)",
+
+                  backgroundColor: "var(--color-surface)",
+
+                  color: "var(--color-ink)",
                 }}
                 placeholder="At least 6 characters"
                 autoComplete="new-password"
               />
             </div>
             {errorMessage && (
-              <p className="text-[15px] leading-5" style={{ color: "#C53D2E" }}>
+              <p className="text-body leading-5" style={{ color: "#C53D2E" }}>
                 {errorMessage}
               </p>
             )}
             {message && (
-              <p className="text-[15px] leading-5" style={{ color: "#5F6F52" }}>
+              <p className="text-body leading-5" style={{ color: "#5F6F52" }}>
                 {message}
               </p>
             )}
             {confirmationSent && (
               <div
                 className="rounded-[12px] px-4 py-3 text-center"
-                style={{ backgroundColor: "#FFF8F3" }}
+                style={{ backgroundColor: "var(--color-primary-faint)" }}
               >
-                <p className="text-[14px]" style={{ color: "#6F6F6F" }}>
+                <p
+                  className="text-label"
+                  style={{ color: "var(--color-gray)" }}
+                >
                   Didn't get your email?{" "}
                   <button
                     type="button"
                     onClick={handleResendConfirmation}
                     disabled={resendLoading || resendCooldown > 0}
                     className="font-semibold disabled:opacity-50"
-                    style={{ color: "#F26B21" }}
+                    style={{ color: "var(--color-primary)" }}
                   >
                     {resendLoading
                       ? "Sending…"
@@ -616,8 +831,8 @@ export default function AuthScreen({
             <button
               type="submit"
               disabled={loading || Boolean(socialLoading) || confirmationSent}
-              className="w-full h-12 rounded-[8px] text-white text-[17px] font-semibold disabled:opacity-60"
-              style={{ backgroundColor: "#F26B21" }}
+              className="w-full h-12 rounded-[8px] text-white text-body font-semibold disabled:opacity-60"
+              style={{ backgroundColor: "var(--color-primary)" }}
             >
               {loading
                 ? "Please wait…"
@@ -630,8 +845,8 @@ export default function AuthScreen({
               <button
                 type="button"
                 onClick={() => changeMode("signin")}
-                className="text-[14px] font-normal"
-                style={{ color: "#A0A0A0" }}
+                className="text-label font-normal"
+                style={{ color: "var(--color-gray-soft)" }}
               >
                 Already have an account? Log in
               </button>
@@ -650,7 +865,7 @@ export default function AuthScreen({
           onClick={onBack}
           aria-label="Back"
           className="w-9 h-9 flex items-center justify-center"
-          style={{ color: "#1F1F1F" }}
+          style={{ color: "var(--color-ink)" }}
         >
           <svg
             width="20"
@@ -671,18 +886,21 @@ export default function AuthScreen({
           <PickleLogo size={28} iconSize={88} stacked />
         </div>
         <div className="text-center mb-7">
-          <h1 className="font-bold text-[27px]" style={{ color: "#1F1F1F" }}>
+          <h1
+            className="font-bold text-page"
+            style={{ color: "var(--color-ink)" }}
+          >
             Welcome back
           </h1>
-          <p className="text-[16px] mt-2" style={{ color: "#777777" }}>
+          <p className="text-body mt-2" style={{ color: "var(--color-gray)" }}>
             Sign in to keep your Pickle activity with you.
           </p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label
-              className="auth-field-label block text-[15px] font-semibold mb-2"
-              style={{ color: "#444444" }}
+              className="auth-field-label block text-body font-semibold mb-2"
+              style={{ color: "var(--color-gray-strong)" }}
             >
               Email
             </label>
@@ -691,11 +909,13 @@ export default function AuthScreen({
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="auth-field-input w-full h-12 px-4 rounded-[12px] border outline-none text-[17px]"
+              className="auth-field-input w-full h-12 px-4 rounded-[12px] border outline-none text-body"
               style={{
-                borderColor: "#E5E5E5",
-                backgroundColor: "#FAFAFA",
-                color: "#1F1F1F",
+                borderColor: "var(--color-border)",
+
+                backgroundColor: "var(--color-surface)",
+
+                color: "var(--color-ink)",
               }}
               placeholder="you@example.com"
               autoCapitalize="none"
@@ -704,8 +924,8 @@ export default function AuthScreen({
           </div>
           <div>
             <label
-              className="auth-field-label block text-[15px] font-semibold mb-2"
-              style={{ color: "#444444" }}
+              className="auth-field-label block text-body font-semibold mb-2"
+              style={{ color: "var(--color-gray-strong)" }}
             >
               Password
             </label>
@@ -715,50 +935,52 @@ export default function AuthScreen({
               minLength={6}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="auth-field-input w-full h-12 px-4 rounded-[12px] border outline-none text-[17px]"
+              className="auth-field-input w-full h-12 px-4 rounded-[12px] border outline-none text-body"
               style={{
-                borderColor: "#E5E5E5",
-                backgroundColor: "#FAFAFA",
-                color: "#1F1F1F",
+                borderColor: "var(--color-border)",
+
+                backgroundColor: "var(--color-surface)",
+
+                color: "var(--color-ink)",
               }}
               placeholder="At least 6 characters"
               autoComplete="current-password"
             />
           </div>
           {errorMessage && (
-            <p className="text-[15px] leading-5" style={{ color: "#C53D2E" }}>
+            <p className="text-body leading-5" style={{ color: "#C53D2E" }}>
               {errorMessage}
             </p>
           )}
           {message && (
-            <p className="text-[15px] leading-5" style={{ color: "#5F6F52" }}>
+            <p className="text-body leading-5" style={{ color: "#5F6F52" }}>
               {message}
             </p>
           )}
           <button
             type="submit"
             disabled={loading || Boolean(socialLoading)}
-            className="w-full h-12 rounded-[8px] text-white text-[17px] font-semibold disabled:opacity-60"
-            style={{ backgroundColor: "#F26B21" }}
+            className="w-full h-12 rounded-[8px] text-white text-body font-semibold disabled:opacity-60"
+            style={{ backgroundColor: "var(--color-primary)" }}
           >
             {loading ? "Please wait…" : "Log in"}
           </button>
           {socialButtons}
-          <div className="flex items-center justify-center gap-3 text-[14px]">
+          <div className="flex items-center justify-center gap-3 text-label">
             <button
               type="button"
               onClick={() => changeMode("signup")}
               className="font-normal"
-              style={{ color: "#A0A0A0" }}
+              style={{ color: "var(--color-gray-soft)" }}
             >
               Sign up
             </button>
-            <span style={{ color: "#D0D0D0" }}>·</span>
+            <span style={{ color: "var(--color-gray-faint)" }}>·</span>
             <button
               type="button"
               onClick={() => changeMode("forgot")}
               className="font-normal"
-              style={{ color: "#A0A0A0" }}
+              style={{ color: "var(--color-gray-soft)" }}
             >
               Forgot password?
             </button>

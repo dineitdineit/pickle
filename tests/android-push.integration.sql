@@ -1,0 +1,73 @@
+-- Synthetic accounts/tokens only; never dispatch the network worker. Roll back everything.
+begin;
+create temp table f as select gen_random_uuid() u,gen_random_uuid() v,gen_random_uuid() session_id,gen_random_uuid() device_id,gen_random_uuid() p,gen_random_uuid() c;
+grant select on f to authenticated,anon;
+insert into auth.users(id,email,raw_user_meta_data) select i,i||'@example.invalid',jsonb_build_object('username','push_'||replace(i::text,'-','')) from f,lateral(values(u),(v))a(i);
+do $$declare i uuid;begin for i in select u from f union all select v from f loop
+perform set_config('request.jwt.claims',jsonb_build_object('sub',i,'role','authenticated','is_anonymous',false)::text,true);
+perform public.confirm_account_age_v2('1990-01-01');
+perform public.accept_content_policy((select version from public.content_policy_versions where active),true,true);
+end loop;end$$;
+insert into auth.sessions(id,user_id) select session_id,u from f;
+select set_config('request.jwt.claims',jsonb_build_object('sub',u,'session_id',session_id,'role','authenticated','is_anonymous',false)::text,true) from f;
+set local role authenticated;
+select public.register_push_device(device_id,repeat('a',64),'synthetic-fcm-token-for-rollback-testing-only') from f;
+do $$begin
+ begin perform public.register_push_device(device_id,repeat('b',64),'synthetic-other-token-for-rollback-testing-only') from f; raise exception 'Capability mismatch accepted'; exception when insufficient_privilege then null; end;
+ begin perform public.push_worker('claim'); raise exception 'User obtained worker access'; exception when insufficient_privilege then null; end;
+end$$;
+reset role;
+update push_helpers.state set enabled=true,credential_ready=true;
+insert into public.photo_posts(id,author_id,status,published_at) select p,u,'published',now() from f;
+select set_config('request.jwt.claims',jsonb_build_object('sub',v,'role','authenticated','is_anonymous',false)::text,true) from f;
+set local role authenticated;
+select public.add_post_comment(c,p,'Synthetic push verification') from f;
+reset role;
+do $$declare job uuid;begin
+ select id into job from push_helpers.jobs where recipient_id=(select u from f);
+ if job is null or not push_helpers.allowed(job) then raise exception 'Eligible comment did not queue'; end if;
+ if (select count(*) from push_helpers.jobs where recipient_id=(select u from f))<>1 then raise exception 'Duplicate queue'; end if;
+ insert into public.notification_preferences(user_id,comments) select u,false from f;
+ if push_helpers.allowed(job) then raise exception 'Muted comment allowed'; end if;
+ update public.notification_preferences set comments=true where user_id=(select u from f);
+ update public.post_comments set deleted_at=now(),content='Deleted comment' where id=(select c from f);
+ if push_helpers.allowed(job) then raise exception 'Deleted comment allowed'; end if;
+ update public.post_comments set deleted_at=null,content='Restored fixture' where id=(select c from f);
+ insert into public.user_blocks(blocker_id,blocked_id) select u,v from f;
+ if push_helpers.allowed(job) then raise exception 'Blocked sender allowed'; end if;
+ delete from public.user_blocks where blocker_id=(select u from f);
+ update public.user_notifications set read_at=now() where id=(select notification_id from push_helpers.jobs where id=job);
+ if push_helpers.allowed(job) then raise exception 'Read alert allowed'; end if;
+end$$;
+select set_config('request.jwt.claims',jsonb_build_object('sub',v,'role','authenticated','is_anonymous',false)::text,true) from f;
+set local role authenticated;
+select public.send_direct_message(u,'Synthetic push message',gen_random_uuid()) from f;
+reset role;
+do $$declare job uuid; ticket jsonb; prepared jsonb; i integer;begin
+ select id into job from push_helpers.jobs where recipient_id=(select u from f) and message_id is not null;
+ if job is null or not push_helpers.allowed(job) then raise exception 'Message did not queue'; end if;
+ update public.direct_messages set read_at=now() where id=(select message_id from push_helpers.jobs where id=job);
+ if push_helpers.allowed(job) then raise exception 'Read message allowed'; end if;
+ update public.direct_messages set read_at=null where id=(select message_id from push_helpers.jobs where id=job);
+ for i in 1..3 loop ticket:=push_helpers.worker('claim','{}'); exit when ticket ? 'id'; end loop;
+ if ticket->>'id' is distinct from job::text then raise exception 'Claim missed eligible message'; end if;
+ prepared:=push_helpers.worker('prepare',ticket);
+ if prepared->>'kind'<>'message' or prepared ? 'body' then raise exception 'Unsafe message payload'; end if;
+ if push_helpers.worker('ack',ticket||jsonb_build_object('lease',gen_random_uuid(),'outcome','sent'))<>'false'::jsonb then raise exception 'Forged lease accepted'; end if;
+ perform push_helpers.worker('ack',ticket||'{"outcome":"retry"}'::jsonb);
+ if not exists(select 1 from push_helpers.jobs where id=job and attempts=1 and status='pending' and next_at>now()) then raise exception 'Retry not bounded/delayed'; end if;
+ update push_helpers.jobs set next_at=now() where id=job;
+ ticket:=push_helpers.worker('claim','{}');
+ update push_helpers.devices set token='synthetic-rotated-token-for-rollback-testing' where id=(select device_id from f);
+ perform push_helpers.worker('ack',ticket||jsonb_build_object('outcome','invalid_token','token',prepared->>'token'));
+ if not exists(select 1 from push_helpers.devices where id=(select device_id from f)) then raise exception 'Rotated token was removed'; end if;
+ perform push_helpers.worker('ack',ticket||'{"outcome":"sent"}'::jsonb);
+ if not exists(select 1 from push_helpers.jobs where id=job and status='sent') then raise exception 'Send was not acknowledged'; end if;
+end$$;
+-- Session revocation cascades through device registrations and pending jobs.
+delete from auth.sessions where id=(select session_id from f);
+do $$begin if exists(select 1 from push_helpers.devices where id=(select device_id from f)) or exists(select 1 from push_helpers.jobs where recipient_id=(select u from f)) then raise exception 'Logout left device or queued jobs'; end if;end$$;
+set local role anon;
+select public.remove_push_device(device_id,repeat('a',64)) from f;
+reset role;
+rollback;

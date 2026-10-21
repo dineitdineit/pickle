@@ -1,3 +1,4 @@
+import BackIcon from "./BackIcon"
 import { useState } from "react"
 import RetryState from "./RetryState"
 import {
@@ -6,7 +7,6 @@ import {
   getRecentSearches,
   removeRecentSearch,
 } from "./recentSearches"
-
 const BROWSE_CATEGORIES = [
   {
     title: "Ingredients",
@@ -40,67 +40,78 @@ const BROWSE_CATEGORIES = [
     items: ["Easy", "Quick", "Party"],
   },
 ] as const
-
 interface BrowseScreenProps {
   searchValue: string
   setSearchValue: (v: string) => void
   onSearch: () => void
+  onOpenSearch: () => void
+  onBack: () => void
   dataError?: string
   onRetry?: () => void
 }
-
 export default function BrowseScreen({
   searchValue,
   setSearchValue,
   onSearch,
+  onOpenSearch,
+  onBack,
   dataError = "",
   onRetry,
 }: BrowseScreenProps) {
   const [recentSearches, setRecentSearches] = useState<string[]>(() =>
     getRecentSearches(),
   )
-
   function removeRecent(item: string) {
     setRecentSearches(removeRecentSearch(item))
   }
-
   function clearRecent() {
     setRecentSearches(clearRecentSearches())
   }
-
   function searchKeyword(keyword: string) {
     const term = keyword.trim()
     if (!term) {
       onSearch()
       return
     }
-
     setRecentSearches(addRecentSearch(term))
     setSearchValue(term)
     requestAnimationFrame(() => onSearch())
   }
-
   return (
     <div className="browse-screen pb-24">
       {/* Title */}
-      <div className="px-4 pt-6 pb-2 flex items-center justify-center">
-        <h1 className="font-bold text-[27px]" style={{ color: "#1F1F1F" }}>
+      <div className="relative px-4 pt-6 pb-2 flex items-center justify-center">
+        <button
+          type="button"
+          onClick={onBack}
+          aria-label="Back"
+          className="absolute left-4 top-5 w-9 h-9 flex items-center justify-center"
+          style={{ color: "var(--color-ink)" }}
+        >
+          <BackIcon />
+        </button>
+        <h1
+          className="font-bold text-page"
+          style={{ color: "var(--color-ink)" }}
+        >
           Browse
         </h1>
       </div>
-
       {/* Search Bar */}
       <div className="px-4 mt-3 mb-8">
         <div
           className="flex items-center gap-3 px-4 h-12 rounded-[12px] border"
-          style={{ backgroundColor: "#F9F9F9", borderColor: "#EAEAEA" }}
+          style={{
+            backgroundColor: "var(--color-surface)",
+            borderColor: "var(--color-border)",
+          }}
         >
           <svg
             width="18"
             height="18"
             viewBox="0 0 24 24"
             fill="none"
-            stroke="#6F6F6F"
+            stroke="var(--color-gray)"
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -110,17 +121,27 @@ export default function BrowseScreen({
           </svg>
           <input
             type="text"
+            enterKeyHint="search"
+            maxLength={80}
+            aria-label="Search recipes and users"
             placeholder="Search recipes..."
             value={searchValue}
+            onFocus={onOpenSearch}
             onChange={(e) => setSearchValue(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && searchKeyword(searchValue)}
-            className="flex-1 bg-transparent outline-none text-[18px] placeholder:text-[#6F6F6F]"
-            style={{ color: "#1F1F1F" }}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" && !event.nativeEvent.isComposing) {
+                event.preventDefault()
+                event.currentTarget.blur()
+                searchKeyword(searchValue)
+              }
+            }}
+            className="flex-1 bg-transparent outline-none text-lead placeholder:text-[var(--color-gray)]"
+            style={{ color: "var(--color-ink)" }}
           />
           {searchValue && (
             <button
               onClick={() => setSearchValue("")}
-              className="text-[#6F6F6F]"
+              className="text-[var(--color-gray)]"
             >
               <svg
                 width="16"
@@ -137,7 +158,6 @@ export default function BrowseScreen({
           )}
         </div>
       </div>
-
       {dataError && onRetry && (
         <div className="mb-5">
           <RetryState
@@ -148,13 +168,12 @@ export default function BrowseScreen({
           />
         </div>
       )}
-
       {/* Recently Searched */}
       <div className="px-4 mb-8">
         <div className="flex items-center justify-between mb-4">
           <h2
-            className="font-semibold text-[22px]"
-            style={{ color: "#1F1F1F" }}
+            className="font-semibold text-section"
+            style={{ color: "var(--color-ink)" }}
           >
             Recently Searched
           </h2>
@@ -162,8 +181,8 @@ export default function BrowseScreen({
             <button
               type="button"
               onClick={clearRecent}
-              className="text-[16px] font-medium"
-              style={{ color: "#F26B21" }}
+              className="text-body font-medium"
+              style={{ color: "var(--color-primary)" }}
             >
               Clear
             </button>
@@ -174,11 +193,11 @@ export default function BrowseScreen({
             recentSearches.map((item) => (
               <div
                 key={item}
-                className="flex items-center gap-1 rounded-full text-[16px] font-medium overflow-hidden"
+                className="flex items-center gap-1 rounded-full text-body font-medium overflow-hidden"
                 style={{
-                  backgroundColor: "#F9F9F9",
-                  border: "1.5px solid #EAEAEA",
-                  color: "#1F1F1F",
+                  backgroundColor: "var(--color-surface)",
+                  border: "1.5px solid var(--color-border)",
+                  color: "var(--color-ink)",
                 }}
               >
                 <button
@@ -191,7 +210,7 @@ export default function BrowseScreen({
                     height="13"
                     viewBox="0 0 24 24"
                     fill="none"
-                    stroke="#6F6F6F"
+                    stroke="var(--color-gray)"
                     strokeWidth="2.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -206,7 +225,7 @@ export default function BrowseScreen({
                   onClick={() => removeRecent(item)}
                   aria-label={`Remove ${item} from recent searches`}
                   className="w-7 h-7 flex items-center justify-center mr-0.5"
-                  style={{ color: "#6F6F6F" }}
+                  style={{ color: "var(--color-gray)" }}
                 >
                   <svg
                     width="12"
@@ -223,29 +242,33 @@ export default function BrowseScreen({
               </div>
             ))
           ) : (
-            <p className="text-[15px]" style={{ color: "#A0A0A0" }}>
+            <p
+              className="text-body"
+              style={{ color: "var(--color-gray-soft)" }}
+            >
               Your recent searches will appear here.
             </p>
           )}
         </div>
       </div>
-
       {/* Browse categories */}
       <div className="browse-category-grid px-4 space-y-8 mb-8">
         {BROWSE_CATEGORIES.map((section) => (
           <section key={section.title}>
             <div className="mb-3">
               <h2
-                className="font-semibold text-[22px]"
-                style={{ color: "#1F1F1F" }}
+                className="font-semibold text-section"
+                style={{ color: "var(--color-ink)" }}
               >
                 {section.title}
               </h2>
-              <p className="text-[15px] mt-1" style={{ color: "#8A8A8A" }}>
+              <p
+                className="text-body mt-1"
+                style={{ color: "var(--color-gray-soft)" }}
+              >
                 {section.subtitle}
               </p>
             </div>
-
             <div className="grid grid-cols-2 gap-2.5">
               {section.items.map((item) => (
                 <button
@@ -253,11 +276,14 @@ export default function BrowseScreen({
                   type="button"
                   onClick={() => searchKeyword(item)}
                   className="min-h-[48px] rounded-[14px] border px-3.5 flex items-center justify-between gap-2 text-left"
-                  style={{ borderColor: "#EAEAEA", backgroundColor: "#FFFFFF" }}
+                  style={{
+                    borderColor: "var(--color-border)",
+                    backgroundColor: "var(--color-white)",
+                  }}
                 >
                   <span
-                    className="text-[17px] font-medium truncate"
-                    style={{ color: "#1F1F1F" }}
+                    className="text-body font-medium truncate"
+                    style={{ color: "var(--color-ink)" }}
                   >
                     {item}
                   </span>
@@ -266,7 +292,7 @@ export default function BrowseScreen({
                     height="15"
                     viewBox="0 0 24 24"
                     fill="none"
-                    stroke="#B0B0B0"
+                    stroke="var(--color-gray-soft)"
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
